@@ -9,24 +9,7 @@
     </head>
   <body>
 
-    <!--navBar-->
-    <div class="navbar-wrapper">
-        <nav class="navbar navbar-expand-lg custom-navbar">
-            <div class="container trasparent">
-                <a class="navbar-brand brand-logo" href="./index.html">
-                    <img src="./assets/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-                    Doremi
-                </a>
-                <div class="nav-actions">
-                    <a class="btn-night" href="./login.html">Accedi</a>
-                    <a class="btn-amber" href="./register.html">Iscriviti</a>
-
-                </div>
-
-            </div>
-        </nav>
-    </div>
-    <!--navBar-->
+    <div class="navbar-wrapper" id="homeNavBar"></div>
 
     <main class="hero-section">
         <!-- Container centrato per la ricerca indirizzo -->
@@ -151,5 +134,7 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="./components/navbars.js"></script>
+    <script>getNavbar(0);</script>    
   </body>
 </html>

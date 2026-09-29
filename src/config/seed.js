@@ -12,9 +12,9 @@ export async function seedDatabase() {
       const parsedData = JSON.parse(fileData);
       
     const cleanData = parsedData.map(meal => {
-        // Estraiamo il campo _id problematico e teniamo tutto il resto in 'restoDelPiatto'
+
         const { _id, ...restoDelPiatto } = meal; 
-        return restoDelPiatto; // Ritorniamo l'oggetto pulito senza _id
+        return restoDelPiatto;
       });
 
       await Meal.insertMany(cleanData);

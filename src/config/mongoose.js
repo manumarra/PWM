@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Opzioni di connessione raccomandate
 const opts = { 
   maxPoolSize: 10, 
   serverSelectionTimeoutMS: 5000, 
@@ -9,7 +8,7 @@ const opts = {
 };
 
 export async function connectMongoose() { 
-  mongoose.set("strictQuery", true); // ignora campi extra
+  mongoose.set("strictQuery", true); 
   
   mongoose.connection.on("connected", () => console.log("✅ Mongoose connesso"));
   mongoose.connection.on("error", (err) => console.error("❌ Mongoose errore:", err));

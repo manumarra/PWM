@@ -1,0 +1,386 @@
+@font-face {
+  font-family: 'DoremiFont';
+  src: url('../fonts/doremi-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'DoremiFont';
+  src: url('../fonts/doremi-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: var(--night-dark);
+
+  /* Font Stack: se il font personalizzato fallisce o non è supportato,
+     il browser usa in sequenza i font disponibili lato utente fino a sans-serif */
+  font-family: 'DoremiFont', 'Trebuchet MS', Tahoma, Arial, sans-serif;
+
+  /* Dimensione percentuale di default del browser (100% corrisponde a 16px) */
+  font-size: 100%;
+  line-height: 1.5;
+}
+
+
+/* Palette Giallo Ambra & Notte */
+:root {
+  --amber-primary: #F59E0B;       /* Ambra caldo */
+  --amber-hover: #D97706;         /* Ambra scuro al passaggio mouse */
+  --night-dark: #111827;          /* Notte profondo */
+  --night-light: #1F2937;         /* Notte più chiaro per hover e bordi */
+  --border-subtle: #E5E7EB;       /* Grigio neutro per il bordo inferiore */
+}
+
+
+.navbar-wrapper {
+  position: absolute;
+  top: 16px;                
+  left: 0;
+  right: 0;
+  padding: 0 20px;          
+  z-index: 100;             
+}
+/* Stile della barra di navigazione */
+.custom-navbar {
+max-width: 1200px;        /* Evita che su schermi ultrawide si allarghi all'infinito */
+  margin: 0 auto;           /* Centra orizzontalmente la navbar */
+  padding: 12px 24px;       /* Spazio interno traspirante */
+  
+  /* Trasparenza + Effetto Vetro Offuscato */
+  background-color: rgba(255, 255, 255, 0.75); /* Bianco semitrasparente al 75% */
+  backdrop-filter: blur(12px);                 /* Sfoca ciò che scorre o sta sotto */
+  -webkit-backdrop-filter: blur(12px);         /* Supporto per Safari */
+  
+  border: 1px solid rgba(255, 255, 255, 0.4);  /* Bordo tenue chiaro */
+  border-radius: 14px;                         /* Angoli arrotondati (non a spigolo coi bordi schermo) */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Logo FastFood */
+.brand-logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--night-dark);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-logo:hover {
+  color: var(--amber-primary);
+}
+
+/* Pulsante Accedi (Stile minimale Notte) */
+.btn-night {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: var(--amber-primary);
+  border: 1px solid var(--amber-primary);
+  color: var(--night-dark);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-night:hover {
+  background-color: var(--amber-hover);
+  border-color: var(--amber-hover);
+  color: #ffffff;
+}
+
+/* Pulsante Iscriviti (Pulsante Ambra Pieno) */
+.btn-amber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-dark);
+  border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-amber:hover {
+  background-color: var(--night-light);
+  border-color: var(--night-light);
+  color: #ffffff;
+}
+
+.trasparent {
+    background-color: transparent;
+}
+
+
+
+/* =========================================================
+   HERO SECTION CON SFONDO E BOX CENTRALE
+   ========================================================= */
+.hero-section {
+  min-height: 100vh;        /* Occupa l'intera altezza del viewport */
+  background-image: 
+    linear-gradient(rgba(17, 24, 39, 0.5), rgba(17, 24, 39, 0.5)),
+    url('../assets/sfondoCibi.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  /* Centratura perfetta con Flexbox */
+  display: flex;            /* Contenitore flessibile */
+  justify-content: center;  /* Centra orizzontalmente[cite: 3] */
+  align-items: center;      /* Centra verticalmente[cite: 3] */
+  padding: 100px 16px 40px; /* Padding top di 100px per non finire sotto la navbar fluttuante */
+}
+
+/* Card centrale */
+.search-card {
+  background-color: #ffffff;
+  padding: 36px 28px;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  max-width: 580px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Gruppo Input + Bottone Responsive */
+.search-input-group {
+  display: flex;            /* Dispone input e bottone come flex items[cite: 3] */
+  flex-wrap: wrap;          /* Permette di andare a capo automaticamente su mobile[cite: 3] */
+  gap: 8px;                 /* Spazio tra input e bottone */
+  border: 2px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 6px;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input-group:focus-within {
+  border-color: var(--amber-primary);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+/* Campo di testo */
+.address-field {
+  flex: 1 1 240px;          /* Base minima di 240px: se c'è spazio cresce, altrimenti occupa la riga */
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 10px 14px;
+  color: var(--night-dark);
+  font-family: inherit;
+  width: 100%;
+}
+
+/* Bottone di ricerca */
+.btn-search {
+  flex: 0 0 auto;           /* Su desktop mantiene la dimensione del suo testo */
+  background-color: var(--amber-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-search:hover {
+  background-color: var(--amber-hover);
+}
+
+/* Adattamento completo su smartphone stretti */
+@media (max-width: 576px) {
+  .search-card {
+    padding: 24px 16px;     /* Riduce i margini interni su schermi piccoli */
+  }
+
+  .hero-title {
+    font-size: 1.6rem;      /* Riduce il titolo per evitare troppi a capo */
+  }
+
+  .btn-search {
+    width: 100%;            /* Su mobile il bottone si allarga comodamente a tutta larghezza */
+  }
+}
+/* =========================================================
+   CAROSELLO TICKER CONTINUO SENZA BUCHI
+   ========================================================= */
+
+.ticker-section {
+  display: flex;               /* Affianca i due gruppi orizzontalmente */
+  overflow: hidden;            /* Maschera le pillole che escono dai bordi */
+  user-select: none;
+  background-color: #ffffff;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 16px 0;
+}
+
+/* Ogni gruppo scorre da solo del 100% della sua larghezza */
+.ticker-group {
+  flex-shrink: 0;              /* Impedisce al gruppo di comprimersi */
+  display: flex;               /* Dispone le pillole in riga */
+  align-items: center;         /* Allinea i badge al centro */
+  justify-content: space-around;
+  min-width: 100%;             /* Garantisce che copra almeno l'intero schermo */
+  animation: scrollSeamless 25s linear infinite;
+}
+
+/* Metti in pausa entrambi i gruppi all'hover */
+.ticker-section:hover .ticker-group {
+    animation-play-state: paused;
+}
+
+/* Singolo badge */
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px;              /* Il margine laterale assicura spaziatura costante anche tra i due blocchi */
+  background-color: #f9fafb;
+  border: 1px solid var(--border-subtle);
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--night-dark);
+}
+
+.ticker-icon {
+  font-size: 1.1rem;
+}
+
+/* Animazione di scorrimento puro del 100% */
+@keyframes scrollSeamless {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* =========================================================
+   FOOTER FINALE (Stile Notte & Ambra)
+   ========================================================= */
+
+.site-footer {
+  background-color: var(--night-dark); /* Sfondo Notte profondo */
+  color: #9CA3AF;                      /* Testo grigio neutro ad alta leggibilità */
+  padding: 64px 0 32px;
+}
+
+/* Logo nel footer */
+.footer-brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #9CA3AF;
+  max-width: 260px;
+}
+
+/* Intestazioni delle sezioni */
+.footer-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+/* Elenchi di navigazione */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: #9CA3AF;
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+  display: inline-block;
+}
+
+/* Hover: il link si colora di Ambra ed effettua un micro-scatto a destra */
+.footer-links a:hover {
+  color: var(--amber-primary);
+  padding-left: 4px;
+}
+
+/* Barra di chiusura inferiore */
+.footer-bottom {
+  border-top: 1px solid var(--night-light);
+  padding-top: 24px;
+  gap: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copyright-text {
+  font-size: 0.88rem;
+  color: #6B7280;
+}
+
+/* Icone Social */
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--night-light);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.social-icon:hover {
+  background-color: var(--amber-primary);
+  color: #ffffff;
+  transform: translateY(-3px);
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+}

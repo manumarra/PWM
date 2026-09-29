@@ -3,11 +3,153 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
+    <title>PWM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
+    <link rel="stylesheet" href="./css/style.css">
+    </head>
   <body>
-    <h1>Hello, world!</h1>
+
+    <!--navBar-->
+    <div class="navbar-wrapper">
+        <nav class="navbar navbar-expand-lg custom-navbar">
+            <div class="container trasparent">
+                <a class="navbar-brand brand-logo" href="./index.html">
+                    <img src="./assets/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                    Doremi
+                </a>
+                <div class="nav-actions">
+                    <a class="btn-night" href="./login.html">Accedi</a>
+                    <a class="btn-amber" href="./register.html">Iscriviti</a>
+
+                </div>
+
+            </div>
+        </nav>
+    </div>
+    <!--navBar-->
+
+    <main class="hero-section">
+        <!-- Container centrato per la ricerca indirizzo -->
+        <div class="search-card">
+            <h1 class="hero-title">I tuoi piatti preferiti, a portata di click.</h1>
+            <p class="hero-subtitle">Inserisci l'indirizzo per scoprire i ristoranti che consegnano da te.</p>
+
+            <!-- Form di inserimento -->
+            <form class="address-form" action="/cerca" method="GET">
+            <div class="search-input-group">
+                <input 
+                type="text" 
+                name="address" 
+                class="address-field" 
+                placeholder="Es. Via Roma, 10, Milano" 
+                required
+                >
+                <button type="submit" class="btn-search">Cerca</button>
+            </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- CAROSELLO CONTINUO CATEGORIE / SPECIALITÀ -->
+    <section class="ticker-section">
+    <!-- Primo gruppo identico -->
+        <div class="ticker-group">
+            <div class="ticker-item"><span class="ticker-icon">🍔</span> Smash Burger</div>
+            <div class="ticker-item"><span class="ticker-icon">🍗</span> Crispy Chicken</div>
+            <div class="ticker-item"><span class="ticker-icon">🍟</span> Patatine Dippers</div>
+            <div class="ticker-item"><span class="ticker-icon">🥤</span> Milkshake e Drink</div>
+            <div class="ticker-item"><span class="ticker-icon">🔥</span> Offerte Lampo</div>
+            <div class="ticker-item"><span class="ticker-icon">🌱</span> Opzioni Vegane</div>
+            <div class="ticker-item"><span class="ticker-icon">🥓</span> Bacon Cheese</div>
+            <div class="ticker-item"><span class="ticker-icon">🍦</span> Dessert e Dolci</div>
+        </div>
+
+        <!-- Secondo gruppo gemello (senza interruzioni) -->
+        <div class="ticker-group" aria-hidden="true">
+            <div class="ticker-item"><span class="ticker-icon">🍔</span> Smash Burger</div>
+            <div class="ticker-item"><span class="ticker-icon">🍗</span> Crispy Chicken</div>
+            <div class="ticker-item"><span class="ticker-icon">🍟</span> Patatine Dippers</div>
+            <div class="ticker-item"><span class="ticker-icon">🥤</span> Milkshake e Drink</div>
+            <div class="ticker-item"><span class="ticker-icon">🔥</span> Offerte Lampo</div>
+            <div class="ticker-item"><span class="ticker-icon">🌱</span> Opzioni Vegane</div>
+            <div class="ticker-item"><span class="ticker-icon">🥓</span> Bacon Cheese</div>
+            <div class="ticker-item"><span class="ticker-icon">🍦</span> Dessert e Dolci</div>
+        </div>
+    </section>
+    <!-- FINE CAROSELLO CONTINUO CATEGORIE / SPECIALITÀ -->
+
+    <!-- FOOTER FINALE -->
+    <footer class="site-footer">
+        <div class="container">
+            <!-- Griglia responsive a 4 colonne Bootstrap -->
+            <div class="row g-4 mb-5">
+            
+            <!-- Colonna 1: Brand e Mission -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="footer-brand mb-3">
+                <span class="footer-logo">Doremi</span>
+                </div>
+                <p class="footer-text">
+                Il tuo cibo preferito, consegnato caldo e veloce direttamente a casa tua.
+                </p>
+            </div>
+
+            <!-- Colonna 2: Scopri di più -->
+            <div class="col-6 col-md-6 col-lg-3">
+                <h3 class="footer-heading">Scopri Doremi</h3>
+                <ul class="footer-links">
+                <li><a href="#">Chi siamo</a></li>
+                <li><a href="#">I nostri locali</a></li>
+                <li><a href="#">Diventa un Rider</a></li>
+                <li><a href="#">News & Promozioni</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonna 3: Note Legali -->
+            <div class="col-6 col-md-6 col-lg-3">
+                <h3 class="footer-heading">Note Legali</h3>
+                <ul class="footer-links">
+                <li><a href="#">Termini e Condizioni</a></li>
+                <li><a href="#">Informativa Privacy</a></li>
+                <li><a href="#">Policy sui Cookie</a></li>
+                <li><a href="#">Sicurezza alimentare</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonna 4: Assistenza e Contatti -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <h3 class="footer-heading">Aiuto</h3>
+                <ul class="footer-links">
+                <li><a href="#">Domande frequenti</a></li>
+                <li><a href="#">Supporto Clienti</a></li>
+                <li><a href="#">Segnala un problema</a></li>
+                </ul>
+            </div>
+
+            </div>
+
+            <!-- Barra inferiore: Copyright e Social -->
+            <div class="footer-bottom">
+            <p class="mb-0 copyright-text">
+                &copy; 2026 Doremi Inc. Tutti i diritti riservati.
+            </p>
+
+            <div class="social-links">
+                <a href="#" class="social-icon" aria-label="Instagram" >
+                    <img src="./assets/instagram.jpg" alt="Instagram" width="24" height="24">
+                </a>
+                <a href="#" class="social-icon" aria-label="Facebook">
+                    <img src="./assets/facebook.jpeg" alt="Facebook" width="24" height="24">
+                </a>
+                <a href="#" class="social-icon" aria-label="X">
+                    <img src="./assets/x.jpeg" alt="X" width="24" height="24">
+                </a>
+            </div>
+            </div>
+        </div>
+    </footer>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   </body>
 </html>

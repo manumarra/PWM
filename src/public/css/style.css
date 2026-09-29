@@ -49,7 +49,7 @@ body {
 }
 /* Stile della barra di navigazione */
 .custom-navbar {
-max-width: 1200px;        /* Evita che su schermi ultrawide si allarghi all'infinito */
+  max-width: 1200px;        /* Evita che su schermi ultrawide si allarghi all'infinito */
   margin: 0 auto;           /* Centra orizzontalmente la navbar */
   padding: 12px 24px;       /* Spazio interno traspirante */
   
@@ -131,6 +131,58 @@ max-width: 1200px;        /* Evita che su schermi ultrawide si allarghi all'infi
 
 .trasparent {
     background-color: transparent;
+}
+
+/* =========================================================
+   RESPONSIVE NAVBAR PER SMARTPHONE E SCHERMI STRETTI
+   ========================================================= */
+
+/* Breakpoint per dispositivi mobili (< 576px / xs) */
+@media (max-width: 576px) {
+  /* 1. Riduciamo i margini esterni per recuperare spazio prezioso */
+  .navbar-wrapper {
+    top: 8px;
+    padding: 0 8px;
+  }
+
+  /* 2. Riduciamo il padding interno della barra */
+  .custom-navbar {
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+
+  /* 3. Scaliamo il logo proporzionalmente */
+  .brand-logo {
+    font-size: 1.15rem;
+    gap: 4px;
+  }
+
+  /* 4. Riduciamo il gap tra i bottoni */
+  .nav-actions {
+    gap: 6px;
+  }
+
+  /* 5. Rendiamo i pulsanti compatti */
+  .btn-night,
+  .btn-amber {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    white-space: nowrap; /* Impedisce che la scritta si spezzi su due righe */
+  }
+}
+
+/* Breakpoint per schermi ultra-compatti (< 360px) */
+@media (max-width: 360px) {
+  .brand-logo {
+    font-size: 1rem;
+  }
+
+  .btn-night,
+  .btn-amber {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
 }
 
 

@@ -1,1 +1,68 @@
-<h1>ciao</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/style.css">
+  </head>
+  <body>
+
+    <div class="navbar-wrapper" id="homeNavBar"></div>
+
+   <main class="signup-hero" id="signupHero">
+        <!-- Contenitore a griglia Bootstrap: la somma delle colonne col-md-6 fa 12 -->
+        <div class="row g-0 switch-card" id="signupCard">
+            
+            <!-- Pannello Informativo (colonna da 6 su schermi medi/desktop) -->
+            <div class="col-12 col-md-6 panel info-panel">
+            <h1 id="formEmoji" class="fade-content">👨‍🍳🍳👩‍🍳</h1>    
+            <h2 id="infoTitle" class="fade-content">Registrati come Ristoratore</h2>
+            <p id="infoDesc" class="fade-content">Porta i tuoi piatti a migliaia di nuovi clienti nella tua città.</p>
+            </div>
+
+            <!-- Bottone di scambio centrale -->
+            <button type="button" class="btn-switch" id="switchBtn" title="Inverti modalità">
+            ⇄
+            </button>
+
+            <!-- Pannello Form (colonna da 6 su schermi medi/desktop) -->
+            <div class="col-12 col-md-6 panel form-panel">
+                <form id="signupForm" action="/api/signup" method="POST">
+                    <div class="mb-3">
+                    <label id="restOwner" hidden></label>
+                    <label class="form-label" id="nameLabel">Nome Utente</label>
+                    <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Indirizzo</label>
+                    <input type="text" name="indirizzo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn-night w-100">Crea Account</button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+
+    <footer id="homeFooter" class="site-footer"></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="../components/navbars.js"></script>
+    <script src="../components/footer.js"></script>
+    <script src="../utils/swap.js"></script>
+    <script>getNavbar(0);</script>
+    <script>getFooter();</script>
+
+  </body>
+</html>

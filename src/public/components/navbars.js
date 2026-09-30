@@ -1,13 +1,13 @@
 const navbars = [`
         <nav class="navbar navbar-expand-lg custom-navbar">
             <div class="container trasparent">
-                <a class="navbar-brand brand-logo" href="./index.html">
-                    <img src="./assets/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                <a class="navbar-brand brand-logo" href="/index.html">
+                    <img src="/assets/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
                     Doremi
                 </a>
                 <div class="nav-actions">
-                    <a class="btn-night" href="./login.html">Accedi</a>
-                    <a class="btn-amber" href="../pages/singUp.html">Iscriviti</a>
+                    <a class="btn-night" href="/login.html">Accedi</a>
+                    <a class="btn-amber" href="/pages/singUp.html">Iscriviti</a>
 
                 </div>
 

@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const infoDesc = document.getElementById("infoDesc");
   const nameLabel = document.getElementById("nameLabel");
   const formEmoji = document.getElementById("formEmoji");
-  const restOwner = document.getElementById("restOwner");
   if (!switchBtn || !card || !hero) return;
 
   let isCustomer = false;
@@ -26,13 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. A metà animazione aggiorna i contenuti e li fa riapparire
     setTimeout(() => {
       if (isCustomer) {
-        restOwner.setAttribute("id", "customer");
         formEmoji.textContent = "🍔🍕🥗";
         infoTitle.textContent = "Registrati come Cliente";
         infoDesc.textContent = "Ordina dai migliori ristoranti e ricevi il cibo caldo e veloce a casa tua.";
         nameLabel.textContent = "Nome Utente";
       } else { 
-        restOwner.setAttribute("id", "");
         formEmoji.textContent = "👨‍🍳🍳👩‍🍳";
         infoTitle.textContent = "Registrati come Ristoratore";
         infoDesc.textContent = "Porta i tuoi piatti a migliaia di nuovi clienti nella tua città.";

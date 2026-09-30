@@ -7,6 +7,7 @@ const footer = `
             <!-- Colonna 1: Brand e Mission -->
             <div class="col-12 col-md-6 col-lg-3">
                 <div class="footer-brand mb-3">
+                <img src="../assets/doremi.png" width="70" height="60" alt="Doremi">
                 <span class="footer-logo">Doremi</span>
                 </div>
                 <p class="footer-text">
@@ -56,13 +57,13 @@ const footer = `
 
             <div class="social-links">
                 <a href="#" class="social-icon" aria-label="Instagram" >
-                    <img src="./assets/instagram.jpg" alt="Instagram" width="24" height="24">
+                    <img src="/assets/IG.png" alt="Instagram" width="24" height="24">
                 </a>
                 <a href="#" class="social-icon" aria-label="Facebook">
-                    <img src="./assets/facebook.jpeg" alt="Facebook" width="24" height="24">
+                    <img src="/assets/FB.png" alt="Facebook" width="24" height="24">
                 </a>
                 <a href="#" class="social-icon" aria-label="X">
-                    <img src="./assets/x.jpeg" alt="X" width="24" height="24">
+                    <img src="/assets/WA.png" alt="X" width="24" height="24">
                 </a>
             </div>
             </div>

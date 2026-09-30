@@ -2,7 +2,7 @@ const navbars = [`
         <nav class="navbar navbar-expand-lg custom-navbar">
             <div class="container trasparent">
                 <a class="navbar-brand brand-logo" href="/index.html">
-                    <img src="/assets/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                    <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
                     Doremi
                 </a>
                 <div class="nav-actions">

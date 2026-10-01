@@ -6,8 +6,8 @@ const navbars = [`
                     Doremi
                 </a>
                 <div class="nav-actions">
-                    <a class="btn-night" href="/login.html">Accedi</a>
-                    <a class="btn-amber" href="/pages/singUp.html">Iscriviti</a>
+                    <a class="btn-night" href="/pages/login.html">Accedi</a>
+                    <a class="btn-amber" href="/pages/singup.html">Iscriviti</a>
 
                 </div>
 

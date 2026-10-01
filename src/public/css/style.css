@@ -613,3 +613,73 @@ body {
     transform: rotate(270deg) !important;
   }
 }
+
+
+/* Notifica toast personalizzata */
+.custom-alert {
+  position: fixed;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 320px;
+  max-width: 90%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  font-family: inherit;
+  animation: slideDown 0.35s ease-out forwards;
+  transition: opacity 0.3s ease;
+}
+
+/* Stato di successo (verde caldo) */
+.custom-alert.alert-success {
+  background-color: #1e392a;
+  color: #a3e635;
+  border: 1px solid #2e5c3e;
+}
+
+/* Stato di errore (rosso/ambra elegante) */
+.custom-alert.alert-danger {
+  background-color: #3b1818;
+  color: #f87171;
+  border: 1px solid #682323;
+}
+
+.custom-alert .alert-icon {
+  font-size: 1.4rem;
+}
+
+.custom-alert .alert-content p {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.btn-close-alert {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.3rem;
+  cursor: pointer;
+  margin-left: auto;
+  line-height: 1;
+}
+
+.btn-close-alert:hover {
+  color: #fff;
+}
+
+/* Animazione di comparsa */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    top: 5px;
+  }
+  to {
+    opacity: 1;
+    top: 25px;
+  }
+}

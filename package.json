@@ -10,6 +10,7 @@
     "start": "nodemon ./src/app.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^18.0.3",
     "express": "^5.2.1",
     "mongodb": "^7.6.0",

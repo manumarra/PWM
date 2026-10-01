@@ -2,12 +2,14 @@ import "dotenv/config";
 import express from "express";
 import { connectMongoose } from "./config/mongoose.js";
 import { seedDatabase } from "./config/seed.js";
+import userRoutes from "./routes/users.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static("./src/public"));
+app.use("/api/users", userRoutes);
 
 async function startServer(){
     try {

@@ -683,3 +683,83 @@ body {
     top: 25px;
   }
 }
+
+
+/* Modificatore per la card di login mantenendo la base .switch-card */
+.switch-card.login-card {
+  max-width: 860px;
+  width: 100%;
+}
+
+/* Pannello sinistro */
+.card-left-panel {
+  background-color: var(--night-dark);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--night-light);
+}
+
+.card-brand-title {
+  color: var(--amber-primary);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.card-brand-text {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card-bottom-link {
+  padding-top: 1.5rem;
+  border-top: 1px solid #333333;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.link-amber {
+  color: var(--amber-hover);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-amber:hover {
+  color: #b45309;
+  text-decoration: underline;
+}
+
+/* Pannello destro (Form) */
+.card-right-panel {
+  background-color: var(--amber-primary);
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-heading {
+  color: var(--night-dark);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.card-right-panel .form-label {
+  color: var(--night-light);
+  font-size: 0.9rem;
+}
+
+/* Breakpoint desktop (md) */
+@media screen and (min-width: 768px) {
+  .card-left-panel {
+    border-bottom: none;
+    border-right: 1px solid var(--night-light);
+    padding: 3.5rem 2.5rem;
+  }
+
+  .card-right-panel {
+    padding: 3.5rem 3rem;
+  }
+}

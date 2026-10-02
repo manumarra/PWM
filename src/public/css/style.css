@@ -44,11 +44,13 @@ body {
   top: 16px;                
   left: 0;
   right: 0;
-  padding: 0 20px;          
-  z-index: 100;             
+  padding: 0 16px;      
+  z-index: 100;   
+  margin-bottom: 20px;          
 }
 /* Stile della barra di navigazione */
 .custom-navbar {
+  width: 100%;
   max-width: 1200px;        /* Evita che su schermi ultrawide si allarghi all'infinito */
   margin: 0 auto;           /* Centra orizzontalmente la navbar */
   padding: 12px 24px;       /* Spazio interno traspirante */
@@ -63,21 +65,30 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.custom-toggler {
+  border-color: var(--night-dark);
 }
 
 /* Logo FastFood */
 .brand-logo {
+  /* 1. Consente all'elemento di restringersi se lo spazio è insufficiente */
+  flex-shrink: 1;
+
+  /* 2. Impedisce che vada a capo su due righe sformando l'altezza */
+  white-space: nowrap;
+
+  /* 3. Se lo schermo diventa davvero minuscolo, taglia il testo in eccesso con eleganza (...) */
+  overflow: hidden;
+
+  /* 4. Riduce il margine destro predefinito di Bootstrap (.navbar-brand ha margin-right: 1rem) */
+  margin-right: 0.5rem;
+  
+  /* Dimensione scalata per schermi piccoli */
+  font-size: 1.2rem;
+
+  color: var(--night-dark);
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--night-dark);
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .brand-logo:hover {
@@ -129,63 +140,12 @@ body {
   color: #ffffff;
 }
 
-.trasparent {
-    background-color: transparent;
-}
-
-/* =========================================================
-   RESPONSIVE NAVBAR PER SMARTPHONE E SCHERMI STRETTI
-   ========================================================= */
-
-/* Breakpoint per dispositivi mobili (< 576px / xs) */
-@media (max-width: 576px) {
-  /* 1. Riduciamo i margini esterni per recuperare spazio prezioso */
-  .navbar-wrapper {
-    top: 8px;
-    padding: 0 8px;
-  }
-
-  /* 2. Riduciamo il padding interno della barra */
-  .custom-navbar {
-    padding: 8px 12px;
-    border-radius: 10px;
-  }
-
-  /* 3. Scaliamo il logo proporzionalmente */
+@media (min-width: 768px) {
   .brand-logo {
-    font-size: 1.15rem;
-    gap: 4px;
-  }
-
-  /* 4. Riduciamo il gap tra i bottoni */
-  .nav-actions {
-    gap: 6px;
-  }
-
-  /* 5. Rendiamo i pulsanti compatti */
-  .btn-night,
-  .btn-amber {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    border-radius: 6px;
-    white-space: nowrap; /* Impedisce che la scritta si spezzi su due righe */
+    font-size: 1.4rem;
+    overflow: visible;
   }
 }
-
-/* Breakpoint per schermi ultra-compatti (< 360px) */
-@media (max-width: 360px) {
-  .brand-logo {
-    font-size: 1rem;
-  }
-
-  .btn-night,
-  .btn-amber {
-    padding: 5px 8px;
-    font-size: 0.75rem;
-  }
-}
-
-
 
 /* =========================================================
    HERO SECTION CON SFONDO E BOX CENTRALE
@@ -205,6 +165,7 @@ body {
   align-items: center;      /* Centra verticalmente[cite: 3] */
   padding: 100px 16px 40px; /* Padding top di 100px per non finire sotto la navbar fluttuante */
 }
+
 
 /* Card centrale */
 .search-card {
@@ -277,6 +238,12 @@ body {
   .btn-search {
     width: 100%;            /* Su mobile il bottone si allarga comodamente a tutta larghezza */
   }
+
+  .hero-section {
+    align-items: center;
+    padding-top: 10rem; /* Oppure mantieni lo spazio minimo necessario */
+  }
+
 }
 /* =========================================================
    CAROSELLO TICKER CONTINUO SENZA BUCHI
@@ -573,6 +540,7 @@ body {
     width: 100%;
     min-height: auto;
     position: relative;
+    margin-top: 5rem;
   }
 
   /* Rimuove qualsiasi traslazione su mobile: i blocchi non si muovono nello spazio */

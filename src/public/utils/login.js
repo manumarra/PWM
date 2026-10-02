@@ -39,9 +39,9 @@ loginForm.addEventListener("submit", async (event) => {
         localStorage.setItem("user", JSON.stringify(data.data)); // Salva i dati dell'utente nel localStorage
         setTimeout(() => {
             if(data.data.role === "restaurateur") {
-                window.location.href = "/dashboard.html"; // Modifica con la tua pagina di destinazione
+                window.location.href = "/pages/restaurateur/home.html"; // Modifica con la tua pagina di destinazione
             } else {
-                window.location.href = "/customer.html"; // Modifica con la tua pagina di destinazione per i clienti
+                window.location.href = "/pages/customer/home.html"; // Modifica con la tua pagina di destinazione per i clienti
             }
         },2000);
 

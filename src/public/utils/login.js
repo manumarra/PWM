@@ -37,13 +37,14 @@ loginForm.addEventListener("submit", async (event) => {
     try {
         const data = await loginUser(payload);
         localStorage.setItem("user", JSON.stringify(data.data)); // Salva i dati dell'utente nel localStorage
+        showAlert("success", "Autenticazione completata!", "Reindirizzamento al profilo in corso...");
         setTimeout(() => {
             if(data.data.role === "restaurateur") {
                 window.location.href = "/pages/restaurateur/home.html"; // Modifica con la tua pagina di destinazione
             } else {
                 window.location.href = "/pages/customer/home.html"; // Modifica con la tua pagina di destinazione per i clienti
             }
-        },2000);
+        },700);
 
     } catch (err) {
         console.error("Errore durante il login:", err);

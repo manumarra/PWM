@@ -38,7 +38,6 @@ body {
   --border-subtle: #E5E7EB;       /* Grigio neutro per il bordo inferiore */
 }
 
-
 .navbar-wrapper {
   position: absolute;
   top: 16px;                
@@ -80,9 +79,6 @@ body {
   /* 3. Se lo schermo diventa davvero minuscolo, taglia il testo in eccesso con eleganza (...) */
   overflow: hidden;
 
-  /* 4. Riduce il margine destro predefinito di Bootstrap (.navbar-brand ha margin-right: 1rem) */
-  margin-right: 0.5rem;
-  
   /* Dimensione scalata per schermi piccoli */
   font-size: 1.2rem;
 
@@ -145,6 +141,62 @@ body {
     font-size: 1.4rem;
     overflow: visible;
   }
+}
+
+/* =========================================================
+   NAVBAR RISTORATORE (A TUTTO SCHERMO E PIÙ ALTA)
+   ========================================================= */
+
+/* 1. Reset dimensioni per occupare l'intera larghezza e ingrandire l'altezza */
+.custom-navbar.restaurateur-navbar {
+  max-width: 100% !important;   /* Occupa tutto lo schermo da bordo a bordo */
+  width: 100%;
+  margin: 0;
+  border-radius: 0;              /* Bordo dritto ai lati dello schermo */
+  padding: 16px 0;               /* Più alta e traspirante */
+  min-height: 90px;              /* Presidio di altezza minima generosa */
+  background-color: var(--night-dark, #111827); /* Fondo scuro solido o semitrasparente */
+  border: 1px solid var(--night-light, #1F2937);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+/* 2. Cura delle voci di testo (scritte della navbar) */
+.restaurateur-navbar .nav-link-restaurateur {
+  font-size: 1.05rem;            /* Testo leggibile e proporzionato */
+  font-weight: 500;
+  color: #9CA3AF;                /* Grigio tenue raffinato di default */
+  padding: 6px 12px;
+  border-radius: 8px;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover sui link */
+.restaurateur-navbar .nav-link-restaurateur:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.05); /* Leggero alone moderno */
+}
+
+/* Voce attiva (Home) */
+.restaurateur-navbar .nav-link-restaurateur.active {
+  color: var(--amber-primary, #F59E0B) !important;
+  font-weight: 600;
+  background-color: rgba(245, 158, 11, 0.1);    /* Sfondo ambra molto tenue */
+}
+
+/* 3. Icona/Pulsante toggler proporzionato all'altezza della barra */
+.restaurateur-navbar .rest-custom-toggler {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;            /* Bottone tondo a pillola */
+  border: 1px solid var(--night-light, #1F2937);
+  background-color: var(--night-light, #1F2937);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.restaurateur-navbar .rest-custom-toggler:hover {
+  border-color: var(--amber-primary, #F59E0B);
+  background-color: rgba(245, 158, 11, 0.15);
 }
 
 /* =========================================================
@@ -730,4 +782,50 @@ body {
   .card-right-panel {
     padding: 3.5rem 3rem;
   }
+}
+
+
+/*========================================*/
+/* Card Profilo cliccabile nell'Offcanvas */
+.profile-card {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease;
+}
+
+.profile-card:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Sfondo del Modal Ristoratore */
+.profile-modal-content {
+  background-color: var(--night-dark, #111827);
+}
+
+/* Modale Profilo: contrasto testi e campi di input */
+.profile-modal-content {
+  color: var(--amber-hover);
+}
+
+.profile-modal-content .form-label {
+  color: var(--amber-primary);
+}
+
+.profile-modal-content .form-control {
+  border-color: #374151;
+  color: var(--night-light);
+}
+
+.profile-modal-content .form-control:focus {
+  border-color: var(--amber-primary, #f59e0b);
+  color: var(--night-light);
+
+}
+
+/* Separatore interno al form del profilo */
+.profile-divider {
+  border: 0;
+  border-top: 1px solid #374151; /* oppure #4b5563 */
+  margin: 1.5rem 0;
+  opacity: 1;
 }

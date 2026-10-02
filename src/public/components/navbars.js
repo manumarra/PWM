@@ -7,7 +7,7 @@ const navbars = [`
                 </a>
                 <div class="nav-actions">
                     <a class="btn-night" href="/pages/login.html">Accedi</a>
-                    <a class="btn-amber" href="/pages/singup.html">Iscriviti</a>
+                    <a class="btn-amber" href="/pages/signup.html">Iscriviti</a>
 
                 </div>
 

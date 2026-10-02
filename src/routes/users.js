@@ -1,41 +1,52 @@
 import {Router} from "express";
 import * as userRepo from "../repositories/userRepository.js";
-
+import { asyncWrapper as AW} from "../utils/asyncWrapper.js";
 const router = Router();
 
-router.post("/singup", async (req, res, next) => {
-    try {
-        const userData = req.body;
+router.post("/signup", AW(async (req, res) => {
+    const user = await userRepo.createUser(req.body);
+    res.status(201).json({status: "ok", data: user})
+}));
 
-        const existingUser = await userRepo.getUserByEmail(userData.email);
-        if (existingUser) {
-            return res.status(409).json({ 
-                status: "error",
-                message: "Email già registrata" });
-        }
+router.post("/login", AW(async (req, res) => {
+  const { email, password } = req.body;
 
-        const newUser = await userRepo.createUser(userData);
-        res.status(201).json({ message: "Utente registrato con successo", userId: newUser._id });
+  // 1. Controllo presenza parametri
+  if (!email || !password) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Email e password sono obbligatorie"
+    });
+  }
 
-    } catch (error) {
-        // Gestione errori di validazione dello Schema Mongoose
-        if (error.name === "ValidationError") {
-            return res.status(400).json({
-                status: "fail",
-                message: error.message
-            });
-        }
-        // Gestione duplicato MongoDB (indice univoco email)
-        if (error.code === 11000) {
-            return res.status(409).json({
-                status: "fail",
-                message: "Email già registrata"
-            });
-        }
-        next(error);
+  // 2. Ricerca utente tramite il repository
+  const user = await userRepo.getUserByEmail(email);
+  if (!user) {
+    return res.status(401).json({
+      status: "fail",
+      message: "Credenziali non valide"
+    });
+  }
+
+  // 3. Verifica hash tramite il metodo d'istanza di User.js
+  const isMatch = await userRepo.comparePassword(user, password);
+  if (!isMatch) {
+    return res.status(401).json({
+      status: "fail",
+      message: "Credenziali non valide"
+    });
+  }
+
+  // 4. Risposta per il frontend (include il ruolo per il redirect)
+  res.status(200).json({
+    status: "ok",
+    message: "Accesso eseguito con successo",
+    data: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
     }
-
-    
-});
-
+  });
+}));
 export default router;

@@ -3,13 +3,14 @@ import express from "express";
 import { connectMongoose } from "./config/mongoose.js";
 import { seedDatabase } from "./config/seed.js";
 import userRoutes from "./routes/users.js";
-
+import { mongoErrorHandler } from "./middleware/errorHandler.js";
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static("./src/public"));
 app.use("/api/users", userRoutes);
+app.use(mongoErrorHandler);
 
 async function startServer(){
     try {

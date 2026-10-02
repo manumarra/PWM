@@ -1,4 +1,5 @@
 import { registerUser } from "/services/userService.js";
+import { showAlert } from "/components/alerts.js";
 let isCustomer = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -56,56 +57,28 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Funzione helper per mostrare l'alert grafico
-function showAlert(type, title, message) {
-  const alertBox = document.getElementById("statusAlert");
-  const alertIcon = document.getElementById("statusAlertIcon");
-  const alertTitle = document.getElementById("statusAlertTitle");
-  const alertMsg = document.getElementById("statusAlertMsg");
-  const closeBtn = document.getElementById("statusAlertClose");
+const signupForm = document.getElementById("signupForm");
 
-  // Reset classi
-  alertBox.className = `custom-alert alert-${type}`;
-  alertIcon.textContent = type === "success" ? "✓" : "⚠";
-  alertTitle.textContent = title;
-  alertMsg.textContent = message;
-
-  // Mostra il banner
-  alertBox.classList.remove("d-none");
-
-  // Chiusura al click sulla 'x'
-  closeBtn.onclick = () => alertBox.classList.add("d-none");
-
-  // Chiusura automatica dopo 4 secondi (se è un errore)
-  if (type === "danger") {
-    setTimeout(() => alertBox.classList.add("d-none"), 4000);
-  } else {
-    setTimeout(() => alertBox.classList.add("d-none"), 2000);
-  }
-}
-
-const singupForm = document.getElementById("signupForm");
-
-singupForm.addEventListener("submit", async (event) => {
+signupForm.addEventListener("submit", async (event) => {
 
   event.preventDefault();
   const role = isCustomer ? "customer" : "restaurateur";
 
   const payload = {
-    name: singupForm.elements["name"].value,
-    email: singupForm.elements["email"].value,
-    password: singupForm.elements["password"].value,
-    phone: singupForm.elements["phone"].value,
+    name: signupForm.elements["name"].value,
+    email: signupForm.elements["email"].value,
+    password: signupForm.elements["password"].value,
+    phone: signupForm.elements["phone"].value,
     role: role,
     address: {
-      street: singupForm.elements["street"].value,
-      city: singupForm.elements["city"].value,
-      zip: singupForm.elements["zip"].value,
-      country: singupForm.elements["country"].value
+      street: signupForm.elements["street"].value,
+      city: signupForm.elements["city"].value,
+      zip: signupForm.elements["zip"].value,
+      country: signupForm.elements["country"].value
     }
   }
   if (isCustomer === false) {
-    payload.ivaNumber = singupForm.elements["ivaNumber"].value;
+    payload.ivaNumber = signupForm.elements["ivaNumber"].value;
   }
 
   try {

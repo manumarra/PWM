@@ -8,7 +8,6 @@ loginForm.addEventListener("submit", async (event) => {
     
     const email = loginForm.elements["email"].value.trim();
     const password = loginForm.elements["password"].value;
-    console.log("xxxxxxx:", email, password);
     // 2. Validazione client-side
     if (!email || !password) {
         showAlert("danger", "Attenzione", "Inserisci sia l'email che la password.");

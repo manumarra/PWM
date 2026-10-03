@@ -10,13 +10,12 @@ router.post("/signup", AW(async (req, res) => {
 
 router.post("/login", AW(async (req, res) => {
   const { email, password } = req.body;
-
-  // 1. Controllo presenza parametri
-  if (!email || !password) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Email e password sono obbligatorie"
-    });
+    // 1. Controllo presenza parametri
+    if (!email || !password) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Email e password sono obbligatorie"
+      });
   }
 
   // 2. Ricerca utente tramite il repository
@@ -41,12 +40,7 @@ router.post("/login", AW(async (req, res) => {
   res.status(200).json({
     status: "ok",
     message: "Accesso eseguito con successo",
-    data: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    }
+    data: userRepo.toPublicJSON(user)
   });
 }));
 export default router;

@@ -84,4 +84,12 @@ userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email: email.toLowerCase() }).select("+password");
 };
 
+userSchema.methods.toPublicJSON =
+function() {
+  const obj = this.toObject();
+  delete obj.password;
+  delete obj.__v;
+  return obj;
+};
+
 export default mongoose.model("User", userSchema);

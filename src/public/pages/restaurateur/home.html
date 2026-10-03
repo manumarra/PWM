@@ -79,21 +79,25 @@
         <div class="modal-body p-4">
           <form id="editProfileForm" novalidate>
             <div class="mb-3">
+              <label class="form-label" for="editEmail">Email</label>
+              <input type="email" class="form-control onlyread" id="editEmail" name="email" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="editVatNumber">Partita IVA</label>
+              <input type="text" class="form-control onlyread" id="editIvaNumber" name="ivaNumber" readonly>
+            </div>
+
+            <div class="mb-3">
               <label class="form-label" for="editName">Nome Attività</label>
               <input type="text" class="form-control" id="editName" name="name" required>
             </div>
-            <div class="mb-3">
-              <label class="form-label" for="editEmail">Email</label>
-              <input type="email" class="form-control" id="editEmail" name="email" required>
-            </div>
+
             <div class="mb-3">
               <label class="form-label" for="editPhone">Telefono</label>
               <input type="tel" class="form-control" id="editPhone" name="phone">
             </div>
-            <div class="mb-3">
-              <label class="form-label" for="editVatNumber">Partita IVA</label>
-              <input type="text" class="form-control" id="editVatNumber" name="vatNumber">
-            </div>
+
             <hr class="profile-divider">
             <div class="row g-2 mb-3">
               <div class="col-12">

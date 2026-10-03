@@ -7,3 +7,5 @@ export const getUserByEmail = (email) => User.findByEmail(email);
 export const comparePassword = async (user, password) => {
     return await user.comparePassword(password);
 };
+
+export const toPublicJSON = (user) => user.toPublicJSON();

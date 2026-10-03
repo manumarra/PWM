@@ -4,13 +4,8 @@ const user = getStoredUser();
 
 if (user) {
     // 1. Popola le etichette dell'Offcanvas
-    const nameLabel = document.getElementById("offcanvasRestaurateurName");
-    const titleLabel = document.getElementById("offcanvasRestaurantTitle");
     const nameCanvas = document.getElementById("restaurateurName");
     const restaurantNameCanvas = document.getElementById("restaurantEmail");
-
-    if (nameLabel) nameLabel.textContent = user.name || "restaurateur";
-    if (titleLabel) titleLabel.textContent = user.email || "";
 
     if (nameCanvas) nameCanvas.textContent = user.name || "";
     if (restaurantNameCanvas) restaurantNameCanvas.textContent = user.email || "";
@@ -21,7 +16,7 @@ if (user) {
         form.elements["name"].value = user.name || "";
         form.elements["email"].value = user.email || "";
         form.elements["phone"].value = user.phone || "";
-        form.elements["vatNumber"].value = user.vatNumber || "";
+        form.elements["ivaNumber"].value = user.ivaNumber || "";
 
         if (user.address) {
         form.elements["street"].value = user.address.street || "";

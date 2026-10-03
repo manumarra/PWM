@@ -5,10 +5,12 @@ import bcrypt from "bcrypt";
 const { Schema } = mongoose;
 
 const addressSchema = new Schema({
-  street:  { type: String, required: true, trim: true, minlength: 2 },
-  city:    { type: String, required: true, trim: true, match: [/^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}$/, "Nome città può contenere solo caratteri"] },
-  zip:     { type: String, required: true, match: [/^\d{5}$/, "CAP non valido (5 cifre)"] },
-  country: { type: String, default: "ITA", uppercase: true }
+  street:  { type: String, required: [true, "Via obbligatoria"], trim: true,
+     match: [/^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s'-]+(?:\s+\d+[a-zA-Z]?)?$/,"Formato indirizzo non valido (es. 'Via Roma 12', 'Roma 12' o 'Roma')"
+  ] },
+  city:    { type: String, required: [true, "Città obbligatoria"], trim: true, match: [/^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}$/, "Nome città può contenere solo caratteri"] },
+  zip:     { type: String, required: [true, "CAP obbligatorio"], match: [/^\d{5}$/, "CAP non valido (5 cifre)"] },
+  country: { type: String, default: "ITA", uppercase: true, require: [true, "Stato obbligatorio ()"], maxlength: [3, "Massimo 3 caratteri"], minlength:[2, "Minimo 2 caratteri"] }
 }, { _id: false }); // Nessun _id per il subdocument come da slide
 
 const userSchema = new Schema({
@@ -37,12 +39,13 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Numero di telefono obbligatorio"],
     trim: true,
-    match: [/^[0-9+\s-]{6,20}$/, "Numero di telefono non valido"]
+    match: [/^[0-9]{6,15}$/, "Numero di telefono non valido (senza il + e unito)"]
   },
   role: { 
     type: String, 
     enum: ["customer", "restaurateur"], 
-    default: "restaurateur" 
+    default: "restaurateur",
+    requared: [true, "Ruolo obbligatorio"]
   },
   // Partita IVA: gestita solo se il ruolo è ristoratore
   ivaNumber: {
@@ -56,7 +59,7 @@ const userSchema = new Schema({
         }
         return true;
       },
-      message: "La Partita IVA per i ristoratori deve contenere esattamente 11 cifre numeriche"
+      message: "La Partita IVA deve contenere esattamente 11 cifre numeriche"
     }
   },
   address: addressSchema,

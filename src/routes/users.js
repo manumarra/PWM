@@ -5,7 +5,7 @@ const router = Router();
 
 router.post("/signup", AW(async (req, res) => {
     const user = await userRepo.createUser(req.body);
-    res.status(201).json({status: "ok", data: user})
+    res.status(201).json({status: "ok", data: user});
 }));
 
 router.post("/login", AW(async (req, res) => {
@@ -43,4 +43,33 @@ router.post("/login", AW(async (req, res) => {
     data: userRepo.toPublicJSON(user)
   });
 }));
+
+router.put("/update", AW(async (req, res) => {
+  const {password, id, updates} = req.body;
+
+  const checkUser = await userRepo.getUserById(id);
+  if (!checkUser) {
+      return res.status(401).json({
+      status: "fail",
+      message: "Credenziali non valide"
+    });
+  }
+
+  const checkPassword = await userRepo.comparePassword(checkUser, password);
+  if (!checkPassword) {
+    return res.status(401).json({
+      status: "fail",
+      message: "Password non valida"
+    });
+  }
+
+  const user = await userRepo.updateUser(id, updates);
+  return res.status(200).json({
+    status: "ok",
+    message: "Modifica avvenuta con successo",
+    data: userRepo.toPublicJSON(user)
+  });
+
+}));
+
 export default router;

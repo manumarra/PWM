@@ -78,53 +78,55 @@
 
         <div class="modal-body p-4">
           <form id="editProfileForm" novalidate>
+
             <div class="mb-3">
-              <label class="form-label" for="editEmail">Email</label>
-              <input type="email" class="form-control onlyread" id="editEmail" name="email" readonly>
+              <label class="form-label" for="editName">Nome Attività</label>
+              <input type="text" class="form-control" id="editName" name="nameRest" autocomplete="nameRest" ... required>
             </div>
 
             <div class="mb-3">
               <label class="form-label" for="editVatNumber">Partita IVA</label>
-              <input type="text" class="form-control onlyread" id="editIvaNumber" name="ivaNumber" readonly>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="editName">Nome Attività</label>
-              <input type="text" class="form-control" id="editName" name="name" required>
+              <input type="text" class="form-control" id="editIva" name="iva" autocomplete="iva" ...>
             </div>
 
             <div class="mb-3">
               <label class="form-label" for="editPhone">Telefono</label>
-              <input type="tel" class="form-control" id="editPhone" name="phone">
+              <input type="tel" class="form-control" id="editPhone" name="phone" autocomplete="phone" ...>
             </div>
 
             <hr class="profile-divider">
             <div class="row g-2 mb-3">
               <div class="col-12">
                 <label class="form-label" for="editStreet">Via / Piazza</label>
-                <input type="text" class="form-control" id="editStreet" name="street" required>
+                <input type="text" class="form-control" id="editStreet" name="street" autocomplete="street" ... required>
               </div>
               <div class="col-6">
                 <label class="form-label" for="editCity">Città</label>
-                <input type="text" class="form-control" id="editCity" name="city" required>
+                <input type="text" class="form-control" id="editCity" name="city" autocomplete="city" ... required>
               </div>
               <div class="col-3">
                 <label class="form-label" for="editZip">CAP</label>
-                <input type="text" class="form-control" id="editZip" name="zip" required>
+                <input type="text" class="form-control" id="editZip" name="zip" autocomplete="zip" ... required>
               </div>
               <div class="col-3">
                 <label class="form-label" for="editCountry">Stato</label>
-                <input type="text" class="form-control" id="editCountry" name="country" maxlength="3" required>
+                <input type="text" class="form-control" id="editCountry" name="country" autocomplete="country" ... maxlength="3" required>
               </div>
             </div>
-
             <div id="modalAlert" class="alert alert-danger d-none py-2" role="alert"></div>
+
+            <hr class="profile-divider">
+            <div class="mb-3">
+              <label class="form-label" for="editName">Conferma password</label>
+              <input type="password" class="form-control" id="password" name="password" autocomplete="off" ... required>
+            </div>
+
           </form>
         </div>
 
         <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-night" data-bs-dismiss="modal">Annulla</button>
-          <button type="submit" form="editProfileForm" class="btn btn-night px-4">Salva Modifiche</button>
+          <button type="button" class="btn btn-night btn-modal-footer" data-bs-dismiss="modal">Annulla</button>
+          <button type="submit" form="editProfileForm" class="btn btn-night btn-modal-footer">Salva Modifiche</button>
         </div>
 
       </div>

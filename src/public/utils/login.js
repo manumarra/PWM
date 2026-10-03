@@ -1,5 +1,6 @@
 import {loginUser} from "/services/userService.js";
 import {showAlert} from "/components/alerts.js";
+import { setStoredUser } from "/utils/session.js";
 
 const loginForm = document.getElementById("loginForm");
 
@@ -35,7 +36,7 @@ loginForm.addEventListener("submit", async (event) => {
     }
     try {
         const data = await loginUser(payload);
-        localStorage.setItem("user", JSON.stringify(data.data)); // Salva i dati dell'utente nel localStorage
+        setStoredUser(data.data);
         showAlert("success", "Autenticazione completata!", "Reindirizzamento al profilo in corso...");
         setTimeout(() => {
             if(data.data.role === "restaurateur") {

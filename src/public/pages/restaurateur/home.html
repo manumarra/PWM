@@ -44,12 +44,12 @@
           <!-- Voci di navigazione pannello -->
           <ul class="nav nav-pills flex-column gap-2">
             <li class="nav-item">
-              <a class="nav-link text-white d-flex align-items-center gap-2" href="#">
+              <a class="nav-link " href="#">
                 <i class="bi bi-gear"></i> Impostazioni Locale
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-white d-flex align-items-center gap-2" href="#">
+              <a class="nav-link" href="#">
                 <i class="bi bi-clock-history"></i> Orari di Apertura
               </a>
             </li>
@@ -58,15 +58,59 @@
 
         <!-- Logout in fondo -->
         <div class="pt-3 border-top border-secondary">
-          <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" id="btnLogout">
+          <div class="card-bottom-link offCanvasCredential ">
+            <p class="mb-1">Modifica o elimina il tuo &nbsp;</p>
+            <a href="#" class="link-amber" role="button" data-bs-toggle="modal" data-bs-target="#editCredentialModalLabel">account &rarr;</a>
+          </div>
+          <button class="btn btn-outline-danger" id="btnLogout">
             <i class="bi bi-box-arrow-right"></i> Esci
           </button>
         </div>
       </div>
     </div>
-
+      <!--modal credential-->
+    <div class="modal fade" id="editCredentialModalLabel" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable text-white">
+        <div class="modal-content profile-modal-content border border-secondary shadow-lg">
     
-  <!--modal-->
+          <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="editProfileModalLabel">Modifica Credenziali</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+
+          <div class="modal-body p-4">
+
+            <form id="editCredentialForm" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="editNewPassword">Nuova Password</label>
+                <input type="text" class="form-control" id="editNewPassword" name="nameRest" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="editConfirmPassword">Conferma Nuova Password</label>
+                <input type="text" class="form-control" id="editConfirmPassword" name="nameRest" required>
+              </div>
+
+              <hr class="profile-divider">
+              <div class="mb-3">
+                <label class="form-label" for="editOldPassword">Vecchia password</label>
+                <input type="password" class="form-control" id="editOldPassword" name="password" autocomplete="off" ... required>
+              </div>
+            </form>
+            
+          </div>
+          <form id="deleteCredentialForm" novalidate></form>
+          
+          <div class="modal-footer border-secondary">
+            <button type="submit" form="deleteProfileForm" class="btn btn-outline-danger btn-modal-footer credential-footer">Elimina Account</button>              
+            <button type="submit" form="editProfileForm" class="btn btn-night btn-modal-footer credential-footer">Salva Modifiche</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    
+  <!--modal data-->
   <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable text-white">
       <div class="modal-content profile-modal-content border border-secondary shadow-lg">
@@ -81,12 +125,12 @@
 
             <div class="mb-3">
               <label class="form-label" for="editName">Nome Attività</label>
-              <input type="text" class="form-control" id="editName" name="nameRest" autocomplete="nameRest" ... required>
+              <input type="text" class="form-control" id="editName" name="nameRest" required>
             </div>
 
             <div class="mb-3">
-              <label class="form-label" for="editVatNumber">Partita IVA</label>
-              <input type="text" class="form-control" id="editIva" name="iva" autocomplete="iva" ...>
+              <label class="form-label" for="editIva">Partita IVA</label>
+              <input type="text" class="form-control" id="editIva" name="iva" >
             </div>
 
             <div class="mb-3">
@@ -98,15 +142,15 @@
             <div class="row g-2 mb-3">
               <div class="col-12">
                 <label class="form-label" for="editStreet">Via / Piazza</label>
-                <input type="text" class="form-control" id="editStreet" name="street" autocomplete="street" ... required>
+                <input type="text" class="form-control" id="editStreet" name="street" required>
               </div>
               <div class="col-6">
                 <label class="form-label" for="editCity">Città</label>
-                <input type="text" class="form-control" id="editCity" name="city" autocomplete="city" ... required>
+                <input type="text" class="form-control" id="editCity" name="city" required>
               </div>
               <div class="col-3">
                 <label class="form-label" for="editZip">CAP</label>
-                <input type="text" class="form-control" id="editZip" name="zip" autocomplete="zip" ... required>
+                <input type="text" class="form-control" id="editZip" name="zip" required>
               </div>
               <div class="col-3">
                 <label class="form-label" for="editCountry">Stato</label>

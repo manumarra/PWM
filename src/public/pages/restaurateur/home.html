@@ -12,7 +12,7 @@
 
     <body class="bg-dark text-white min-vh-100 d-flex flex-column">
 
-  <!-- 1. Header con Navbar iniettata da navbars.js -->
+    <!-- 1. Header con Navbar iniettata da navbars.js -->
     <header id="navbar-container"></header>
 
     <!-- 2. Contenuto principale della Dashboard -->
@@ -57,59 +57,15 @@
         </div>
 
         <!-- Logout in fondo -->
-        <div class="pt-3 border-top border-secondary">
-          <div class="card-bottom-link offCanvasCredential ">
-            <p class="mb-1">Modifica o elimina il tuo &nbsp;</p>
-            <a href="#" class="link-amber" role="button" data-bs-toggle="modal" data-bs-target="#editCredentialModalLabel">account &rarr;</a>
-          </div>
-          <button class="btn btn-outline-danger" id="btnLogout">
-            <i class="bi bi-box-arrow-right"></i> Esci
-          </button>
-        </div>
-      </div>
-    </div>
-      <!--modal credential-->
-    <div class="modal fade" id="editCredentialModalLabel" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable text-white">
-        <div class="modal-content profile-modal-content border border-secondary shadow-lg">
-    
-          <div class="modal-header border-secondary">
-          <h5 class="modal-title fw-bold" id="editProfileModalLabel">Modifica Credenziali</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-          </div>
-
-          <div class="modal-body p-4">
-
-            <form id="editCredentialForm" novalidate>
-              <div class="mb-3">
-                <label class="form-label" for="editNewPassword">Nuova Password</label>
-                <input type="text" class="form-control" id="editNewPassword" name="nameRest" required>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label" for="editConfirmPassword">Conferma Nuova Password</label>
-                <input type="text" class="form-control" id="editConfirmPassword" name="nameRest" required>
-              </div>
-
-              <hr class="profile-divider">
-              <div class="mb-3">
-                <label class="form-label" for="editOldPassword">Vecchia password</label>
-                <input type="password" class="form-control" id="editOldPassword" name="password" autocomplete="off" ... required>
-              </div>
-            </form>
-            
-          </div>
-          <form id="deleteCredentialForm" novalidate></form>
-          
-          <div class="modal-footer border-secondary">
-            <button type="submit" form="deleteProfileForm" class="btn btn-outline-danger btn-modal-footer credential-footer">Elimina Account</button>              
-            <button type="submit" form="editProfileForm" class="btn btn-night btn-modal-footer credential-footer">Salva Modifiche</button>
-          </div>
-
-        </div>
+        <div class="pt-3 border-top border-secondary" id="footerLogout"></div>
       </div>
     </div>
     
+  <!--modal credential-->
+  <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
+  <!--modal delete-->>
+  <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>    
+  
   <!--modal data-->
   <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable text-white">
@@ -184,9 +140,12 @@
     <script src="/components/navbars.js"></script>
     <script src="/components/footer.js"></script>
     <script src="/components/alerts.js" type="module"></script>
-    <script>getNavbar(1, "navbar-container");</script>
-    <script>getFooter();</script>
+    <script src="/components/logout.js"></script>
     <script src="/utils/restHome.js" type="module"></script>
+    <script src="/utils/deleteOrUpdateCredential.js" type="module"></script>
+    <script>getNavbar(1, "navbar-container"); getFooter(); getFooterLogoutAndForm();</script>
 
   </body>
 </html>
+git commit --amend --no-edit   
+git push --force origin main 

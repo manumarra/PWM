@@ -38,6 +38,19 @@ export async function updateUser(payload) {
   return data;
 }
 
+export async function deleteUser(payload) {
+  const response = await fetch("/api/users/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
+}
+
 function checkResponse(response, data) {
 
   if (!response.ok) {

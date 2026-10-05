@@ -9,11 +9,13 @@ const editForm = document.getElementById("editProfileForm");
 editForm.addEventListener("submit", async(event) => {
     event.preventDefault();
 
-    const password = editForm.elements["password"].value;
-
+    const currentPassword = editForm.elements["password"].value;
     const name = editForm.elements["nameRest"].value;
     const phone = editForm.elements["phone"].value;
     const ivaNumber = editForm.elements["iva"].value;
+
+    if(!currentPassword) return showAlert("danger", "Attenzione", "Elemento mancante nel DOM");
+
     const address = {
         street: editForm.elements["street"].value,
         city: editForm.elements["city"].value,
@@ -24,7 +26,7 @@ editForm.addEventListener("submit", async(event) => {
     const id = USER._id;
 
     const payload = {
-        password,
+        currentPassword,
         id,
         updates: {
             name,

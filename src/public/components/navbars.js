@@ -9,15 +9,7 @@ const navbars = [`
         </a>
 
         <!-- Toggler per schermi piccoli (mobile) -->
-        <button 
-          class="navbar-toggler custom-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" 
-          data-bs-target="#mainNavbar" 
-          aria-controls="mainNavbar" 
-          aria-expanded="false" 
-          aria-label="Toggle navigation"
-        >
+        <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -62,13 +54,7 @@ const navbars = [`
 
       <!-- 3. Toggler a destra: apre l'offcanvas presente nella pagina -->
       <button 
-        class="navbar-toggler rest-custom-toggler- ms-auto d-flex align-items-center justify-content-center" 
-        type="button" 
-        data-bs-toggle="offcanvas" 
-        data-bs-target="#restaurantUserOffcanvas" 
-        aria-controls="restaurantUserOffcanvas"
-        aria-label="Apri pannello profilo"
-      >
+        class="navbar-toggler rest-custom-toggler- ms-auto d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#restaurantUserOffcanvas" aria-controls="restaurantUserOffcanvas" aria-label="Apri pannello profilo">
         <i class="bi bi-person-circle fs-4 text-white"></i>
       </button>
 

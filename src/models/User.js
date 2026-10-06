@@ -10,7 +10,7 @@ const addressSchema = new Schema({
   ] },
   city:    { type: String, required: [true, "Città obbligatoria"], trim: true, match: [/^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}$/, "Nome città può contenere solo caratteri"] },
   zip:     { type: String, required: [true, "CAP obbligatorio"], match: [/^\d{5}$/, "CAP non valido (5 cifre)"] },
-  country: { type: String, default: "ITA", uppercase: true, require: [true, "Stato obbligatorio ()"], maxlength: [3, "Massimo 3 caratteri"], minlength:[2, "Minimo 2 caratteri"] }
+  country: { type: String, default: "ITA", uppercase: true, required: [true, "Stato obbligatorio"], maxlength: [3, "Stato: massimo 3 caratteri"], minlength:[2, "Stato: minimo 2 caratteri"] }
 }, { _id: false }); // Nessun _id per il subdocument come da slide
 
 const userSchema = new Schema({
@@ -45,19 +45,16 @@ const userSchema = new Schema({
     type: String, 
     enum: ["customer", "restaurateur"], 
     default: "restaurateur",
-    requared: [true, "Ruolo obbligatorio"]
+    required: [true, "Ruolo obbligatorio"]
   },
   // Partita IVA: gestita solo se il ruolo è ristoratore
-  ivaNumber: {
+ivaNumber: {
     type: String,
     trim: true,
     validate: {
       validator: function(v) {
-        // Se è cliente non è richiesta; se è ristoratore deve essere di 11 cifre
-        if (this.role === "restaurateur") {
-          return /^\d{11}$/.test(v);
-        }
-        return true;
+        if (!v) return true; // se vuoto non bloccare
+        return /^\d{11}$/.test(v);
       },
       message: "La Partita IVA deve contenere esattamente 11 cifre numeriche"
     }

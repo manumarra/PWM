@@ -18,7 +18,7 @@ const credentialForm = `
         </div>
 
         <div class="modal-body p-4">
-            <form id="editCredentialForm" novalidate>
+            <form id="editCredentialForm">
                 <div class="mb-3">
                   <label class="form-label" for="editNewPassword">Nuova Password</label>
                   <input type="password" class="form-control" id="editNewPassword" name="password" required>
@@ -61,7 +61,7 @@ const deleteAccountModal = `
           <p class="mb-0">Sei sicuro di voler eliminare definitivamente il tuo account? Tutti i dati andranno persi.</p>
 
             <hr class="profile-divider">
-            <form id="deleteProfileForm" novalidate>
+            <form id="deleteProfileForm">
                 <div class="mb-3">
                     <label class="form-label" for="editCurrentPassword">Conferma password</label>
                     <input type="password" class="form-control" id="password" name="password" autocomplete="off" required>
@@ -89,7 +89,7 @@ function getFooterLogoutAndForm() {
     const editFormContainer = document.getElementById("editCredentialModal");
     const deleteFormContainer = document.getElementById("deleteModalToggle2");
 
-    if (footerContainer || !editFormContainer || !deleteFormContainer) {
+    if (!footerContainer || !editFormContainer || !deleteFormContainer) {
         console.error("Elemento/i non trovato nel DOM");
         return;
     }

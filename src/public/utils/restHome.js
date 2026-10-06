@@ -3,6 +3,7 @@ import { updateUser } from "/services/userService.js";
 import { showAlert } from "/components/alerts.js";
 
 var USER = getStoredUser();
+const isRestaurateur = USER.role === "restaurateur" ? true : false;
 showData();
 
 const editForm = document.getElementById("editProfileForm");
@@ -10,17 +11,16 @@ editForm.addEventListener("submit", async(event) => {
     event.preventDefault();
 
     const currentPassword = editForm.elements["password"].value;
-    const name = editForm.elements["nameRest"].value;
-    const phone = editForm.elements["phone"].value;
-    const ivaNumber = editForm.elements["iva"].value;
+    const name = editForm.elements["nameRest"].value.trim();
+    const phone = editForm.elements["phone"].value.trim();
 
     if(!currentPassword) return showAlert("danger", "Attenzione", "Elemento mancante nel DOM");
 
     const address = {
-        street: editForm.elements["street"].value,
-        city: editForm.elements["city"].value,
-        zip: editForm.elements["zip"].value,
-        country: editForm.elements["country"].value
+        street: editForm.elements["street"].value.trim(),
+        city: editForm.elements["city"].value.trim(),
+        zip: editForm.elements["zip"].value.trim(),
+        country: editForm.elements["country"].value.trim()
     }
     
     const id = USER._id;
@@ -31,9 +31,13 @@ editForm.addEventListener("submit", async(event) => {
         updates: {
             name,
             phone,
-            ivaNumber,
             address
         }
+    }
+
+    if(isRestaurateur) {
+        const ivaNumber = editForm.elements["iva"].value.trim();
+        if (ivaNumber) payload.updates.ivaNumber = ivaNumber;
     }
 
     try {
@@ -62,7 +66,7 @@ function showData() {
     if (form) {
         form.elements["nameRest"].value = USER.name || "";
         form.elements["phone"].value = USER.phone || "";
-        form.elements["iva"].value = USER.ivaNumber || "";
+        if(isRestaurateur) form.elements["iva"].value = USER.ivaNumber || "";
 
         if (USER.address) {
         form.elements["street"].value = USER.address.street || "";

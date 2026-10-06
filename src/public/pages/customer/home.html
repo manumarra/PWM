@@ -5,9 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
   </head>
   <body>
-    <h1>Hello, world! CUSTOMER</h1>
+
+    <!-- 1. Header con Navbar iniettata da navbars.js -->
+    <header id="navbar-container"></header>
+
+    <!-- 2. Contenuto principale della Dashboard -->
+    <main class="container my-4 flex-grow-1">
+      <h1 class="h3 fw-bold mb-4">Pannello di Controllo</h1>
+      <p class="text-secondary">Benvenuto nella gestione CLIENTE.</p>
+    </main>
+
+    <!--CANVAS-->
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="restaurantUserOffcanvas" aria-labelledby="restaurantUserOffcanvasLabel"></div>
+    <!--MODAL DATA-->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true"></div>
+
+    <!--modal credential-->
+    <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
+    <!--modal delete-->>
+    <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>    
+  
+
+
+    <footer id="homeFooter" class="site-footer"></footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <!-- Script componenti non a modulo -->
+    <script src="/components/navbars.js"></script>
+    <script src="/components/footer.js"></script>
+    <script src="/components/logout.js"></script>
+
+    <!-- Script di montaggio e inizializzazione (type="module") -->
+    <script type="module">
+      import { getCanvas, getCanvasContent } from "/components/canvas.js";
+      import "/components/alerts.js";
+
+      // 1. Inietta navbar e footer
+      getNavbar(1, "navbar-container");
+      getFooter();
+
+      // 2. Inietta il canvas (che contiene #footerLogout) e la modale dati
+      getCanvas();
+
+      getCanvasContent();
+      // 3. Inietta il footer di logout e i form di modifica/eliminazione credenziali
+      getFooterLogoutAndForm();
+
+      // 4. Ora che i form esistono fisicamente nel DOM, carica gli ascoltatori degli eventi
+      import("/utils/deleteOrUpdateCredential.js");
+      
+    </script>
+    <script src="/utils/restHome.js" type="module"></script>
   </body>
 </html>

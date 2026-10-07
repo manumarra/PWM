@@ -18,9 +18,9 @@
             
             <!-- Pannello Informativo (colonna da 6 su schermi medi/desktop) -->
             <div class="col-12 col-md-6 panel info-panel">
-            <h1 id="formEmoji" class="fade-content">👨‍🍳🍳👩‍🍳</h1>    
-            <h2 id="infoTitle" class="fade-content">Registrati come Ristoratore</h2>
-            <p id="infoDesc" class="fade-content">Porta i tuoi piatti a migliaia di nuovi clienti nella tua città.</p>
+              <h1 id="formEmoji" class="fade-content">👨‍🍳🍳👩‍🍳</h1>    
+              <h2 id="infoTitle" class="fade-content">Registrati come Ristoratore</h2>
+              <p id="infoDesc" class="fade-content">Porta i tuoi piatti a migliaia di nuovi clienti nella tua città.</p>
             </div>
 
             <!-- Bottone di scambio centrale -->
@@ -34,53 +34,53 @@
 
                   <div class="row g-2 mb-2">
                     <div class="col-12" id="nameCol">
-                      <label class="form-label mb-1" id="nameLabel">Nome Attività</label>
-                      <input type="text" name="name" class="form-control" placeholder="Mario" value="Mario" required>
+                      <label class="form-label mb-1" id="nameLabel" for="name">Nome Attività</label>
+                      <input type="text" name="name" class="form-control" id="name" placeholder="Mario" value="Mario" autocomplete="..." required>
                     </div>
                     <div class="col-6" id="surnameCol" style="display: none;">
-                      <label class="form-label mb-1">Cognome</label>
-                      <input type="text" name="surname" class="form-control" placeholder="Rossi">
+                      <label class="form-label mb-1" for="surname">Cognome</label>
+                      <input type="text" name="surname" id="surname" class="form-control" placeholder="Rossi">
                     </div>
                   </div>
 
                   <div class="row g-2 mb-2">
                     <div class="col-6">
-                      <label class="form-label mb-1">Email</label>
-                      <input type="email" name="email" class="form-control" placeholder="mario@email.it" value="manuel@gmail.com" required>
+                      <label class="form-label mb-1" for="email">Email</label>
+                      <input type="email" name="email" id="email" class="form-control" placeholder="mario@email.it" value="manuel@gmail.com" autocomplete="..." required>
                     </div>
                     <div class="col-6">
-                      <label class="form-label mb-1">Password</label>
-                      <input type="password" name="password" class="form-control" value="123456" minlength="6" required>
+                      <label class="form-label mb-1" for="password">Password</label>
+                      <input type="password" name="password" id="password" class="form-control" value="123456" minlength="6" required>
                     </div>
                   </div>
 
                   <div class="row g-2 mb-2">
                     <div class="col-6" id="phoneCol">
-                      <label class="form-label mb-1">Telefono</label>
-                      <input type="tel" name="phone" class="form-control" value="1234567890" required>
+                      <label class="form-label mb-1" for="phone">Telefono</label>
+                      <input type="tel" name="phone" id="phone" class="form-control" value="1234567890" autocomplete="..." required>
                     </div>
                     <div class="col-6" id="ivaContainer">
-                      <label class="form-label mb-1">Partita IVA</label>
-                      <input type="text" name="ivaNumber" class="form-control" placeholder="11 cifre" value="12345678901" maxlength="11">
+                      <label class="form-label mb-1" for="iva">Partita IVA</label>
+                      <input type="text" name="ivaNumber" id="iva" class="form-control" placeholder="11 cifre" value="12345678901" maxlength="11">
                     </div>
                   </div>
 
                   <div class="row g-2 mb-3">
                     <div class="col-12">
-                      <label class="form-label mb-1">Indirizzo (Via e Civico)</label>
-                      <input type="text" name="street" class="form-control" placeholder="Via Roma 12" value="Via Roma 12" minlength="2" required>
+                      <label class="form-label mb-1" for="address">Indirizzo (Via e Civico)</label>
+                      <input type="text" name="street" id="address" class="form-control" placeholder="Via Roma 12" value="Via Roma 12" minlength="2" autocomplete="..." required>
                     </div>
                     <div class="col-6">
-                      <label class="form-label mb-1">Città</label>
-                      <input type="text" name="city" class="form-control" placeholder="Milano" value="Milano" pattern="[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}" required>
+                      <label class="form-label mb-1" for="city">Città</label>
+                      <input type="text" name="city" id="city" class="form-control" placeholder="Milano" value="Milano" pattern="[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}" required>
                     </div>
                     <div class="col-3">
-                      <label class="form-label mb-1">CAP</label>
-                      <input type="text" name="zip" class="form-control" placeholder="92024" value="92024" maxlength="5" pattern="\d{5}" required>
+                      <label class="form-label mb-1" for="cap">CAP</label>
+                      <input type="text" name="zip" id="cap" class="form-control" placeholder="92024" value="92024" maxlength="5" pattern="\d{5}" required>
                     </div>
                     <div class="col-3">
-                      <label class="form-label mb-1">Stato</label>
-                      <input type="text" name="country" class="form-control" value="ITA" maxlength="3" pattern="[a-zA-Z]{3}" required>
+                      <label class="form-label mb-1" for="country">Stato</label>
+                      <input type="text" name="country" id="country" class="form-control" value="ITA" maxlength="3" pattern="[a-zA-Z]{3}" autocomplete="..." required>
                     </div>
                   </div>
 

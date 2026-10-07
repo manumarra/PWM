@@ -18,8 +18,28 @@ const userSchema = new Schema({
     type: String, 
     required: [true, "Nome obbligatorio"], 
     trim: true, 
-    minlength: 2, 
-    maxlength: 80 
+    minlength: [2, "Il nome deve contenere almeno 2 caratteri"], 
+    maxlength: [80, "Il nome deve contenere al massimo 80 caratteri"],
+    match: [
+      /^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s'-]+$/, 
+      "Il nome può contenere solo caratteri alfabetici"
+    ] 
+  },
+  surname: {
+    type: String,
+    trim: true,
+    minlength: [2, "Il cognome deve contenere almeno 2 caratteri"],
+    maxlength: [80, "Il cognome deve contenere al massimo 80 caratteri"],
+    match: [
+      /^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s'-]+$/,
+      "Il cognome può contenere solo caratteri alfabetici"
+    ],
+    required: [
+      function() {
+        return this.role === "customer";
+      },
+      "Il cognome è obbligatorio per i clienti"
+    ]
   },
   email: { 
     type: String, 
@@ -53,7 +73,7 @@ ivaNumber: {
     trim: true,
     validate: {
       validator: function(v) {
-        if (!v) return true; // se vuoto non bloccare
+        if (!v) return true; // opzionale
         return /^\d{11}$/.test(v);
       },
       message: "La Partita IVA deve contenere esattamente 11 cifre numeriche"

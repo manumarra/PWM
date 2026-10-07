@@ -4,13 +4,14 @@ const {Schema} = mongoose;
 
 const mealSchema = new Schema({
     
-    idMeal: {type: String, required: true},
-    strMeal: {type: String, required: true},
-    strCategory: {type: String},
-    strArea: {type: String},
-    strInstructions: {type: String},
-    strMealThumb: {type: String},
-    ingredients: [{type: String}]
+    mealId: {type: String, required: true},
+    nameMeal: {type: String, required: true},
+    category: {type: String},
+    area: {type: String},
+    instructions: {type: String},
+    image: {type: String},
+    ingredients: [{type: String}],
+    measures: [{type: String}]
 }, {timestamps: true});
 
 export default mongoose.model("Meal", mealSchema);

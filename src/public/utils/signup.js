@@ -1,5 +1,6 @@
 import { registerUser } from "/services/userService.js";
 import { showAlert } from "/components/alerts.js";
+
 let isCustomer = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,10 +9,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const hero = document.getElementById("signupHero");
   const infoTitle = document.getElementById("infoTitle");
   const infoDesc = document.getElementById("infoDesc");
-  const nameLabel = document.getElementById("nameLabel");
   const formEmoji = document.getElementById("formEmoji");
-  const ivaContainer = document.getElementById("ivaContainer");
+
+  const nameCol = document.getElementById("nameCol");
+  const nameLabel = document.getElementById("nameLabel");
+  const surnameCol = document.getElementById("surnameCol");
   const phoneCol = document.getElementById("phoneCol");
+  const ivaContainer = document.getElementById("ivaContainer");
+
+  const signupForm = document.getElementById("signupForm");
+  const surnameInput = signupForm.elements["surname"];
   const ivaInput = signupForm.elements["ivaNumber"];
 
   if (!switchBtn || !card || !hero) return;
@@ -28,13 +35,20 @@ document.addEventListener("DOMContentLoaded", () => {
     infoTitle.classList.add("is-fading");
     infoDesc.classList.add("is-fading");
 
-    // 3. A metà animazione aggiorna i contenuti e li fa riapparire
+    // 3. A metà animazione aggiorna i contenuti
     setTimeout(() => {
       if (isCustomer) {
         formEmoji.textContent = "🍔🍕🥗";
         infoTitle.textContent = "Registrati come Cliente";
         infoDesc.textContent = "Ordina dai migliori ristoranti e ricevi il cibo caldo e veloce a casa tua.";
-        nameLabel.textContent = "Nome Utente";
+
+        // Configurazione Nome e Cognome (2 colonne da 6)
+        nameLabel.textContent = "Nome";
+        nameCol.className = "col-6";
+        surnameCol.style.display = "block";
+        surnameInput.required = true;
+
+        // Nasconde Partita IVA ed espande Telefono a riga intera
         ivaContainer.style.display = "none";
         ivaInput.required = false;
         ivaInput.value = "";
@@ -44,8 +58,16 @@ document.addEventListener("DOMContentLoaded", () => {
         formEmoji.textContent = "👨‍🍳🍳👩‍🍳";
         infoTitle.textContent = "Registrati come Ristoratore";
         infoDesc.textContent = "Porta i tuoi piatti a migliaia di nuovi clienti nella tua città.";
+
+        // Configurazione Nome Attività (riga intera col-12) e nasconde Cognome
+        nameLabel.textContent = "Nome Attività";
+        nameCol.className = "col-12";
+        surnameCol.style.display = "none";
+        surnameInput.required = false;
+        surnameInput.value = "";
+
+        // Mostra Partita IVA e divide con Telefono (2 colonne da 6)
         ivaContainer.style.display = "block";
-        nameLabel.textContent = "Nome Ristorante / Titolare";
         ivaInput.required = true;
         phoneCol.className = "col-6";
       }
@@ -60,43 +82,38 @@ document.addEventListener("DOMContentLoaded", () => {
 const signupForm = document.getElementById("signupForm");
 
 signupForm.addEventListener("submit", async (event) => {
-
   event.preventDefault();
+
   const role = isCustomer ? "customer" : "restaurateur";
 
   const payload = {
-    name: signupForm.elements["name"].value,
-    email: signupForm.elements["email"].value,
+    name: signupForm.elements["name"].value.trim(),
+    email: signupForm.elements["email"].value.trim(),
     password: signupForm.elements["password"].value,
-    phone: signupForm.elements["phone"].value,
+    phone: signupForm.elements["phone"].value.trim(),
     role: role,
     address: {
-      street: signupForm.elements["street"].value,
-      city: signupForm.elements["city"].value,
-      zip: signupForm.elements["zip"].value,
-      country: signupForm.elements["country"].value
+      street: signupForm.elements["street"].value.trim(),
+      city: signupForm.elements["city"].value.trim(),
+      zip: signupForm.elements["zip"].value.trim(),
+      country: signupForm.elements["country"].value.trim().toUpperCase()
     }
-  }
-  if (isCustomer === false) {
-    payload.ivaNumber = signupForm.elements["ivaNumber"].value;
+  };
+
+  if (isCustomer) {
+    payload.surname = signupForm.elements["surname"].value.trim();
+  } else {
+    payload.ivaNumber = signupForm.elements["ivaNumber"].value.trim();
   }
 
   try {
-      const result = await registerUser(payload);
+    const result = await registerUser(payload);
+    showAlert("success", "Registrazione completata!", "Reindirizzamento al login in corso...");
 
-      // Mostra notifica di successo
-      showAlert("success", "Registrazione completata!", "Reindirizzamento al login in corso...");
-
-      // Attendi 2 secondi prima di cambiare pagina per godersi l'effetto visivo
-      setTimeout(() => {
-        window.location.href = "/pages/login.html";
-      }, 1000);
-
-    } catch (err) {
-      // Mostra notifica di errore con il messaggio proveniente dal backend
-      showAlert("danger", "Errore di Registrazione", err.message);
+    setTimeout(() => {
+      window.location.href = "/pages/login.html";
+    }, 1000);
+  } catch (err) {
+    showAlert("danger", "Errore di Registrazione", err.message);
   }
-
 });
-
-

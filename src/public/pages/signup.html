@@ -32,9 +32,15 @@
             <div class="col-12 col-md-6 panel form-panel">
                 <form id="signupForm" novalidate>
 
-                  <div class="mb-2">
-                    <label class="form-label mb-1" id="nameLabel">Nome Ristorante / Titolare</label>
-                    <input type="text" name="name" class="form-control" value="manuel" required>
+                  <div class="row g-2 mb-2">
+                    <div class="col-12" id="nameCol">
+                      <label class="form-label mb-1" id="nameLabel">Nome Attività</label>
+                      <input type="text" name="name" class="form-control" placeholder="Mario" value="Mario" required>
+                    </div>
+                    <div class="col-6" id="surnameCol" style="display: none;">
+                      <label class="form-label mb-1">Cognome</label>
+                      <input type="text" name="surname" class="form-control" placeholder="Rossi">
+                    </div>
                   </div>
 
                   <div class="row g-2 mb-2">

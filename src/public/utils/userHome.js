@@ -40,6 +40,11 @@ editForm.addEventListener("submit", async(event) => {
         if (ivaNumber) payload.updates.ivaNumber = ivaNumber;
     }
 
+    if(!isRestaurateur) {
+        const surname = editForm.elements["surname"].value.trim();
+        if(surname) payload.updates.surname = surname;
+    }
+
     try {
         const data = await updateUser(payload);
         
@@ -68,13 +73,22 @@ function showData() {
     const nameCanvas = document.getElementById("nameUserContent");
     const restaurantNameCanvas = document.getElementById("emailUserContent");
 
-    if (nameCanvas) nameCanvas.textContent = USER.name || "";
+    if(!isRestaurateur) {
+        if (nameCanvas) nameCanvas.textContent = USER.name + " " + USER.surname || "";
+
+    } else { if (nameCanvas) nameCanvas.textContent = USER.name || ""; }
+
+    
     if (restaurantNameCanvas) restaurantNameCanvas.textContent = USER.email || "";
 
     // 2. Popola i campi del form della modale
     const form = document.getElementById("editProfileForm");
     if (form) {
         form.elements["nameUser"].value = USER.name || "";
+
+        if (form.elements["surname"]) form.elements["surname"].value = USER.surname || "";
+
+
         form.elements["phone"].value = USER.phone || "";
         if(isRestaurateur) form.elements["iva"].value = USER.ivaNumber || "";
 

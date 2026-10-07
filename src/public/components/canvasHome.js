@@ -31,9 +31,18 @@ const modalData = `
       <div class="modal-body p-4">
         <form id="editProfileForm">
 
-          <div class="mb-3">
-            <label class="form-label" for="editName">Nome Attività</label>
-            <input type="text" class="form-control" id="editName" name="nameUser" required>
+          <div class="row g-2 mb-3">
+            <div class="${isRestaurateur ? 'col-12' : 'col-6'}">
+              <label class="form-label" for="editName">${isRestaurateur ? 'Nome Attività' : 'Nome'}</label>
+              <input type="text" class="form-control" id="editName" name="nameUser" required>
+            </div>
+
+            ${!isRestaurateur ? `
+            <div class="col-6">
+              <label class="form-label" for="editSurname">Cognome</label>
+              <input type="text" class="form-control" id="editSurname" name="surname" required>
+            </div>
+            ` : ''}
           </div>
 
           ${isRestaurateur ? `

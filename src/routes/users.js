@@ -4,8 +4,18 @@ import { asyncWrapper as AW} from "../utils/asyncWrapper.js";
 const router = Router();
 
 router.post("/signup", AW(async (req, res) => {
-    const user = await userRepo.createUser(req.body);
-    res.status(201).json({status: "ok", data: user});
+  
+  const { email } = req.body;
+  const existingUser = await userRepo.getUserByEmail(email);
+  if (existingUser) {
+    return res.status(409).json({
+      status: "fail",
+      message: "Email già registrata"
+    });
+  }
+
+  const user = await userRepo.createUser(req.body);
+  res.status(201).json({status: "ok", data: user});
 }));
 
 router.post("/login", AW(async (req, res) => {

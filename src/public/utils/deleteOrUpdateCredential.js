@@ -31,6 +31,15 @@ credentialForm.addEventListener("submit", async(event) => {
     try {
         await updateUser(payload);
         showAlert("success", "Password modificata con successo!");
+        
+        const modalEl = document.getElementById("editCredentialModal");
+        if (modalEl) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+
     } catch (error) {
         console.error("Errore modifica password:", error);
         showAlert("danger", "Errore durante la modifica della password", error.message);

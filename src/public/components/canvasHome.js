@@ -4,7 +4,7 @@ const isRestaurateur = USER.role === "restaurateur" ? true : false;
 
 const canvas = `
       <div class="offcanvas-header border-bottom border-secondary">
-        <h5 class="offcanvas-title fw-bold" id="restaurantUserOffcanvasLabel">
+        <h5 class="offcanvas-title fw-bold" id="userOffcanvasLabel">
           <i class="bi bi-shop me-2 text-warning"></i> ${isRestaurateur ? `Area Ristoratore` : 'Area Clienti'}
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Chiudi"></button>
@@ -33,7 +33,7 @@ const modalData = `
 
           <div class="mb-3">
             <label class="form-label" for="editName">Nome Attività</label>
-            <input type="text" class="form-control" id="editName" name="nameRest" required>
+            <input type="text" class="form-control" id="editName" name="nameUser" required>
           </div>
 
           ${isRestaurateur ? `
@@ -93,8 +93,8 @@ const canvasBodyContentCustomer = `
 <div class="profile-card d-flex align-items-center gap-3 mb-4 p-3 rounded" role="button" data-bs-toggle="modal" data-bs-target="#editProfileModal">
   <i class="bi bi-person-circle fs-1 text-warning"></i>
   <div>
-    <h6 class="mb-0 fw-bold" id="restaurateurName"></h6>
-    <small class="text-secondary" id="restaurantEmail"></small>
+    <h6 class="mb-0 fw-bold" id="nameUserContent"></h6>
+    <small class="text-secondary" id="emailUserContent"></small>
   </div>
 </div>
 
@@ -118,8 +118,8 @@ const canvasBodyContentRestaurateur = `
 <div class="profile-card d-flex align-items-center gap-3 mb-4 p-3 rounded" role="button" data-bs-toggle="modal" data-bs-target="#editProfileModal">
   <i class="bi bi-person-circle fs-1 text-warning"></i>
   <div>
-    <h6 class="mb-0 fw-bold" id="restaurateurName"></h6>
-    <small class="text-secondary" id="restaurantEmail"></small>
+    <h6 class="mb-0 fw-bold" id="nameUserContent"></h6>
+    <small class="text-secondary" id="emailUserContent"></small>
   </div>
 </div>
 
@@ -139,7 +139,7 @@ const canvasBodyContentRestaurateur = `
 `;
 
 export function getCanvas() {
-    const canvasContainer = document.getElementById("restaurantUserOffcanvas");
+    const canvasContainer = document.getElementById("userOffcanvas");
     const modalContainer = document.getElementById("editProfileModal");
     if(!canvasContainer) return console.error("Documento mancante nel DOM");
     if (!modalContainer) return console.error("Elemento mancante del DOM");

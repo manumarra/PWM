@@ -20,7 +20,7 @@
     </main>
 
     <!--CANVAS-->
-    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="restaurantUserOffcanvas" aria-labelledby="restaurantUserOffcanvasLabel"></div>
+    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas" aria-labelledby="userOffcanvasLabel"></div>
     <!--MODAL DATA-->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true"></div>
 
@@ -41,7 +41,7 @@
 
     <!-- Script di montaggio e inizializzazione (type="module") -->
     <script type="module">
-      import { getCanvas, getCanvasContent } from "/components/canvas.js";
+      import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
       import "/components/alerts.js";
 
       // 1. Inietta navbar e footer
@@ -59,6 +59,6 @@
       import("/utils/deleteOrUpdateCredential.js");
       
     </script>
-    <script src="/utils/restHome.js" type="module"></script>
+    <script src="/utils/userHome.js" type="module"></script>
   </body>
 </html>

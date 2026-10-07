@@ -11,7 +11,7 @@ editForm.addEventListener("submit", async(event) => {
     event.preventDefault();
 
     const currentPassword = editForm.elements["password"].value;
-    const name = editForm.elements["nameRest"].value.trim();
+    const name = editForm.elements["nameUser"].value.trim();
     const phone = editForm.elements["phone"].value.trim();
 
     if(!currentPassword) return showAlert("danger", "Attenzione", "Elemento mancante nel DOM");
@@ -42,10 +42,20 @@ editForm.addEventListener("submit", async(event) => {
 
     try {
         const data = await updateUser(payload);
+        
         setStoredUser(data.data);
         USER = getStoredUser();
         showData();
         showAlert("success", "Dati modificati con successo");
+
+        const modalEl = document.getElementById("editProfileModal");
+        if (modalEl) {
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+        
     } catch(error) {
         console.log("errore: ", error)
         showAlert("danger", "Errore durante la modifica dei dati: ", error.message)
@@ -55,8 +65,8 @@ editForm.addEventListener("submit", async(event) => {
 
 function showData() {
     // 1. Popola le etichette dell'Offcanvas
-    const nameCanvas = document.getElementById("restaurateurName");
-    const restaurantNameCanvas = document.getElementById("restaurantEmail");
+    const nameCanvas = document.getElementById("nameUserContent");
+    const restaurantNameCanvas = document.getElementById("emailUserContent");
 
     if (nameCanvas) nameCanvas.textContent = USER.name || "";
     if (restaurantNameCanvas) restaurantNameCanvas.textContent = USER.email || "";
@@ -64,7 +74,7 @@ function showData() {
     // 2. Popola i campi del form della modale
     const form = document.getElementById("editProfileForm");
     if (form) {
-        form.elements["nameRest"].value = USER.name || "";
+        form.elements["nameUser"].value = USER.name || "";
         form.elements["phone"].value = USER.phone || "";
         if(isRestaurateur) form.elements["iva"].value = USER.ivaNumber || "";
 

@@ -3,7 +3,7 @@ const navbars = [`
       <div class="container-fluid">
         
         <!-- Logo Brand -->
-        <a class="navbar-brand brand-logo" href="/pages/restaurateur/home.html">
+        <a class="navbar-brand brand-logo" href="/pages/customer/home.html">
             <img src="/assets/doremi.png" alt="Logo" width="45" height="36 class="d-inline-block align-text-top">
           Doremi
         </a>
@@ -45,7 +45,7 @@ const navbars = [`
           <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/restaurateur/home.html">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="#">Menu</a>
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/menuBuilder.html">Menu</a>
         </li>
         <li class="nav-item">
           <a class="nav-link nav-link-restaurateur" href="#">Ordini</a>

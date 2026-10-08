@@ -10,11 +10,18 @@ export async function seedDatabase() {
 
       const fileData = fs.readFileSync("./meals.json", "utf-8"); 
       const parsedData = JSON.parse(fileData);
-      
-    const cleanData = parsedData.map(meal => {
 
-        const { _id, ...restoDelPiatto } = meal; 
-        return restoDelPiatto;
+      const cleanData = parsedData.map(meal => {
+        return {
+          mealId: meal.idMeal,
+          nameMeal: meal.strMeal,
+          category: meal.strCategory,
+          area: meal.strArea,
+          instructions: meal.strInstructions,
+          image: meal.strMealThumb,
+          ingredients: meal.ingredients || [],
+          measures: meal.measures || []
+        };
       });
 
       await Meal.insertMany(cleanData);
@@ -26,3 +33,4 @@ export async function seedDatabase() {
     console.error("❌ Errore durante il caricamento dati:", error);
   }
 }
+//mealId, nameMeal,category, area, instructions, image, ingriedients, measures

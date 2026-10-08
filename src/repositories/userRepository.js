@@ -11,14 +11,6 @@ export const comparePassword = async (user, password) => {
 };
 
 export const toPublicJSON = (user) => user.toPublicJSON();
-/*
-export const updateUser = (id, updates) =>
-  User.findByIdAndUpdate(
-    id,
-    { $set: updates },
-    {returnDocument: 'after', runValidators: true}
-  );
-*/
 
 export const updateUser = async (id, updates) => {
   // Se il payload contiene la password, usiamo .save() per attivare .pre("save")

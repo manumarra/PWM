@@ -102,8 +102,9 @@ body {
   background-color: var(--amber-primary);
   border: 1px solid var(--amber-primary);
   color: var(--night-dark);
-  text-decoration: none;
   border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(180, 180, 180, 0.603);
   transition: all 0.2s ease;
 }
 
@@ -883,4 +884,210 @@ body {
 }
 .modal-dialog {
   padding: 8px;
+}
+
+/* =========================================================
+   MENU BUILDER (Catalogo, Offcanvas e Modale)
+   ========================================================= */
+
+/* Layout e contenitore principale */
+.menu-builder-main {
+  min-height: 80vh;
+  padding: 2.5rem 1rem;
+}
+
+.menu-builder-header {
+  border-bottom: 1px solid var(--night-light);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.menu-builder-title {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.menu-builder-subtitle {
+  color: #9CA3AF;
+  font-size: 0.95rem;
+}
+
+/* Campi di filtro e ricerca */
+.menu-search-input,
+.menu-filter-select {
+  background-color: var(--night-dark);
+  color: #ffffff;
+  border: 1px solid var(--night-light);
+}
+
+.menu-search-input::placeholder {
+  color: #9CA3AF; /* Grigio chiaro leggibile sullo sfondo scuro */
+  opacity: 1;     /* Forza l'opacità piena su Firefox */
+}
+
+.menu-search-input:focus,
+.menu-filter-select:focus {
+  border-color: var(--amber-primary);
+  background-color: var(--night-dark);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.menu-input-icon {
+  background-color: var(--night-light);
+  border: 1px solid var(--night-light);
+  color: #ffffff;
+}
+
+/* Offcanvas Menù e Recenti */
+.menu-offcanvas {
+  background-color: var(--night-dark);
+  color: #ffffff;
+  border-left: 1px solid var(--night-light);
+  border-right: 1px solid var(--night-light);
+}
+
+.menu-offcanvas-header {
+  border-bottom: 1px solid var(--night-light);
+}
+
+.menu-offcanvas-footer {
+  border-top: 1px solid var(--night-light);
+  padding-top: 1rem;
+}
+
+.menu-empty-msg {
+  color: #9CA3AF;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* Modale Personalizzazione Piatto */
+.menu-modal-content {
+  background-color: var(--night-dark);
+  color: #ffffff;
+  border: 1px solid var(--night-light);
+  border-radius: 14px;
+}
+
+.menu-modal-header {
+  border-bottom: 1px solid var(--night-light);
+}
+
+.menu-modal-footer {
+  border-top: 1px solid var(--night-light);
+}
+
+.menu-modal-label {
+  color: var(--amber-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+body.menu-builder-page {
+  background-color: var(--night-light);
+  color: #ffffff;
+}
+
+/* =========================================================
+   PILLOLE INGREDIENTI (MODALE MENU BUILDER)
+   ========================================================= */
+
+/* Contenitore delle pillole */
+.ingredient-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+/* Singola pillola attiva */
+.ingredient-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--night-light);
+  border: 1px solid var(--amber-primary);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.ingredient-pill:hover {
+  border-color: var(--amber-hover);
+}
+
+/* Icona per rimuovere l'ingrediente */
+.ingredient-pill .btn-remove-tag {
+  background: transparent;
+  border: none;
+  color: var(--amber-primary);
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ingredient-pill .btn-remove-tag:hover {
+  color: #ffffff;
+}
+
+/* Bottone per aggiungere nuovi ingredienti */
+.btn-add-ingredient {
+  background-color: var(--amber-primary);
+  border: 1px solid var(--amber-primary);
+  color: var(--night-dark);
+  font-weight: 600;
+}
+
+.btn-add-ingredient:hover {
+  background-color: var(--amber-hover);
+  border-color: var(--amber-hover);
+  color: #ffffff;
+}
+
+/* Card del piatto nell'Offcanvas destro */
+.recent-meal-item {
+  position: relative;
+  background-color: var(--night-light);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.recent-meal-item:hover {
+  border-color: var(--amber-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Pulsante cestino: nascosto di base, visibile solo all'hover */
+.recent-meal-item .btn-delete-recent {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 1.15rem;
+  padding: 0 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.recent-meal-item:hover .btn-delete-recent {
+  display: inline-flex;
+  align-items: center;
+}
+
+.recent-meal-item .btn-delete-recent:hover {
+  color: #ef4444;
+  transform: scale(1.15);
 }

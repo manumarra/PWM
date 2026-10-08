@@ -3,6 +3,8 @@ import express from "express";
 import { connectMongoose } from "./config/mongoose.js";
 import { seedDatabase } from "./config/seed.js";
 import userRoutes from "./routes/users.js";
+import mealRoutes from "./routes/meals.js";
+import productRoutes from "./routes/products.js";
 import { mongoErrorHandler } from "./middleware/errorHandler.js";
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,6 +12,8 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static("./src/public"));
 app.use("/api/users", userRoutes);
+app.use("/api/meals", mealRoutes);
+app.use("/api/products", productRoutes);
 app.use(mongoErrorHandler);
 
 async function startServer(){

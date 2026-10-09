@@ -269,9 +269,9 @@ function renderPagination(pagination) {
 function openCustomizeModal(meal) {
     activeModalMeal = meal;
     editingRecentIndex = null;
-    const mealTitle = meal.nameMeal || meal.strMeal || "";
-    const mealImg = meal.image || meal.strMealThumb || "/assets/sfondoCibi.jpg";
-    const mealCat = meal.category || meal.strCategory || "Altro";
+    const mealTitle = meal.nameMeal || "";
+    const mealImg = meal.image || "/assets/sfondoCibi.jpg";
+    const mealCat = meal.category || "Altro";
 
     // Copia gli ingredienti del piatto corrente
     currentIngredients = [...(meal.ingredients || [])];
@@ -349,8 +349,8 @@ function addCustomIngredient() {
   input.focus();
 }
 
-// 1. Aggiunta nuovo ingrediente tramite click sul bottone
-const btnAddIngredient = document.getElementById("btnAddIngredient");
+  // 1. Aggiunta nuovo ingrediente tramite click sul bottone
+  const btnAddIngredient = document.getElementById("btnAddIngredient");
   const customIngredientInput = document.getElementById("customIngredientInput");
 
   btnAddIngredient?.addEventListener("click", () => {
@@ -358,9 +358,9 @@ const btnAddIngredient = document.getElementById("btnAddIngredient");
   });
 
   // 2. Aggiunta nuovo ingrediente premendo Invio nel campo
-  customIngredientInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  customIngredientInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
       addCustomIngredient();
     }
 });
@@ -391,8 +391,7 @@ function renderRecentAddedList() {
 
         item.innerHTML = `
             <div class="d-flex align-items-center gap-2 text-truncate pe-2">
-                <img 
-                    src="${imgSrc}" width="42" height="42" class="rounded object-fit-cover" alt="${product.nameMeal}" onerror="this.src='/assets/defaultMeal.jpeg'">
+                <img src="${imgSrc}" width="42" height="42" class="rounded object-fit-cover" alt="${product.nameMeal}" onerror="this.src='/assets/defaultMeal.jpeg'">
                 <div class="text-truncate">
                     <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
                     <small class="text-warning">${Number(product.price).toFixed(2)} €</small>
@@ -485,6 +484,7 @@ async function saveMenuToDatabase(restaurantId) {
   try {
     // Salviamo ciascun piatto tramite la rotta POST /api/products/create
     for (const item of recentlyAddedMeals) {
+      if (item.ingredients.length === 0)  return showAlert("danger", "Attenzione", "I piatti devono contenere almeno 1 ingrediente");
       const payload = {
         restaurantId,
         mealId: item.originalMeal?._id,

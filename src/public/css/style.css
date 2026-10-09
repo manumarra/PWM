@@ -1070,6 +1070,7 @@ body.menu-builder-page {
 .recent-meal-item {
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
+  background-color: #45484d;
 }
 
 .recent-meal-item:hover {

@@ -26,9 +26,6 @@ const addedCountBadge = document.getElementById("addedCountBadge");
 const customizeModalElement = document.getElementById("customizeMealModal");
 const customCatContainer = document.getElementById("customCategoryContainer");
 const customCatInput = document.getElementById("customCategoryInput");
-const btnCreateNewMeal = document.getElementById("btnCreateNewMeal");
-const modalMealImageUrl = document.getElementById("modalMealImageUrl");
-const modalMealImg = document.getElementById("modalMealImg");
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -153,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
             recentlyAddedMeals.unshift(updatedProduct);
         }
 
+        showAlert("success", "Prodotto aggiunto alla lista");
         renderRecentAddedList();
 
         const modalInst = bootstrap.Modal.getInstance(customizeModalElement);
@@ -414,9 +412,11 @@ function renderRecentAddedList() {
 
         // 2. Click sul cestino (hover): rimuove il piatto
         const deleteBtn = item.querySelector(".btn-delete-recent");
-        deleteBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Impedisce al click di scatenare anche l'apertura della modale!
+        deleteBtn.addEventListener("click", (event) => {
+
+            event.stopPropagation(); // Impedisce al click di scatenare anche l'apertura della modale!
             recentlyAddedMeals.splice(index, 1);
+            showAlert("danger", "Prodotto rimosso dalla lista")
             renderRecentAddedList();
         });
 
@@ -510,7 +510,7 @@ async function saveMenuToDatabase(restaurantId) {
     const offcanvasEl = document.getElementById("offcanvasRecentAdded");
     const offcanvasInst = bootstrap.Offcanvas.getInstance(offcanvasEl);
     if (offcanvasInst) offcanvasInst.hide();
-    showAlert("success", "Prodotto salvato nel menù con successo")
+    showAlert("success", "Prodotto salvato nel menù")
   } catch (error) {
     console.error("Errore salvataggio menù:", error);
     showAlert("danger", "Attenzione", error);
@@ -575,7 +575,7 @@ async function loadCurrentRestaurantMenu(restaurantId) {
           await deleteProduct(product._id);
           // Ricarica la lista aggiornata dal database
           await loadCurrentRestaurantMenu(restaurantId);
-          showAlert("success", "Menù aggiornato con successo");
+          showAlert("danger", "Prodotto rimosso");
         } catch (error) {
           console.error("Errore durante l'eliminazione:", error);
           showAlert("danger", error);
@@ -602,7 +602,7 @@ async function loadCurrentRestaurantMenu(restaurantId) {
           if (confirmModal) confirmModal.hide();
 
           await deleteAllProduct(restaurantId);
-          showAlert("success", "Menù eliminato con successo");
+          showAlert("danger", "Menù eliminato");
 
           // Aggiorna l'interfaccia dell'Offcanvas
           currentMenuList.innerHTML = `

@@ -6,20 +6,20 @@ export async function getMeals({ page = 1, limit = 12, category = "", search = "
     if (search) params.append("search", search);
 
     const response = await fetch(`/api/meals/catalog?${params.toString()}`);
-    if (!response.ok) {
-        throw new Error("Errore durante il recupero dei piatti dal catalogo");
-    }
-    return await response.json();
+    
+    const data = await response.json().catch(() => null);
+    checkResponse(response, data);
+    return data;
 }
 
 //Recupera i prodotti già inseriti nel menù di un determinato ristoratore
  
 export async function getRestaurantProducts(restaurantId) {
   const response = await fetch(`/api/products?restaurantId=${encodeURIComponent(restaurantId)}`);
-  if (!response.ok) {
-    throw new Error("Errore durante il caricamento del menù del ristorante");
-  }
-  return await response.json();
+  
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
 }
 
 //Salva un nuovo piatto nel menù del ristorante (creazione Product)
@@ -33,9 +33,27 @@ export async function createProduct(productData) {
     body: JSON.stringify(productData)
   });
 
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
+}
+
+
+function checkResponse(response, data) {
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Errore durante l'aggiunta del piatto al menù");
+    // 1. Errore di validazione (Mongoose): estrae il testo del primo errore trovato
+    if (data?.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      throw new Error(data.errors[0].msg || data.errors[0].message);
+    }
+
+    // 2. Errore con campo message singolo (es. "Email già in uso")
+    if (data?.message) {
+      throw new Error(data.message);
+    }
+
+    // 3. Fallback generico pulito se non c'è un messaggio formattato
+    throw new Error(error.message || "Si è verificato un errore durante la richiesta. Riprova più tardi.");
   }
-  return await response.json();
+  return data;
 }

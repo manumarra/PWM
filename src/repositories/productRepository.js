@@ -17,3 +17,6 @@ export const updateProduct = (id, updates) =>
 
 // DELETE: rimuove un piatto dal menù
 export const deleteProduct = (id) => Product.findByIdAndDelete(id);
+
+//DELETE: tutto il menù
+export const deleteAllProduct = (restaurantId) => Product.deleteMany({ restaurantId });

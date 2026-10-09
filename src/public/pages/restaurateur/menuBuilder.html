@@ -56,10 +56,15 @@
                     <option value="Beef">Beef</option>
                     <option value="Chicken">Chicken</option>
                     <option value="Dessert">Dessert</option>
-                    <option value="Pasta">Pasta</option>
+                    <option value="Pasta">pasta</option>
                     <option value="Seafood">Seafood</option>
                     <option value="Vegetarian">Vegetarian</option>
+                    <hr>
+                    <option value="custom">Personalizza...</option>
                 </select>
+                <div class="mt-2 d-none" id="customCategoryContainer">
+                    <input type="text" id="customCategoryInput" class="form-control menu-search-input" placeholder="Scrivi la tua categoria...">
+                </div>
             </div>
         </div>
 
@@ -68,13 +73,13 @@
 
         <!-- Feedback lista vuota -->
         <div class="menu-empty-msg d-none" id="emptyState">
-        <i class="bi bi-inbox fs-1"></i>
-        <p class="mt-2">Nessun piatto trovato con i criteri selezionati.</p>
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Nessun piatto trovato con i criteri selezionati.</p>
         </div>
 
         <!-- Paginazione Server-Side -->
         <nav aria-label="Paginazione catalogo" class="mt-5">
-        <ul class="pagination justify-content-center" id="paginationContainer"></ul>
+            <ul class="pagination justify-content-center" id="paginationContainer"></ul>
         </nav>
     </main>
 
@@ -85,37 +90,40 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
-        <div id="currentMenuList" class="d-flex flex-column gap-3 overflow-y-auto">
-            <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
-            Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
+            <div id="currentMenuList" class="d-flex flex-column gap-3 overflow-y-auto">
+                <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
+                    Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
+                </div>
             </div>
-        </div>
-        <div class="menu-offcanvas-footer">
-            <a href="./home.html" class="btn-amber w-100 text-center">
-            Concludi e vai alla Home
-            </a>
-        </div>
+            <div class="menu-offcanvas-footer d-flex flex-column gap-2">
+                <button type="button" class="btn btn-outline-danger w-100" id="deleteAllBtn">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Elimina Menù
+                </button>
+                <a href="./home.html" class="btn-amber w-100 text-center">
+                    Concludi e vai alla Home
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- OFFCANVAS DESTRO: Aggiunti di Recente -->
     <div class="offcanvas offcanvas-end menu-offcanvas" tabindex="-1" id="offcanvasRecentAdded">
         <div class="offcanvas-header menu-offcanvas-header">
-        <h5 class="offcanvas-title fw-bold">Aggiunti di Recente</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            <h5 class="offcanvas-title fw-bold">Aggiunti di Recente</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
         <div id="recentAddedList" class="d-flex flex-column gap-2 overflow-y-auto">
             <div class="menu-empty-msg" id="emptyRecentAddedMsg">
-            Nessun piatto aggiunto in questa sessione.
+                Nessun piatto aggiunto in questa sessione.
             </div>
         </div>
             <div class="menu-offcanvas-footer d-flex flex-column gap-2">
                 <button type="button" class="btn-amber w-100" id="btnSaveEntireMenu">
-                <i class="bi bi-cloud-arrow-up me-2"></i>Salva Menù
+                    <i class="bi bi-cloud-arrow-up me-2"></i>Salva Menù
                 </button>
                 <button type="button" class="btn-night w-100" data-bs-dismiss="offcanvas">
-                Continua a Scegliere
+                    Continua a Scegliere
                 </button>
             </div>
         </div>
@@ -133,71 +141,47 @@
 
             <form id="customizeProductForm">
                 <div class="modal-body p-4">
-                <div class="row g-3">
-                    <!-- Colonna Immagine -->
-                    <div class="col-12 col-md-4 text-center">
-                    <img 
-                        id="modalMealImg"
-                        src="/assets/sfondoCibi.jpg" 
-                        class="img-fluid rounded border border-secondary" 
-                        alt="Anteprima piatto"
-                    >
-                    <div class="mt-2 text-secondary small" id="modalMealCategory"></div>
-                    </div>
-
-                    <!-- Colonna Dati e Prezzo -->
-                    <div class="col-12 col-md-8">
-                        <div class="mb-3">
-                            <label class="form-label menu-modal-label" for="modalMealName">Nome Piatto</label>
-                            <input 
-                            type="text" 
-                            id="modalMealName" 
-                            class="form-control menu-search-input" 
-                            required
-                            >
+                    <div class="row g-3">
+                        <!-- Colonna Immagine -->
+                        <div class="col-12 col-md-4 text-center">
+                        <img id="modalMealImg" src="/assets/sfondoCibi.jpg" class="img-fluid rounded border border-secondary" alt="Anteprima piatto">
+                        <div class="mt-2 text-secondary small" id="modalMealCategory"></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label menu-modal-label" for="modalMealPrice">Prezzo di Vendita (€) *</label>
-                            <input 
-                            type="number" 
-                            id="modalMealPrice" 
-                            class="form-control menu-search-input" 
-                            step="0.10" 
-                            min="0.50" 
-                            placeholder="es. 8.50" 
-                            value="2"
-                            required
-                            >
-                        </div>
+                        <!-- Colonna Dati e Prezzo -->
+                        <div class="col-12 col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label menu-modal-label" for="modalMealName">Nome Piatto</label>
+                                <input type="text" id="modalMealName" class="form-control menu-search-input" required>
+                            </div>
 
-                    <!-- Sezione Ingredienti con Pillole e Input Aggiunta -->
-                        <div class="mb-2">
-                            <label class="form-label menu-modal-label">Ingredienti</label>
-                            
-                            <!-- Contenitore delle pillole generate dinamicamente -->
-                            <div class="ingredient-tags-container mb-3" id="modalIngredientsList"></div>
+                            <div class="mb-3">
+                                <label class="form-label menu-modal-label" for="modalMealPrice">Prezzo di Vendita (€) *</label>
+                                <input type="number" id="modalMealPrice" class="form-control menu-search-input" step="0.10" min="0.10" placeholder="es. 8.50" value="2" required>
+                            </div>
 
-                            <!-- Gruppo input per aggiungere un ingrediente personalizzato -->
-                            <div class="input-group">
-                                <input 
-                                type="text" 
-                                id="customIngredientInput" 
-                                class="form-control menu-search-input" 
-                                placeholder="Aggiungi variante o ingrediente..."
-                                >
-                                <button class="btn btn-add-ingredient" type="button" id="btnAddIngredient">
-                                <i class="bi bi-plus-lg"></i> Aggiungi
-                                </button>
+                            <!-- Sezione Ingredienti con Pillole e Input Aggiunta -->
+                            <div class="mb-2">
+                                <label class="form-label menu-modal-label">Ingredienti</label>
+                                
+                                <!-- Contenitore delle pillole generate dinamicamente -->
+                                <div class="ingredient-tags-container mb-3" id="modalIngredientsList"></div>
+
+                                <!-- Gruppo input per aggiungere un ingrediente personalizzato -->
+                                <div class="input-group">
+                                    <input type="text" id="customIngredientInput" class="form-control menu-search-input" placeholder="Aggiungi ingrediente...">
+                                    <button class="btn btn-add-ingredient" type="button" id="btnAddIngredient">
+                                    <i class="bi bi-plus-lg"></i> Aggiungi
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                </div>
 
                 <div class="modal-footer menu-modal-footer">
-                <button type="button" class="btn btn-night" data-bs-dismiss="modal">Annulla</button>
-                <button type="submit" class="btn btn-amber">Salva nel Menù</button>
+                    <button type="button" class="btn btn-night" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-amber">Salva nel Menù</button>
                 </div>
             </form>
 

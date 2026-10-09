@@ -1,7 +1,7 @@
 // public/utils/menuBuilder.js
 import { getMeals } from "/services/mealService.js";
 import { getStoredUser } from "/utils/session.js";
-import { createProduct, getRestaurantProducts } from "/services/productService.js";
+import { createProduct, getRestaurantProducts, deleteProduct, deleteAllProduct } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
 
 // Stato locale della pagina
@@ -24,6 +24,9 @@ const currentMenuList = document.getElementById("currentMenuList");
 const recentAddedList = document.getElementById("recentAddedList");
 const addedCountBadge = document.getElementById("addedCountBadge");
 const customizeModalElement = document.getElementById("customizeMealModal");
+const customCatContainer = document.getElementById("customCategoryContainer");
+const customCatInput = document.getElementById("customCategoryInput");
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -45,23 +48,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 4. Gestione ricerca con debounce
     let debounceTimeout = null;
-    searchInput?.addEventListener("input", (e) => {
+    searchInput?.addEventListener("input", (event) => {
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(() => {
-        currentSearch = e.target.value.trim();
+        currentSearch = event.target.value.trim();
         fetchCatalogPage(1);
         }, 350);
     });
 
     // 5. Gestione cambio categoria
-    categorySelect?.addEventListener("change", (e) => {
-        currentCategory = e.target.value;
+    categorySelect?.addEventListener("change", (event) => {
+        currentCategory = event.target.value;
         fetchCatalogPage(1);
     });
 
+    // 5. Gestione cambio categoria
+    categorySelect?.addEventListener("change", (e) => {
+        const selectedVal = e.target.value;
+
+        if (selectedVal === "custom") {
+            // Mostra l'input di testo per scrivere la categoria libera
+            customCatContainer?.classList.remove("d-none");
+            customCatInput?.focus();
+            currentCategory = customCatInput?.value.trim() || "";
+        } else {
+            // Nasconde e svuota l'input libero se selezioni una categoria predefinita
+            customCatContainer?.classList.add("d-none");
+            if (customCatInput) customCatInput.value = "";
+            currentCategory = selectedVal;
+        }
+
+        fetchCatalogPage(1);
+    });
+
+    // 5b. Gestione digitazione nella categoria personalizzata
+    let customCatTimeout = null;
+    customCatInput?.addEventListener("input", (e) => {
+        clearTimeout(customCatTimeout);
+        customCatTimeout = setTimeout(() => {
+            currentCategory = e.target.value.trim();
+            fetchCatalogPage(1);
+        }, 350);
+    });
+
     const customizeForm = document.getElementById("customizeProductForm");
-    customizeForm?.addEventListener("submit", (e) => {
-        e.preventDefault();
+    customizeForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
         const price = document.getElementById("modalMealPrice").value;
         const name = document.getElementById("modalMealName").value;
 
@@ -357,16 +389,32 @@ function renderRecentAddedList() {
 
     recentlyAddedMeals.forEach((product, index) => {
         const item = document.createElement("div");
-        item.className = "recent-meal-item d-flex align-items-center justify-content-between";
+        item.className = "recent-meal-item d-flex align-items-center justify-content-between p-2 rounded menu-modal-content";
         
+        const imgSrc = product.originalMeal?.image || product.image || "/assets/defaultMeal.jpeg";
+        const catName = product.originalMeal?.category || product.category || "Altro";
+
         item.innerHTML = `
-            <div class="text-truncate pe-2">
-                <div class="text-white fw-semibold text-truncate">${product.nameMeal}</div>
-                <small class="text-success">${Number(product.price).toFixed(2)} €</small>
+            <div class="d-flex align-items-center gap-2 text-truncate pe-2">
+                <img 
+                    src="${imgSrc}" 
+                    width="42" 
+                    height="42" 
+                    class="rounded object-fit-cover" 
+                    alt="${product.nameMeal}"
+                    onerror="this.src='/assets/defaultMeal.jpeg'"
+                >
+                <div class="text-truncate">
+                    <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
+                    <small class="text-warning">${Number(product.price).toFixed(2)} €</small>
+                </div>
             </div>
-            <button type="button" class="btn-delete-recent" title="Rimuovi piatto" aria-label="Rimuovi piatto">
-                <i class="bi bi-trash3"></i>
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary">${catName}</span>
+                <button type="button" class="btn-delete-recent" title="Rimuovi piatto" aria-label="Rimuovi piatto">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
         `;
 
         // 1. Click sulla riga: riapre la modale pre-compilata per modificare
@@ -450,14 +498,15 @@ async function saveMenuToDatabase(restaurantId) {
     for (const item of recentlyAddedMeals) {
       const payload = {
         restaurantId,
-        mealId: item.originalMeal?._id || null,
+        mealId: item.originalMeal?._id,
         nameMeal: item.nameMeal,
         category: item.originalMeal?.category || "Altro",
         price: item.price,
         image: item.originalMeal?.image || "/assets/defaultMeal.jpeg",
-        ingredients: item.ingredients || []
+        ingredients: item.ingredients
       };
       await createProduct(payload);
+      
     }
 
     // Svuota la coda temporanea dei recenti dopo il salvataggio
@@ -471,11 +520,10 @@ async function saveMenuToDatabase(restaurantId) {
     const offcanvasEl = document.getElementById("offcanvasRecentAdded");
     const offcanvasInst = bootstrap.Offcanvas.getInstance(offcanvasEl);
     if (offcanvasInst) offcanvasInst.hide();
-
     showAlert("success", "Prodotto salvato nel menù con successo")
-  } catch (err) {
-    console.error("Errore salvataggio menù:", err);
-    showAlert("danger", "Attenzione", "Si è verificato un errore durante il salvataggio del menù");
+  } catch (error) {
+    console.error("Errore salvataggio menù:", error);
+    showAlert("danger", "Attenzione", error);
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
@@ -493,17 +541,26 @@ async function loadCurrentRestaurantMenu(restaurantId) {
   try {
     const res = await getRestaurantProducts(restaurantId);
     const products = res.data || [];
+    const deleteAllBtn = document.getElementById("deleteAllBtn");
 
     if (products.length === 0) {
-      currentMenuList.innerHTML = `
+        currentMenuList.innerHTML = `
         <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
-          Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
+            Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
         </div>`;
+
+        deleteAllBtn.disabled = true;
       return;
     }
 
-    currentMenuList.innerHTML = products.map(product => `
-      <div class="d-flex align-items-center justify-content-between p-2 rounded menu-modal-content">
+    deleteAllBtn.disabled = false;
+    currentMenuList.innerHTML = "";
+
+    products.forEach((product) => {
+      const item = document.createElement("div");
+      item.className = "recent-meal-item d-flex align-items-center justify-content-between p-2 rounded menu-modal-content";
+
+      item.innerHTML = `
         <div class="d-flex align-items-center gap-2 text-truncate pe-2">
           <img 
             src="${product.image || '/assets/defaultMeal.jpeg'}" 
@@ -511,16 +568,55 @@ async function loadCurrentRestaurantMenu(restaurantId) {
             height="42" 
             class="rounded object-fit-cover" 
             alt="${product.nameMeal}"
-            onerror="this.src='/assets/defaultMeal.jpeg'"
-          >
+            onerror="this.src='/assets/defaultMeal.jpeg'">
           <div class="text-truncate">
             <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
             <small class="text-warning">${Number(product.price).toFixed(2)} €</small>
           </div>
         </div>
-        <span class="badge bg-secondary">${product.category || 'Altro'}</span>
-      </div>
-    `).join("");
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-secondary">${product.category || 'Altro'}</span>
+          <button type="button" class="btn-delete-recent" title="Rimuovi piatto dal menù" aria-label="Rimuovi piatto dal menù">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+      `;
+
+      // Gestione eliminazione del piatto salvato sul Database
+      const deleteBtn = item.querySelector(".btn-delete-recent");
+      deleteBtn.addEventListener("click", async (event) => {
+        event.stopPropagation();
+
+        try {
+          await deleteProduct(product._id);
+          // Ricarica la lista aggiornata dal database
+          await loadCurrentRestaurantMenu(restaurantId);
+          showAlert("success", "Menù aggiornato con successo");
+        } catch (error) {
+          console.error("Errore durante l'eliminazione:", error);
+          showAlert("danger", error);
+        }
+      });
+
+      currentMenuList.appendChild(item);
+    });
+
+    deleteAllBtn.addEventListener("click", async(event) => {
+      try {
+          await deleteAllProduct(restaurantId);
+          showAlert("success", "Menù eliminato con successo");
+          currentMenuList.innerHTML = `
+          <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
+            Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
+          </div>`;
+          deleteAllBtn.disabled = true;
+
+      }catch(error) {
+        console.error("Errore durante l'eliminazione di tutto il menù", error);
+        showAlert("danger", "Attenzione", error)
+      }
+    });
+
   } catch (err) {
     console.error("Errore caricamento menù salvato:", err);
   }

@@ -1054,23 +1054,18 @@ body.menu-builder-page {
   color: #ffffff;
 }
 
-/* Card del piatto nell'Offcanvas destro */
+/* Card interattiva nell'Offcanvas destro */
 .recent-meal-item {
-  position: relative;
-  background-color: var(--night-light);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 10px 14px;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .recent-meal-item:hover {
   border-color: var(--amber-primary);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--night-light);
 }
 
-/* Pulsante cestino: nascosto di base, visibile solo all'hover */
+/* Pulsante cestino: visibile solo quando il mouse passa sopra la card */
 .recent-meal-item .btn-delete-recent {
   display: none;
   background: transparent;

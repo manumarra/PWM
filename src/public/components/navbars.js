@@ -3,9 +3,9 @@ const navbars = [`
       <div class="container-fluid">
         
         <!-- Logo Brand -->
-        <a class="navbar-brand brand-logo" href="/pages/customer/home.html">
-            <img src="/assets/doremi.png" alt="Logo" width="45" height="36 class="d-inline-block align-text-top">
-          Doremi
+        <a class="navbar-brand brand-logo homeNav d-flex align-items-center gap-2 me-4" href="/index.html">
+          <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
+          <span class="">Doremi</span>
         </a>
 
         <!-- Toggler per schermi piccoli (mobile) -->
@@ -34,9 +34,8 @@ const navbars = [`
       
       <!-- 1. Logo a sinistra -->
       <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/index.html">
-        <a class="navbar-brand brand-logo" href="/index.html">
-              <img src="/assets/doremi.png" alt="Logo" width="45" height="36 class="d-inline-block align-text-top">
-        </a>
+        <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
+        <span class="">Doremi</span>
       </a>
 
       <!-- 2. Link di navigazione principali -->

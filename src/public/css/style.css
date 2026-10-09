@@ -82,9 +82,13 @@ body {
   /* Dimensione scalata per schermi piccoli */
   font-size: 1.2rem;
 
-  color: var(--night-dark);
+  color: var(--amber-hover);
   font-size: 1.6rem;
   font-weight: 700;
+}
+
+.brand-logo.homeNav {
+  color: var(--night-night);
 }
 
 .brand-logo:hover {

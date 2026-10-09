@@ -225,6 +225,32 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modale di Conferma Eliminazione Menù -->
+    <div class="modal fade" id="deleteAllMenuConfirmModal" tabindex="-1" aria-labelledby="deleteAllMenuConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content menu-modal-content text-center p-3 border-0 shadow-lg">         
+                <div class="modal-body">
+                    <!-- Icona di allerta animata / colorata -->
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle-fill text-danger display-4"></i>
+                    </div>
+                    
+                    <h5 class="modal-title fw-bold text-white mb-2" id="deleteAllMenuConfirmModalLabel">Eliminare il Menù?</h5>
+                    <p class="text-secondary small mb-4">
+                        Tutti i piatti salvati nel tuo menù verranno rimossi definitivamente. Questa azione è irreversibile.
+                    </p>
+
+                    <!-- Pulsanti di azione -->
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-night px-3" data-bs-dismiss="modal">Annulla</button>
+                        <button type="button" class="btn btn-danger px-3" id="confirmDeleteAllMenuBtn">Elimina Tutto</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <hr class="profile-divider">
     <!-- Footer -->

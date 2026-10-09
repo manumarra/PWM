@@ -585,21 +585,38 @@ async function loadCurrentRestaurantMenu(restaurantId) {
       currentMenuList.appendChild(item);
     });
 
-    deleteAllBtn.addEventListener("click", async(event) => {
-      try {
+    // Istanza modale di conferma
+    const confirmModalEl = document.getElementById("deleteAllMenuConfirmModal");
+    const confirmModal = confirmModalEl ? bootstrap.Modal.getOrCreateInstance(confirmModalEl) : null;
+    const confirmDeleteBtn = document.getElementById("confirmDeleteAllMenuBtn");
+
+    // 1. Click su "Elimina Menù" nell'Offcanvas: mostra la modale carina
+    deleteAllBtn.onclick = () => {
+      if (confirmModal) confirmModal.show();
+    };
+
+    // 2. Click definitivo sul tasto rosso "Elimina Tutto" dentro la modale
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.onclick = async () => {
+        try {
+          if (confirmModal) confirmModal.hide();
+
           await deleteAllProduct(restaurantId);
           showAlert("success", "Menù eliminato con successo");
+
+          // Aggiorna l'interfaccia dell'Offcanvas
           currentMenuList.innerHTML = `
-          <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
-            Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
-          </div>`;
+            <div class="menu-empty-msg" id="emptyCurrentMenuMsg">
+              Il tuo menù è ancora vuoto.<br>Aggiungi i tuoi primi piatti dal catalogo!
+            </div>`;
           deleteAllBtn.disabled = true;
 
-      }catch(error) {
-        console.error("Errore durante l'eliminazione di tutto il menù", error);
-        showAlert("danger", "Attenzione", error)
-      }
-    });
+        } catch (error) {
+          console.error("Errore durante l'eliminazione di tutto il menù:", error);
+          showAlert("danger", "Attenzione", error);
+        }
+      };
+    }
 
   } catch (err) {
     console.error("Errore caricamento menù salvato:", err);

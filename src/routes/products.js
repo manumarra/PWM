@@ -17,21 +17,30 @@ router.get("/restaurant/:restaurantId", AW(async (req, res) => {
 router.post("/create", AW(async (req, res) => {
     const { restaurantId, nameMeal, price, ingredients, category, image, mealId } = req.body;
 
-    if (!restaurantId || !nameMeal || price === undefined || ingredients.length === 0) {
+    // 1. Controllo validità dei dati con verifica sicura dell'array
+    if (!restaurantId || !nameMeal || price === undefined || !Array.isArray(ingredients) || ingredients.length === 0) {
         return res.status(400).json({status: "fail", message: "Dati incompleti: restaurantId, nome, prezzo e ingredienti sono obbligatori" });
     }
 
+    // 2. Risoluzione categoria: pulizia spazi ed esclusione di valori non validi o 'custom'
+    let resolvedCategory = (typeof category === "string") ? category.trim() : "";
+    if (!resolvedCategory || resolvedCategory.toLowerCase() === "custom") {
+        resolvedCategory = "Altro";
+    } else resolvedCategory = String(category).charAt(0).toUpperCase().trim() + String(category).slice(1).toLowerCase().trim()
+
+    // 3. Creazione del prodotto tramite Repository
     const newProduct = await productRepo.createProduct({
         restaurantId,
-        nameMeal: nameMeal,
+        nameMeal: nameMeal.trim(),
         price: parseFloat(price),
         ingredients: ingredients,
-        category: category || "Altro",
+        category: resolvedCategory,
         image: image || "/assets/defaultMeal.jpeg",
         mealId: mealId || null
     });
     
-    res.status(201).json({status: "ok", data: newProduct });
+    // 4. Risposta JSON con status 201 Created
+    res.status(201).json({ status: "ok", data: newProduct });
   })
 );
 

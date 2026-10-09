@@ -26,8 +26,9 @@ const addedCountBadge = document.getElementById("addedCountBadge");
 const customizeModalElement = document.getElementById("customizeMealModal");
 const customCatContainer = document.getElementById("customCategoryContainer");
 const customCatInput = document.getElementById("customCategoryInput");
-
-
+const btnCreateNewMeal = document.getElementById("btnCreateNewMeal");
+const modalMealImageUrl = document.getElementById("modalMealImageUrl");
+const modalMealImg = document.getElementById("modalMealImg");
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -94,34 +95,133 @@ document.addEventListener("DOMContentLoaded", () => {
     const customizeForm = document.getElementById("customizeProductForm");
     customizeForm?.addEventListener("submit", (event) => {
         event.preventDefault();
+
         const price = document.getElementById("modalMealPrice").value;
-        const name = document.getElementById("modalMealName").value;
+        const name = document.getElementById("modalMealName").value.trim();
+
+        // 1. Lettura sicura della categoria
+        const catSelect = document.getElementById("modalMealCategory");
+        const selectedOptionValue = catSelect ? catSelect.value : "";
+        const customCatInput = document.getElementById("modalCustomCategoryInput");
+        const customCatText = customCatInput ? customCatInput.value.trim() : "";
+
+        let finalCategory = "Altro";
+        if (selectedOptionValue === "custom") {
+            // Se ha scelto l'opzione custom, usa il testo digitato (o 'Altro' se lasciato vuoto)
+            finalCategory = customCatText || "Altro";
+        } else if (selectedOptionValue) {
+            // Categoria standard dal menu a tendina
+            finalCategory = selectedOptionValue;
+        }
+
+        // 2. Lettura immagine
+        const image = document.getElementById("modalMealImg").src || "/assets/defaultMeal.jpeg";
+
+        let preservedMealId = null;
+
+        if (activeModalMeal && activeModalMeal._id) {
+            const originalTitle = (activeModalMeal.nameMeal || "").trim();
+            const originalCat = (activeModalMeal.category || "Altro").trim();
+            const originalImg = activeModalMeal.image || "/assets/defaultMeal.jpeg";
+            const originalIngs = activeModalMeal.ingredients || [];
+
+            const isTitleSame = name === originalTitle;
+            const isCategorySame = finalCategory === originalCat;
+            const isImageSame = image === originalImg;
+            const areIngsSame = areIngredientsEqual(currentIngredients, originalIngs);
+
+            // Se e solo se NESSUN campo è stato alterato (eccetto il prezzo), conserva il mealId
+            if (isTitleSame && isCategorySame && isImageSame && areIngsSame) {
+                preservedMealId = activeModalMeal._id;
+            }
+        }
 
         const updatedProduct = {
             nameMeal: name,
+            category: finalCategory,
             price: parseFloat(price),
+            image: image,
             ingredients: [...currentIngredients],
-            // Conserviamo i riferimenti originali per poterlo riaprire/modificare
+            mealId: preservedMealId, // Valorizzato solo se non sono state fatte modifiche
             originalMeal: activeModalMeal
         };
 
         if (editingRecentIndex !== null) {
-            // Modifica piatto esistente
             recentlyAddedMeals[editingRecentIndex] = updatedProduct;
             editingRecentIndex = null;
         } else {
-            // Nuovo inserimento
             recentlyAddedMeals.unshift(updatedProduct);
         }
 
         renderRecentAddedList();
 
-        // Chiude la modale recuperando l'istanza corretta
-        const modalEl = document.getElementById("customizeMealModal");
-        
-        // Chiude la modale recuperando l'istanza corretta dal nodo già memorizzato
         const modalInst = bootstrap.Modal.getInstance(customizeModalElement);
         if (modalInst) modalInst.hide();
+    });
+
+    // 1. Gestione Categoria Personalizzata nella Modale
+    const modalCategorySelect = document.getElementById("modalMealCategory");
+    const modalCustomCatContainer = document.getElementById("modalCustomCategoryContainer");
+    const modalCustomCatInput = document.getElementById("modalCustomCategoryInput");
+
+    modalCategorySelect?.addEventListener("change", (event) => {
+        if (event.target.value === "custom") {
+            modalCustomCatContainer?.classList.remove("d-none");
+            modalCustomCatInput?.focus();
+        } else {
+            modalCustomCatContainer?.classList.add("d-none");
+            if (modalCustomCatInput) modalCustomCatInput.value = "";
+        }
+    });
+
+    // 2. Caricamento Immagine da File Locale (Computer)
+    const modalMealFileInput = document.getElementById("modalMealFileInput");
+    const modalMealImg = document.getElementById("modalMealImg");
+    const modalMealImageUrl = document.getElementById("modalMealImageUrl");
+
+    modalMealFileInput?.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // Imposta l'anteprima e memorizza il base64 nell'src dell'immagine
+                modalMealImg.src = event.target.result;
+                if (modalMealImageUrl) modalMealImageUrl.value = ""; // Svuota l'URL web se carica un file locale
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 3. Anteprima da URL Web
+    modalMealImageUrl?.addEventListener("input", (event) => {
+        const val = event.target.value.trim();
+        if (val) {
+            modalMealImg.src = val;
+            if (modalMealFileInput) modalMealFileInput.value = ""; // Svuota il file locale
+        } else {
+            modalMealImg.src = "/assets/defaultMeal.jpeg";
+        }
+    });
+
+    // 4. Bottone "Crea Nuovo Piatto" nella barra superiore
+    const btnCreateNewMeal = document.getElementById("btnCreateNewMeal");
+    btnCreateNewMeal?.addEventListener("click", () => {
+        openCreateNewMealModal();
+    });
+
+    // Aggiunta ingrediente personalizzato
+    const btnAddIngredient = document.getElementById("btnAddIngredient");
+    const customIngredientInput = document.getElementById("customIngredientInput");
+
+    btnAddIngredient?.addEventListener("click", () => {
+        addCustomIngredient();
+    });
+
+    customIngredientInput?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            addCustomIngredient();
+        }
     });
 
 });
@@ -242,7 +342,7 @@ function renderPagination(pagination) {
     const numLi = document.createElement("li");
     const isActive = i === current;
     numLi.className = `page-item ${isActive ? 'active' : ''}`;
-    numLi.innerHTML = `<button class="page-link ${isActive ? 'btn-amber text-white border-0' : 'menu-search-input'}">${i}</button>`;
+    numLi.innerHTML = `<button class="page-link ${isActive ? 'btn-amber text-white border-0 bg-warning' : 'menu-search-input'}">${i}</button>`;
     
     if (!isActive) {
       numLi.querySelector("button").addEventListener("click", (e) => {
@@ -265,105 +365,6 @@ function renderPagination(pagination) {
   }
   paginationContainer.appendChild(nextLi);
 }
-
-function openCustomizeModal(meal) {
-    activeModalMeal = meal;
-    editingRecentIndex = null;
-    const mealTitle = meal.nameMeal || "";
-    const mealImg = meal.image || "/assets/sfondoCibi.jpg";
-    const mealCat = meal.category || "Altro";
-
-    // Copia gli ingredienti del piatto corrente
-    currentIngredients = [...(meal.ingredients || [])];
-
-    // Popola campi testuali
-    document.getElementById("modalMealName").value = mealTitle;
-    document.getElementById("modalMealPrice").value = "";
-    document.getElementById("modalMealCategory").textContent = mealCat;
-
-    const imgEl = document.getElementById("modalMealImg");
-    imgEl.src = mealImg;
-    imgEl.alt = mealTitle;
-
-    // Svuota l'input dell'ingrediente personalizzato
-    const customInput = document.getElementById("customIngredientInput");
-    if (customInput) customInput.value = "";
-
-    // Disegna le pillole iniziali
-    renderIngredientPills();
-
-    // Mostra la modale
-    const modalInst = bootstrap.Modal.getOrCreateInstance(customizeModalElement);
-    modalInst.show();
-}
-
-/**
- * Renderizza le pillole nel contenitore
- */
-function renderIngredientPills() {
-  const container = document.getElementById("modalIngredientsList");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  if (currentIngredients.length === 0) {
-    container.innerHTML = `<span class="text-secondary small">Nessun ingrediente inserito.</span>`;
-    return;
-  }
-
-  currentIngredients.forEach((ing, index) => {
-    const pill = document.createElement("span");
-    pill.className = "ingredient-pill";
-    pill.innerHTML = `
-      <span>${ing}</span>
-      <button type="button" class="btn-remove-tag" aria-label="Rimuovi">&times;</button>
-    `;
-
-    // Click sulla "x" per rimuovere la pillola
-    pill.querySelector(".btn-remove-tag").addEventListener("click", () => {
-      currentIngredients.splice(index, 1);
-      renderIngredientPills();
-    });
-
-    container.appendChild(pill);
-  });
-}
-
-/**
- * Inserisce un nuovo ingrediente digitato dall'utente
- */
-function addCustomIngredient() {
-  const input = document.getElementById("customIngredientInput");
-  if (!input) return;
-
-  const newIng = input.value.trim();
-  if (!newIng) return;
-
-  // Evita duplicati identici
-  if (!currentIngredients.includes(newIng)) {
-    currentIngredients.push(newIng);
-    renderIngredientPills();
-  }
-
-  input.value = "";
-  input.focus();
-}
-
-  // 1. Aggiunta nuovo ingrediente tramite click sul bottone
-  const btnAddIngredient = document.getElementById("btnAddIngredient");
-  const customIngredientInput = document.getElementById("customIngredientInput");
-
-  btnAddIngredient?.addEventListener("click", () => {
-    addCustomIngredient();
-  });
-
-  // 2. Aggiunta nuovo ingrediente premendo Invio nel campo
-  customIngredientInput?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      addCustomIngredient();
-    }
-});
 
 /**
  * Renderizza i piatti nell'Offcanvas destro con supporto a click (modifica) e hover-delete (rimozione)
@@ -487,11 +488,11 @@ async function saveMenuToDatabase(restaurantId) {
       if (item.ingredients.length === 0)  return showAlert("danger", "Attenzione", "I piatti devono contenere almeno 1 ingrediente");
       const payload = {
         restaurantId,
-        mealId: item.originalMeal?._id,
+        mealId: item.mealId || null,
         nameMeal: item.nameMeal,
-        category: item.originalMeal?.category || "Altro",
+        category: item.category || item.originalMeal?.category || "Altro",
         price: item.price,
-        image: item.originalMeal?.image || "/assets/defaultMeal.jpeg",
+        image: item.image || item.originalMeal?.image || "/assets/defaultMeal.jpeg",
         ingredients: item.ingredients
       };
       await createProduct(payload);
@@ -603,4 +604,148 @@ async function loadCurrentRestaurantMenu(restaurantId) {
   } catch (err) {
     console.error("Errore caricamento menù salvato:", err);
   }
+}
+
+/**
+ * Apre la modale per personalizzare un piatto esistente dal catalogo
+ */
+function openCustomizeModal(meal) {
+    activeModalMeal = meal;
+    editingRecentIndex = null;
+    currentIngredients = [...(meal.ingredients || [])];
+  
+    // Allinea il titolo e il bottone interno della modale
+    document.getElementById("customizeMealModalLabel").textContent = "Personalizza Piatto";
+    const modalBtn = document.getElementById("modalSubmitBtn");
+    if (modalBtn) modalBtn.textContent = "Aggiungi al Menù";
+
+    const mealTitle = meal.nameMeal || meal.strMeal || "";
+    const mealImg = meal.image || meal.strMealThumb || "/assets/defaultMeal.jpeg";
+    const mealCat = meal.category || meal.strCategory || "Altro";
+
+    document.getElementById("modalMealName").value = mealTitle;
+    document.getElementById("modalMealPrice").value = "";
+
+    // Gestione categoria nel select o custom
+    const catSelect = document.getElementById("modalMealCategory");
+    const customContainer = document.getElementById("modalCustomCategoryContainer");
+    const customInput = document.getElementById("modalCustomCategoryInput");
+
+    const existsInOptions = Array.from(catSelect.options).some(o => o.value === mealCat);
+    if (existsInOptions) {
+        catSelect.value = mealCat;
+        customContainer?.classList.add("d-none");
+        if (customInput) customInput.value = "";
+    } else {
+        catSelect.value = "custom";
+        customContainer?.classList.remove("d-none");
+        if (customInput) customInput.value = mealCat;
+    }
+
+    // Anteprima e pulizia input caricamento
+    document.getElementById("modalMealImg").src = mealImg;
+    if (document.getElementById("modalMealFileInput")) document.getElementById("modalMealFileInput").value = "";
+    if (document.getElementById("modalMealImageUrl")) document.getElementById("modalMealImageUrl").value = mealImg.startsWith("data:") ? "" : mealImg;
+    if (document.getElementById("customIngredientInput")) document.getElementById("customIngredientInput").value = "";
+
+    renderIngredientPills();
+
+    const modalInst = bootstrap.Modal.getOrCreateInstance(customizeModalElement);
+    modalInst.show();
+}
+
+/**
+ * Renderizza le pillole nel contenitore
+ */
+function renderIngredientPills() {
+  const container = document.getElementById("modalIngredientsList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (currentIngredients.length === 0) {
+    container.innerHTML = `<span class="text-secondary small">Nessun ingrediente inserito.</span>`;
+    return;
+  }
+
+  currentIngredients.forEach((ing, index) => {
+    const pill = document.createElement("span");
+    pill.className = "ingredient-pill";
+    pill.innerHTML = `
+      <span>${ing}</span>
+      <button type="button" class="btn-remove-tag" aria-label="Rimuovi">&times;</button>
+    `;
+
+    // Click sulla "x" per rimuovere la pillola
+    pill.querySelector(".btn-remove-tag").addEventListener("click", () => {
+      currentIngredients.splice(index, 1);
+      renderIngredientPills();
+    });
+
+    container.appendChild(pill);
+  });
+}
+
+/**
+ * Inserisce un nuovo ingrediente digitato dall'utente
+ */
+function addCustomIngredient() {
+  const input = document.getElementById("customIngredientInput");
+  if (!input) return;
+
+  const newIng = input.value.trim();
+  if (!newIng) return;
+
+  // Evita duplicati identici
+  if (!currentIngredients.includes(newIng)) {
+    currentIngredients.push(newIng);
+    renderIngredientPills();
+  }
+
+  input.value = "";
+  input.focus();
+}
+
+/**
+ * Apre la modale per creare un piatto originale da zero
+ */
+function openCreateNewMealModal() {
+    activeModalMeal = null;
+    editingRecentIndex = null;
+    currentIngredients = [];
+
+    // Allinea il titolo e il bottone interno della modale
+    document.getElementById("customizeMealModalLabel").textContent = "Crea Nuovo Piatto";
+    const modalBtn = document.getElementById("modalSubmitBtn");
+    if (modalBtn) modalBtn.textContent = "Aggiungi al Menù";
+
+    // Resetta campi
+    document.getElementById("modalMealName").value = "";
+    document.getElementById("modalMealPrice").value = "";
+    
+    // Resetta categoria
+    document.getElementById("modalMealCategory").value = "Altro";
+    document.getElementById("modalCustomCategoryContainer")?.classList.add("d-none");
+    if (document.getElementById("modalCustomCategoryInput")) {
+        document.getElementById("modalCustomCategoryInput").value = "";
+    }
+
+    // Resetta immagine e input file/url
+    document.getElementById("modalMealImg").src = "/assets/defaultMeal.jpeg";
+    if (document.getElementById("modalMealFileInput")) document.getElementById("modalMealFileInput").value = "";
+    if (document.getElementById("modalMealImageUrl")) document.getElementById("modalMealImageUrl").value = "";
+    if (document.getElementById("customIngredientInput")) document.getElementById("customIngredientInput").value = "";
+
+    renderIngredientPills();
+
+    const modalInst = bootstrap.Modal.getOrCreateInstance(customizeModalElement);
+    modalInst.show();
+}
+
+/**
+ * Verifica se due liste di ingredienti sono identiche (stessi elementi nello stesso ordine)
+ */
+function areIngredientsEqual(arr1 = [], arr2 = []) {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.every((val, index) => val.trim() === (arr2[index] || "").trim());
 }

@@ -11,7 +11,7 @@ const productSchema = new Schema({
   mealId: { 
     type: Schema.Types.ObjectId, 
     ref: "Meal", 
-    //*default: null  se è un piatto originale inventato dal ristoratore
+    default: null  //se è un piatto originale inventato dal ristoratore || si modifica un piatto dal catalogo
   },
   nameMeal: { type: String, required: true, trim: true },
   category: { type: String, required: true, default: "Altro"},

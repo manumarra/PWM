@@ -63,8 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 5. Gestione cambio categoria
-    categorySelect?.addEventListener("change", (e) => {
-        const selectedVal = e.target.value;
+    categorySelect?.addEventListener("change", (event) => {
+        const selectedVal = event.target.value;
 
         if (selectedVal === "custom") {
             // Mostra l'input di testo per scrivere la categoria libera
@@ -83,10 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5b. Gestione digitazione nella categoria personalizzata
     let customCatTimeout = null;
-    customCatInput?.addEventListener("input", (e) => {
+    customCatInput?.addEventListener("input", (event) => {
         clearTimeout(customCatTimeout);
         customCatTimeout = setTimeout(() => {
-            currentCategory = e.target.value.trim();
+            currentCategory = event.target.value.trim();
             fetchCatalogPage(1);
         }, 350);
     });
@@ -181,36 +181,31 @@ function renderMealCards(meals) {
     col.className = "col-12 col-md-6 col-lg-4";
 
     col.innerHTML = `
-      <div class="card h-100 menu-modal-content border-0 shadow-sm overflow-hidden">
-        <img 
-          src="${meal.image || '/assets/defaultMeal.jpeg'}" 
-          class="card-img-top" 
-          alt="${meal.nameMeal}"
-          style="height: 190px; object-fit: cover;"
-          onerror="this.src='/assets/defaultMeal.jpeg'"
-        >
+      <div class="card h-100 menu-modal-content border-0 shadow-sm overflow-hidden meal-card-clickable" role="button" tabindex="0">
+        <img src="${meal.image || '/assets/defaultMeal.jpeg'}" class="card-img-top" alt="${meal.nameMeal}" style="height: 190px; object-fit: cover;" onerror="this.src='/assets/defaultMeal.jpeg'">
         <div class="card-body d-flex flex-column justify-content-between p-3">
           <div>
             <h5 class="card-title text-white fw-bold mb-1 text-truncate" title="${meal.nameMeal}">${meal.nameMeal}</h5>
             <span class="badge bg-secondary mb-2">${meal.category || 'Altro'}</span>
-            <p class="card-text text-secondary small mb-3" style="min-height: 40px;">
+            <p class="card-text text-secondary small mb-0">
               ${meal.ingredients && meal.ingredients.length > 0 ? meal.ingredients.slice(0, 4).join(", ") : "Ingredienti vari"}
             </p>
           </div>
-          
-          <button 
-            type="button" 
-            class="btn btn-night w-100 d-flex align-items-center justify-content-center gap-2"
-            data-action="open-modal"
-          >
-            <i class="bi bi-plus-circle"></i> Aggiungi al Menù
-          </button>
         </div>
       </div>
     `;
 
-    col.querySelector('[data-action="open-modal"]').addEventListener("click", () => {
+    // L'evento click è ora agganciato direttamente alla card
+    const cardElement = col.querySelector(".meal-card-clickable");
+    cardElement.addEventListener("click", () => {
       openCustomizeModal(meal);
+    });
+
+    // Supporto accessibilità per aprire con tasto Invio da tastiera
+    cardElement.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        openCustomizeModal(meal);
+      }
     });
 
     mealsGrid.appendChild(col);
@@ -397,13 +392,7 @@ function renderRecentAddedList() {
         item.innerHTML = `
             <div class="d-flex align-items-center gap-2 text-truncate pe-2">
                 <img 
-                    src="${imgSrc}" 
-                    width="42" 
-                    height="42" 
-                    class="rounded object-fit-cover" 
-                    alt="${product.nameMeal}"
-                    onerror="this.src='/assets/defaultMeal.jpeg'"
-                >
+                    src="${imgSrc}" width="42" height="42" class="rounded object-fit-cover" alt="${product.nameMeal}" onerror="this.src='/assets/defaultMeal.jpeg'">
                 <div class="text-truncate">
                     <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
                     <small class="text-warning">${Number(product.price).toFixed(2)} €</small>
@@ -562,13 +551,7 @@ async function loadCurrentRestaurantMenu(restaurantId) {
 
       item.innerHTML = `
         <div class="d-flex align-items-center gap-2 text-truncate pe-2">
-          <img 
-            src="${product.image || '/assets/defaultMeal.jpeg'}" 
-            width="42" 
-            height="42" 
-            class="rounded object-fit-cover" 
-            alt="${product.nameMeal}"
-            onerror="this.src='/assets/defaultMeal.jpeg'">
+          <img src="${product.image || '/assets/defaultMeal.jpeg'}" width="42" height="42" class="rounded object-fit-cover" alt="${product.nameMeal}" onerror="this.src='/assets/defaultMeal.jpeg'">
           <div class="text-truncate">
             <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
             <small class="text-warning">${Number(product.price).toFixed(2)} €</small>

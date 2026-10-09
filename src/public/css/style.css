@@ -971,6 +971,18 @@ body {
   border-radius: 14px;
 }
 
+/* Card interattiva e cliccabile del catalogo */
+.meal-card-clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.meal-card-clickable:hover {
+  transform: translateY(-4px);
+  border-color: var(--amber-primary) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
 .menu-modal-header {
   border-bottom: 1px solid var(--night-light);
 }

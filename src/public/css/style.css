@@ -1058,9 +1058,9 @@ body.menu-builder-page {
 
 /* Bottone per aggiungere nuovi ingredienti */
 .btn-add-ingredient {
-  background-color: var(--amber-primary);
-  border: 1px solid var(--amber-primary);
-  color: var(--night-dark);
+  background-color: var(--night-light);
+  border: 1px solid var(--night-light);
+  color: var(--amber-primary);
   font-weight: 600;
 }
 

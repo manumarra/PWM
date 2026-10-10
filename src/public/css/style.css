@@ -776,8 +776,14 @@ body {
   font-size: 0.9rem;
 }
 
-/* Breakpoint desktop (md) */
-@media screen and (min-width: 768px) {
+
+/* Intestazione menuBuilder responsive */
+.menu-builder-header {
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+
   .card-left-panel {
     border-bottom: none;
     border-right: 1px solid var(--night-light);
@@ -787,8 +793,22 @@ body {
   .card-right-panel {
     padding: 3.5rem 3rem;
   }
-}
+  /* Su schermi piccoli allinea i bottoni a larghezza piena o compatti */
+  .menu-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
 
+  .menu-header-actions .btn,
+  .menu-header-actions .btn-night,
+  .menu-header-actions .btn-amber {
+    flex: 1 1 auto;              /* I pulsanti si distribuiscono armoniosamente */
+    font-size: 0.85rem;           /* Riduci leggermente il testo per evitare tagli */
+    padding: 8px 10px;
+    white-space: nowrap;
+    text-align: center;
+  }
+}
 
 /*========================================*/
 /* Card Profilo cliccabile nell'Offcanvas */
@@ -985,6 +1005,7 @@ body {
   transform: translateY(-4px);
   border-color: var(--amber-primary) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  opacity: 0.5;
 }
 
 .menu-modal-header {

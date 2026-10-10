@@ -19,7 +19,7 @@ const productSchema = new Schema({
   image: { type: String, default: "/assets/defaultMeal.jpeg"},
   ingredients: [{ type: String, trim: true, required: [true, "Minimo un ingrediente"] }],
   
-  available: { type: Boolean, default: true }, // Per gestire l'esaurito a menu
+  available: { type: Boolean, default: false }, // Per gestire l'esaurito a menu
   discount: {type: Number, default: 0, min: 0}
 }, { timestamps: true });
 

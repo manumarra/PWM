@@ -14,32 +14,20 @@ router.get("/restaurant/:restaurantId", AW(async (req, res) => {
 );
 
 // POST /api/products/create
-router.post("/create", AW(async (req, res) => {
-    const { restaurantId, nameMeal, price, ingredients, category, image, mealId } = req.body;
+router.post(
+  "/create",
+  AW(async (req, res) => {
+    const { restaurantId, nameMeal, price, ingredients } = req.body;
 
-    // 1. Controllo validità dei dati con verifica sicura dell'array
+    // Solo controllo di presenza parametri essenziali HTTP
     if (!restaurantId || !nameMeal || price === undefined || !Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(400).json({status: "fail", message: "Dati incompleti: restaurantId, nome, prezzo e ingredienti sono obbligatori" });
+      return res.status(400).json({
+        status: "fail",
+        message: "Dati incompleti: restaurantId, nome, prezzo e ingredienti sono obbligatori"
+      });
     }
 
-    // 2. Risoluzione categoria: pulizia spazi ed esclusione di valori non validi o 'custom'
-    let resolvedCategory = (typeof category === "string") ? category.trim() : "";
-    if (!resolvedCategory || resolvedCategory.toLowerCase() === "custom") {
-        resolvedCategory = "Altro";
-    } else resolvedCategory = String(category).charAt(0).toUpperCase().trim() + String(category).slice(1).toLowerCase().trim()
-
-    // 3. Creazione del prodotto tramite Repository
-    const newProduct = await productRepo.createProduct({
-        restaurantId,
-        nameMeal: nameMeal.trim(),
-        price: parseFloat(price),
-        ingredients: ingredients,
-        category: resolvedCategory,
-        image: image || "/assets/defaultMeal.jpeg",
-        mealId: mealId || null
-    });
-    
-    // 4. Risposta JSON con status 201 Created
+    const newProduct = await productRepo.createProduct(req.body);
     res.status(201).json({ status: "ok", data: newProduct });
   })
 );
@@ -47,7 +35,9 @@ router.post("/create", AW(async (req, res) => {
 // PUT /api/products/update/:id
 router.put("/update/:id", AW(async (req, res) => {
     const { id } = req.params;
-    const updated = await productRepo.updateProduct(id, req.body);
+    const updates = req.body;
+
+    const updated = await productRepo.updateProduct(id, updates);
 
     if (!updated) {
       return res.status(404).json({status: "fail", message: "Prodotto non trovato" });
@@ -75,9 +65,9 @@ router.delete("/restaurant/:restaurantId", AW(async(req, res) => {
     const deleted = await productRepo.deleteAllProduct(restaurantId);
 
     if(!deleted) {
-      return res.status(404).json({status: "fail", message: "Menù non trovato"});
+      return res.status(404).json({status: "fail", message: "Lista prodotti non trovata"});
     }
-    res.json({stauts: "ok", message: "Menù eliminato con successo"})
+    res.json({status: "ok", message: "Lista prodotti eliminata con successo"})
   })
 );
 

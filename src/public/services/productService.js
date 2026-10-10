@@ -1,8 +1,15 @@
-// public/services/productService.js
-
 /**
- * Salva un nuovo prodotto associato al ristorante
+ * Recupera l'elenco dei prodotti inseriti da uno specifico ristorante
  */
+export async function getRestaurantProducts(restaurantId) {
+  const response = await fetch(`/api/products/restaurant/${encodeURIComponent(restaurantId)}`);
+
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
+}
+
+// Crea un nuovo prodotto associato al ristoratore
 export async function createProduct(productData) {
   const response = await fetch("/api/products/create", {
     method: "POST",
@@ -15,25 +22,13 @@ export async function createProduct(productData) {
   const data = await response.json().catch(() => null);
   checkResponse(response, data);
   return data;
-
-}
-
-/**
- * Recupera l'elenco dei prodotti inseriti da uno specifico ristorante
- */
-export async function getRestaurantProducts(restaurantId) {
-  const response = await fetch(`/api/products/restaurant/${encodeURIComponent(restaurantId)}`);
-
-  const data = await response.json().catch(() => null);
-  checkResponse(response, data);
-  return data;
 }
 
 /**
  * Rimuove un prodotto dal menù
  */
 export async function deleteProduct(productId) {
-  const response = await fetch(`/api/products/remove/${productId}`, {
+  const response = await fetch(`/api/products/remove/${encodeURIComponent(productId)}`, {
     method: "DELETE"
   });
 
@@ -50,6 +45,17 @@ export async function deleteAllProduct(restaurantId) {
   checkResponse(response, data);
   return data;
   
+}
+
+export async function updateProduct(productId, updates) {
+  const response = await fetch(`/api/products/updates/${encodeURIComponent(productId)}`, {
+    method: "PUT",
+    headers: {"Content-type": "application/json;charset=utf-8"},
+    body: JSON.stringify(updates)
+  });
+  const data= await response.json().catch(()=> null);
+  checkResponse(response,data);
+  return data;
 }
 
 function checkResponse(response, data) {

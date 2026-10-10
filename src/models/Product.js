@@ -20,7 +20,7 @@ const productSchema = new Schema({
   ingredients: [{ type: String, trim: true, required: [true, "Minimo un ingrediente"] }],
   
   available: { type: Boolean, default: false }, // Per gestire l'esaurito a menu
-  discount: {type: Number, default: 0, min: 0}
+  discount: { type: Number, default: 0, min: [0, "Lo sconto non può essere minore di 0"], max: [100, "Lo sconto non può essere maggiore di 100"]}
 }, { timestamps: true });
 
 export default mongoose.model("Product", productSchema);

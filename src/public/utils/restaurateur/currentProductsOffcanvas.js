@@ -27,7 +27,7 @@ export function initCurrentProductsOffcanvas(restaurantId) {
       if (confirmModal) confirmModal.hide();
 
       await deleteAllProduct(currentRestaurantId);
-      showAlert("danger", "Menù eliminato");
+      showAlert("danger", "Prodotto eliminato");
 
       const currentMenuList = document.getElementById("currentMenuList");
       if (currentMenuList) {
@@ -39,7 +39,7 @@ export function initCurrentProductsOffcanvas(restaurantId) {
       if (deleteAllBtn) deleteAllBtn.disabled = true;
 
     } catch (error) {
-      console.error("Errore eliminazione menù:", error);
+      console.error("Errore eliminazione prodotto:", error);
       showAlert("danger", "Attenzione", error);
     }
   });

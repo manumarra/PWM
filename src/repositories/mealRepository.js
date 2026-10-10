@@ -1,31 +1,43 @@
 // src/repositories/mealRepository.js
 import Meal from "../models/Meal.js";
 
-// READ paginato con filtri e conteggio (per menuBuilder)
-export const getPaginatedMeals = async ({ filter = {}, page = 1, limit = 12 } = {}) => {
-  const skip = (page - 1) * limit;
+export const getPaginatedMeals = async ({ category, search, page = 1, limit = 12 } = {}) => {
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 12;
+  const skip = (pageNum - 1) * limitNum;
 
-  // Esegue query e conteggio totale in parallelo
+  // Costruzione del filtro isolata nel repository
+  const filter = {};
+
+  if (category) {
+    const formattedCategory =
+      String(category).charAt(0).toUpperCase() + String(category).slice(1).toLowerCase();
+    filter.category = formattedCategory;
+  }
+
+  if (search) {
+    filter.nameMeal = { $regex: search, $options: "i" };
+  }
+
   const [data, total] = await Promise.all([
     Meal.find(filter)
       .skip(skip)
-      .limit(limit)
-      .lean(), // Restituisce oggetti JS semplici, velocizzando la lettura (+30%)
+      .limit(limitNum)
+      .lean(),
     Meal.countDocuments(filter)
   ]);
 
   return {
     data,
     pagination: {
-      page,
-      limit,
+      page: pageNum,
+      limit: limitNum,
       total,
-      pages: Math.ceil(total / limit),
-      hasNext: page * limit < total,
-      hasPrev: page > 1
+      pages: Math.ceil(total / limitNum),
+      hasNext: pageNum * limitNum < total,
+      hasPrev: pageNum > 1
     }
   };
 };
 
-// READ per singolo piatto (utile quando il ristoratore clicca su un piatto per vederne i dettagli)
 export const getMealById = (id) => Meal.findById(id).lean();

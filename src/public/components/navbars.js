@@ -44,7 +44,10 @@ const navbars = [`
           <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/restaurateur/home.html">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Menu</a>
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Menù</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Catalogo</a>
         </li>
         <li class="nav-item">
           <a class="nav-link nav-link-restaurateur" href="#">Ordini</a>

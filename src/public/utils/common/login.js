@@ -1,6 +1,6 @@
 import {loginUser} from "/services/userService.js";
 import {showAlert} from "/components/alerts.js";
-import { setStoredUser } from "/utils/session.js";
+import { setStoredUser } from "/utils/common/session.js";
 
 const loginForm = document.getElementById("loginForm");
 

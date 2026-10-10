@@ -1,4 +1,4 @@
-import { getStoredUser } from "/utils/session.js";
+import { getStoredUser } from "/utils/common/session.js";
 import { showAlert } from "/components/alerts.js";
 import { updateUser, deleteUser } from "/services/userService.js";
 

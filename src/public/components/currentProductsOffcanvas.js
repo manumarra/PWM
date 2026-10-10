@@ -1,5 +1,3 @@
-// public/components/currentProductsOffcanvas.js
-
 export function getCurrentProductsOffcanvasMarkup() {
   return `
     <div class="offcanvas-header menu-offcanvas-header">

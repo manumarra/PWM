@@ -1,4 +1,4 @@
-import { getStoredUser } from "/utils/session.js";
+import { getStoredUser } from "/utils/common/session.js";
 const USER = getStoredUser();
 const isRestaurateur = USER.role === "restaurateur" ? true : false;
 

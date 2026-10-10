@@ -16,10 +16,10 @@ const navbars = [`
         <!-- Contenitore collassabile che racchiude azioni e bottoni -->
         <div class="collapse navbar-collapse" id="mainNavbar">
           <div class="nav-actions ms-auto mt-3 mt-md-0 d-flex flex-column flex-md-row gap-2 align-items-stretch align-items-md-center">
-            <a href="/pages/login.html" class="btn btn-night">
+            <a href="/pages/common/login.html" class="btn btn-night">
               Accedi
             </a>
-            <a href="/pages/signup.html" class="btn btn-amber ">
+            <a href="/pages/common/signup.html" class="btn btn-amber ">
               Iscriviti
             </a>
           </div>

@@ -1,19 +1,19 @@
-import { getStoredUser } from "/utils/session.js";
+import { getStoredUser } from "/utils/common/session.js";
 
 // Modulo Catalogo
-import { initMealCatalog, fetchCatalogPage, updateCatalogFilters } from "/utils/mealCatalog.js";
+import { initMealCatalog, fetchCatalogPage, updateCatalogFilters } from "/utils/restaurateur/mealCatalog.js";
 
 // Modulo Modale Prodotto
 import { getProductModalMarkup } from "/components/productModal.js";
-import { initProductModal, openCustomizeModal, openCreateNewMealModal, openCustomizeModalForEdit } from "/utils/productModal.js";
+import { initProductModal, openCustomizeModal, openCreateNewMealModal, openCustomizeModalForEdit } from "/utils/restaurateur/productModal.js";
 
 // Modulo Offcanvas Sinistro ("I Tuoi Prodotti")
 import { getCurrentProductsOffcanvasMarkup, getDeleteMenuConfirmModalMarkup } from "/components/currentProductsOffcanvas.js";
-import { initCurrentProductsOffcanvas, loadCurrentRestaurantMenu } from "/utils/currentProductsOffcanvas.js";
+import { initCurrentProductsOffcanvas, loadCurrentRestaurantMenu } from "/utils/restaurateur/currentProductsOffcanvas.js";
 
 // Modulo Offcanvas Destro ("Aggiunti di Recente")
 import { getRecentAddedOffcanvasMarkup } from "/components/recentAddedOffcanvas.js";
-import { initRecentAddedOffcanvas, addOrUpdateRecentMeal } from "/utils/recentAddedOffcanvas.js";
+import { initRecentAddedOffcanvas, addOrUpdateRecentMeal } from "/utils/restaurateur/recentAddedOffcanvas.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const user = getStoredUser();

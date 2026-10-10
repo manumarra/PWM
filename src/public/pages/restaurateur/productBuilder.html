@@ -116,7 +116,7 @@
 
     <!-- Script JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="/utils/productBuilder.js"></script>
+    <script type="module" src="/utils/restaurateur/productBuilder.js"></script>
     <!-- Script componenti non a modulo -->
     <script src="/components/navbars.js"></script>
     <script src="/components/footer.js"></script>
@@ -138,8 +138,8 @@
       getFooterLogoutAndForm();
 
       // 4. Ora che i form esistono fisicamente nel DOM, carica gli ascoltatori degli eventi
-      import("/utils/deleteOrUpdateCredential.js");
+      import("/utils/common/deleteOrUpdateCredential.js");
     </script>
-    <script src="/utils/userHome.js" type="module"></script>
+    <script src="/utils/common/userHome.js" type="module"></script>
 </body>
 </html>

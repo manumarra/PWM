@@ -12,32 +12,13 @@ export async function getMeals({ page = 1, limit = 12, category = "", search = "
     return data;
 }
 
-//Recupera i prodotti già inseriti nel menù di un determinato ristoratore
- 
-export async function getRestaurantProducts(restaurantId) {
-  const response = await fetch(`/api/products?restaurantId=${encodeURIComponent(restaurantId)}`);
-  
+// Recupera il singolo piatto comune per visualizzarne i dettagli
+export async function getMealById(id) {
+  const response = await fetch(`/api/meals/detail/${encodeURIComponent(id)}`);
   const data = await response.json().catch(() => null);
   checkResponse(response, data);
   return data;
 }
-
-//Salva un nuovo piatto nel menù del ristorante (creazione Product)
-
-export async function createProduct(productData) {
-  const response = await fetch("/api/products", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json;charset=utf-8"
-    },
-    body: JSON.stringify(productData)
-  });
-
-  const data = await response.json().catch(() => null);
-  checkResponse(response, data);
-  return data;
-}
-
 
 function checkResponse(response, data) {
 

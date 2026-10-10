@@ -1003,7 +1003,7 @@ body {
 
 .meal-card-clickable:hover {
   transform: translateY(-4px);
-  border-color: var(--amber-primary) !important;
+  border-color: var(--amber-primary);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   opacity: 0.5;
 }
@@ -1123,4 +1123,189 @@ body.menu-builder-page {
 .recent-meal-item .btn-delete-recent:hover {
   color: #ef4444;
   transform: scale(1.15);
+}
+
+/* =========================================================
+   CARD MENÙ RINNOVATA (Nuova UI Ristoratore)
+   ========================================================= */
+
+/* Card principale con hover ed elevazione morbida */
+.menu-item-card-modern {
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-light);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-item-card-modern:hover {
+  border-color: var(--amber-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.menu-item-card-modern.is-unavailable {
+  opacity: 0.6;
+}
+
+/* Badge di stato a pillola */
+.badge-status-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 50px;
+  letter-spacing: 0.3px;
+}
+
+.badge-status-pill.status-discount {
+  background-color: var(--amber-primary);
+  color: var(--night-dark);
+}
+
+.badge-status-pill.status-active {
+  background-color: #10B981;
+  color: #ffffff;
+}
+
+.badge-status-pill.status-inactive {
+  background-color: var(--night-light);
+  color: #9CA3AF;
+  border: 1px solid #374151;
+}
+
+/* Circoletto percentuale sconto sopra la foto */
+.discount-circle-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #EF4444;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Sezione comandi in basso (Action Dock) */
+.menu-card-dock {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--night-light);
+  padding: 12px;
+  border-radius: 0 0 14px 14px;
+}
+
+/* 1. Immagine più compatta e proporzionata */
+.menu-item-img-wrapper {
+  position: relative;
+  height: 200px;
+}
+
+/* 2. Contrasto e leggibilità testi ingredienti e prezzi */
+.menu-item-ingredients {
+  color: #D1D5DB; /* Grigio chiaro vivo ad alto contrasto */
+  font-size: 0.85rem;
+}
+
+.menu-price-original {
+  color: #9CA3AF;
+  text-decoration: line-through;
+}
+
+.menu-price-standard {
+  color: #FFFFFF;
+}
+
+.menu-price-discounted {
+  color: var(--amber-primary);
+}
+
+/* 3. Tasto Ordinabile/Non Ordinabile con look da pulsante chiaro */
+.btn-availability-pill {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--night-light);
+  border: 1px solid #4B5563;
+  color: #E5E7EB;
+}
+
+.btn-availability-pill:hover {
+  filter: brightness(1.15);
+}
+
+.btn-availability-pill.is-active {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: #10B981;
+  color: #34D399;
+}
+
+.btn-availability-pill .status-indicator-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #EF4444; /* Rosso spento/chiaro quando non ordinabile */
+}
+
+.btn-availability-pill.is-active .status-indicator-dot {
+  background-color: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+/* Barra input sconto */
+.discount-dock-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.discount-field-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.discount-field-wrapper input {
+  padding-right: 28px;
+  height: 36px;
+  font-size: 0.85rem;
+}
+
+.discount-percent-symbol {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9CA3AF;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.btn-save-discount {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+}
+
+/* 4. Colori dei contatori del Summary */
+.count-available {
+  color: #10B981 !important;
+  font-weight: 700;
+}
+
+.count-unavailable {
+  color: #9CA3AF !important;
+  font-weight: 700;
+}
+
+.count-discounted {
+  color: var(--amber-primary) !important;
+  font-weight: 700;
 }

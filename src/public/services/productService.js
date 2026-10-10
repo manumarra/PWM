@@ -48,7 +48,7 @@ export async function deleteAllProduct(restaurantId) {
 }
 
 export async function updateProduct(productId, updates) {
-  const response = await fetch(`/api/products/updates/${encodeURIComponent(productId)}`, {
+  const response = await fetch(`/api/products/update/${encodeURIComponent(productId)}`, {
     method: "PUT",
     headers: {"Content-type": "application/json;charset=utf-8"},
     body: JSON.stringify(updates)

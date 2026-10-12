@@ -6,12 +6,7 @@ export const createProduct = async (productData) => {
   const { restaurantId, nameMeal, price, ingredients, category, image, mealId } = productData;
 
   // Risoluzione e formattazione della categoria
-  let resolvedCategory = (typeof category === "string") ? category.trim() : "";
-  if (!resolvedCategory || resolvedCategory.toLowerCase() === "custom") {
-    resolvedCategory = "Altro";
-  } else {
-    resolvedCategory = String(resolvedCategory).charAt(0).toUpperCase() + String(resolvedCategory).slice(1).toLowerCase();
-  }
+  let resolvedCategory = categoryFormatter(category);
 
   return await Product.create({
     restaurantId,
@@ -32,15 +27,27 @@ export const getProductsByRestaurant = (restaurantId) =>
 export const getProductById = (id) => Product.findById(id).lean();
 
 // UPDATE: aggiorna campi prodotto
-export const updateProduct = (id, updates) =>
-  Product.findByIdAndUpdate(
+export const updateProduct = (id, updates) => {
+  if(updates.category) updates.category = categoryFormatter(updates.category)
+  return Product.findByIdAndUpdate(
     id,
     { $set: updates },
     { returnDocument: "after", runValidators: true }
   );
+}
 
 // DELETE: singolo prodotto
 export const deleteProduct = (id) => Product.findByIdAndDelete(id);
 
 // DELETE: svuota menù
 export const deleteAllProduct = (restaurantId) => Product.deleteMany({ restaurantId });
+
+export const categoryFormatter = (category) => {
+  let resolvedCategory = (typeof category === "string") ? category.trim() : "";
+  if (!resolvedCategory || resolvedCategory.toLowerCase() === "custom") {
+    resolvedCategory = "Altro";
+  } else {
+    resolvedCategory = String(resolvedCategory).charAt(0).toUpperCase() + String(resolvedCategory).slice(1).toLowerCase();
+  }
+  return resolvedCategory.trim();
+}

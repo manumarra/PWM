@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         showAlert("success", "Piatto aggiornato con successo!");
         applyFilters();
+        populateCategories(allProducts);
       } catch (err) {
         showAlert("danger", err.message || "Errore durante il salvataggio delle modifiche");
       }
@@ -257,10 +258,7 @@ function createMenuCardElement(product) {
         <!-- Riga Gestione Sconto -->
         <div class="discount-dock-row">
           <div class="discount-field-wrapper">
-            <input type="number" min="0" max="100" 
-                   class="form-control menu-search-input text-center discount-input" 
-                   value="${discountVal}" 
-                   placeholder="0">
+            <input name="discountInput" type="number" min="0" max="100" class="form-control menu-search-input text-center discount-input "value="${discountVal}" placeholder="0">
             <span class="discount-percent-symbol">%</span>
           </div>
           <button class="btn btn-amber btn-save-discount save-discount-btn" type="button" title="Applica sconto">
@@ -354,6 +352,7 @@ function populateCategories(products) {
   categorySelect.innerHTML = '<option value="">Tutte le categorie</option>';
   categories.forEach((cat) => {
     const opt = document.createElement("option");
+    cat = String(cat).charAt(0).toUpperCase() + String(cat).slice(1).toLowerCase();
     opt.value = cat;
     opt.textContent = cat;
     categorySelect.appendChild(opt);

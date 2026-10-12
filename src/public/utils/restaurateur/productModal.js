@@ -222,9 +222,9 @@ function handleFormSubmit(e) {
   // 3. Risoluzione mealId: conservato solo se non sono state fatte modifiche rispetto al catalogo
   let preservedMealId = null;
   if (activeModalMeal && activeModalMeal._id) {
-    const originalTitle = (activeModalMeal.nameMeal || activeModalMeal.strMeal || "").trim();
-    const originalCat = (activeModalMeal.category || activeModalMeal.strCategory || "Altro").trim();
-    const originalImg = activeModalMeal.image || activeModalMeal.strMealThumb || "/assets/defaultMeal.jpeg";
+    const originalTitle = (activeModalMeal.nameMeal || "").trim();
+    const originalCat = (activeModalMeal.category  || "Altro").trim();
+    const originalImg = activeModalMeal.image || "/assets/defaultMeal.jpeg";
     const originalIngs = activeModalMeal.ingredients || [];
 
     const isTitleSame = name === originalTitle;

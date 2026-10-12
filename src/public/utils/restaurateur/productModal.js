@@ -148,7 +148,14 @@ export function openCreateNewMealModal() {
  */
 export function openCustomizeModalForEdit(product, index) {
   editingIndex = index;
-  activeModalMeal = product.originalMeal || { nameMeal: product.nameMeal, ingredients: product.ingredients };
+  // Preserva il riferimento al catalogo o ai dati prima della modifica
+  activeModalMeal = product.originalMeal || {
+    _id: product.mealId || null,
+    nameMeal: product.nameMeal,
+    category: product.category,
+    image: product.image,
+    ingredients: [...(product.ingredients || [])]
+  };
 
   const mealTitle = product.nameMeal || activeModalMeal?.nameMeal || "";
   const mealPrice = product.price;
@@ -227,7 +234,7 @@ function handleFormSubmit(e) {
 
     if (isTitleSame && isCategorySame && isImageSame && areIngsSame) {
       preservedMealId = activeModalMeal._id;
-    }
+    } else preservedMealId = null
   }
 
   const productData = {

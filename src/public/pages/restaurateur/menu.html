@@ -69,17 +69,33 @@
       </div>
     </div>
 
-    <!-- Badge Contatori di Sintesi -->
-    <div class="d-flex align-items-center justify-content-between mb-3 px-1 menu-summary-bar small">
-      <div class="d-flex gap-3">
-        <span>In menù: <strong id="countAvailable" class="count-available">0</strong></span>
-        <span>•</span>
-        <span>Fuori menù: <strong id="countUnavailable" class="count-unavailable">0</strong></span>
-        <span>•</span>
+
+  <!-- Badge Contatori di Sintesi & Azioni Massive -->
+  <div class="menu-summary-bar mb-3 px-1">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+      
+      <!-- Contatori a sinistra -->
+      <div class="d-flex flex-wrap align-items-center gap-2 gap-sm-3 small">
         <span>In offerta: <strong id="countDiscounted" class="count-discounted">0</strong></span>
+        <span class="d-none d-sm-inline">•</span>
+        <span>In menù: <strong id="countAvailable" class="count-available">0</strong></span>
+        <span class="d-none d-sm-inline">•</span>
+        <span>Fuori menù: <strong id="countUnavailable" class="count-unavailable">0</strong></span>
       </div>
-      <div id="renderedCounter"></div>
+
+      <!-- Pulsanti e totale piatti a destra -->
+      <div class="d-flex flex-wrap align-items-center gap-2 menu-summary-actions">
+        <button type="button" class="btn-summary-action action-reset-discount" id="btnResetAllDiscounts" title="Azzera lo sconto di tutti i piatti">
+          <i class="bi bi-tag"></i> <span>Annulla tutti gli sconti</span>
+        </button>
+        <button type="button" class="btn-summary-action action-disable-all" id="btnDisableAllProducts" title="Disattiva tutti i piatti dal menù">
+          <i class="bi bi-eye-slash"></i> <span>Rendi tutto non disponibile</span>
+        </button>
+        <div id="renderedCounter" class="small ms-auto ms-sm-0"></div>
+      </div>
+
     </div>
+  </div>
 
     <!-- Griglia dei Prodotti del Menù -->
     <div id="menuCardsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
@@ -100,6 +116,8 @@
 
   </main>
 
+  <!-- Modale Personalizzazione Piatto (iniettata dinamicamente) -->
+  <div class="modal fade" id="customizeMealModal" tabindex="-1" aria-labelledby="customizeMealModalLabel" aria-hidden="true"></div>
   <hr class="profile-divider">
 
   <!-- Footer -->

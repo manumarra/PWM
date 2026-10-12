@@ -1131,11 +1131,17 @@ body.menu-builder-page {
 
 /* Card principale con hover ed elevazione morbida */
 .menu-item-card-modern {
+  cursor: pointer;
   background-color: var(--night-dark);
   border: 1px solid var(--night-light);
   border-radius: 14px;
   overflow: hidden;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 0.45s ease, 
+              border-color 0.2s ease, 
+              box-shadow 0.2s ease;
+  will-change: transform, opacity;
+  animation: cardPopIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 .menu-item-card-modern:hover {
@@ -1308,4 +1314,138 @@ body.menu-builder-page {
 .count-discounted {
   color: var(--amber-primary) !important;
   font-weight: 700;
+}
+
+/* =========================================================
+   PAGINA GESTIONE MENÙ: SUMMARY BAR RESPONSIVE
+   ========================================================= */
+
+.menu-summary-bar {
+  color: #9CA3AF;
+}
+
+.count-available {
+  color: #10B981 !important;
+  font-weight: 700;
+}
+
+.count-unavailable {
+  color: #9CA3AF !important;
+  font-weight: 700;
+}
+
+.count-discounted {
+  color: var(--amber-primary) !important;
+  font-weight: 700;
+}
+
+/* Pulsanti azioni massive */
+.btn-summary-action {
+  background: transparent;
+  border: 1px solid #374151;
+  color: #9CA3AF;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.btn-summary-action:hover {
+  background-color: var(--night-light);
+  border-color: #4B5563;
+  color: #E5E7EB;
+}
+
+.btn-summary-action.action-reset-discount:hover {
+  border-color: var(--amber-primary);
+  color: var(--amber-primary);
+}
+
+.btn-summary-action.action-disable-all:hover {
+  border-color: #EF4444;
+  color: #F87171;
+}
+
+.btn-summary-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Adattamento Responsive (< 768px) */
+@media (max-width: 768px) {
+  .menu-summary-actions {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .menu-summary-actions .btn-summary-action {
+    flex: 1 1 calc(50% - 8px); /* I due bottoni si spartiscono la riga in modo bilanciato */
+    font-size: 0.75rem;
+    padding: 6px 8px;
+    text-align: center;
+  }
+
+  #renderedCounter {
+    width: 100%;
+    text-align: right;
+    margin-top: 2px;
+  }
+}
+
+/* Schermi molto stretti (< 420px) */
+@media (max-width: 420px) {
+  .menu-summary-actions .btn-summary-action {
+    flex: 1 1 100%; /* Ogni pulsante occupa l'intera riga */
+  }
+}
+
+/* =========================================================
+   TRANSIZIONI FLUIDE RIORDINO GRIGLIA MENÙ
+   ========================================================= */
+
+
+/* Animazione evidente di ingresso per i nuovi piatti inseriti */
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Stati di conferma attiva per i bottoni della Summary Bar */
+.btn-summary-action.is-confirming-discount {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-color: var(--amber-primary);
+  color: var(--amber-primary);
+  font-weight: 600;
+  animation: pulseWarning 1s infinite alternate;
+}
+
+.btn-summary-action.is-confirming-disable {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+  color: #F87171;
+  font-weight: 600;
+  animation: pulseDanger 1s infinite alternate;
+}
+
+@keyframes pulseWarning {
+  from { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  to   { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+}
+
+@keyframes pulseDanger {
+  from { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  to   { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
 }

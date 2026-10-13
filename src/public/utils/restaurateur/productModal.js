@@ -30,6 +30,12 @@ export function initProductModal({ modalId = "customizeMealModal", onSubmitProdu
     }
   });
 
+  modalCustomCatInput?.addEventListener("blur", (e) => {
+    if (e.target.value.trim()) {
+      e.target.value = formatCategory(e.target.value);
+    }
+  });
+
   // 2. Caricamento Immagine Locale (Base64)
   const modalMealFileInput = document.getElementById("modalMealFileInput");
   const modalMealImg = document.getElementById("modalMealImg");
@@ -146,7 +152,7 @@ export function openCreateNewMealModal() {
 /**
  * Apre la modale per modificare un piatto già aggiunto temporaneamente alla lista di destra
  */
-export function openCustomizeModalForEdit(product, index) {
+export function openCustomizeModalForEdit(product, index = null) {
   editingIndex = index;
   // Preserva il riferimento al catalogo o ai dati prima della modifica
   activeModalMeal = product.originalMeal || {
@@ -160,7 +166,7 @@ export function openCustomizeModalForEdit(product, index) {
   const mealTitle = product.nameMeal || activeModalMeal?.nameMeal || "";
   const mealPrice = product.price;
   const mealImg = product.image || activeModalMeal?.image || "/assets/defaultMeal.jpeg";
-  const mealCat = product.category || activeModalMeal?.category || "Altro";
+  const mealCat = formatCategory(product.category || activeModalMeal?.category || "Altro");
 
   currentIngredients = [...(product.ingredients || [])];
 
@@ -172,18 +178,26 @@ export function openCustomizeModalForEdit(product, index) {
   document.getElementById("modalMealPrice").value = mealPrice;
 
   const catSelect = document.getElementById("modalMealCategory");
+
   const customContainer = document.getElementById("modalCustomCategoryContainer");
   const customInput = document.getElementById("modalCustomCategoryInput");
 
-  const existsInOptions = Array.from(catSelect.options).some((o) => o.value === mealCat);
+  const existsInOptions = Array.from(catSelect.options).some(
+    (o) => o.value.toLowerCase() === mealCat.toLowerCase()
+  );
+
   if (existsInOptions) {
-    catSelect.value = mealCat;
+    // Seleziona l'opzione esistente corrispondente (evitando discrepanze maiuscole/minuscole)
+    const matchingOption = Array.from(catSelect.options).find(
+      (o) => o.value.toLowerCase() === mealCat.toLowerCase()
+    );
+    catSelect.value = matchingOption ? matchingOption.value : mealCat;
     customContainer?.classList.add("d-none");
     if (customInput) customInput.value = "";
   } else {
     catSelect.value = "custom";
     customContainer?.classList.remove("d-none");
-    if (customInput) customInput.value = mealCat;
+    if (customInput) customInput.value = mealCat; // Mostra la categoria formattata (es. "Pizza")
   }
 
   document.getElementById("modalMealImg").src = mealImg;
@@ -211,9 +225,9 @@ function handleFormSubmit(e) {
 
   let finalCategory = "Altro";
   if (selectedOptionValue === "custom") {
-    finalCategory = customCatText || "Altro";
+    finalCategory = customCatText ? formatCategory(customCatText) : "Altro";
   } else if (selectedOptionValue) {
-    finalCategory = selectedOptionValue;
+    finalCategory = formatCategory(selectedOptionValue);
   }
 
   // 2. Risoluzione immagine
@@ -309,4 +323,37 @@ function addCustomIngredient() {
 function areIngredientsEqual(arr1 = [], arr2 = []) {
   if (arr1.length !== arr2.length) return false;
   return arr1.every((val, index) => val.trim() === (arr2[index] || "").trim());
+}
+
+const formatCategory = (cat) => {
+  const str = String(cat || "").trim();
+  if (!str) return "Altro";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
+
+/**
+ * Aggiorna dinamicamente le opzioni del select categoria nella modale
+ */
+export function updateModalCategories(categories = []) {
+  const select = document.getElementById("modalMealCategory");
+  if (!select) return;
+
+  // Unisce le categorie passate rimuovendo duplicati e formattando
+  const uniqueCats = [...new Set(categories.map(formatCategory).filter(Boolean))].sort();
+
+  // Rigenera le opzioni
+  select.innerHTML = "";
+
+  uniqueCats.forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    select.appendChild(opt);
+  });
+
+  // Aggiunge sempre l'opzione finale per la categoria personalizzata
+  const customOpt = document.createElement("option");
+  customOpt.value = "custom";
+  customOpt.textContent = "Altra categoria...";
+  select.appendChild(customOpt);
 }

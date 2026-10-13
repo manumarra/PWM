@@ -111,7 +111,7 @@ signupForm.addEventListener("submit", async (event) => {
     showAlert("success", "Registrazione completata!", "Reindirizzamento al login in corso...");
 
     setTimeout(() => {
-      window.location.href = "/pages/login.html";
+      window.location.href = "/pages/common/login.html";
     }, 1000);
   } catch (err) {
     showAlert("danger", "Errore di Registrazione", err.message);

@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-
+import Product from "../models/Product.js";
 export const createUser = (userData) => User.create(userData);
 
 export const getUserByEmail = (email) => User.findByEmail(email);
@@ -31,4 +31,12 @@ export const updateUser = async (id, updates) => {
   );
 };
 
-export const deleteUser = (id) => User.findByIdAndDelete(id);
+export const deleteUser = async (id) => {
+  const deletedUser = await User.findByIdAndDelete(id);
+
+  if (!deletedUser) return null;
+
+  if (deletedUser.role === "restaurateur") await Product.deleteMany({restaurantId: id});
+
+  return deleteUser;
+} 

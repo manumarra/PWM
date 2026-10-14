@@ -5,6 +5,7 @@ import { seedDatabase } from "./config/seed.js";
 import userRoutes from "./routes/users.js";
 import mealRoutes from "./routes/meals.js";
 import productRoutes from "./routes/products.js";
+import orderRoutes from "./routes/orders.js";
 import { mongoErrorHandler } from "./middleware/errorHandler.js";
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,6 +15,7 @@ app.use(express.static("./src/public"));
 app.use("/api/users", userRoutes);
 app.use("/api/meals", mealRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
 app.use(mongoErrorHandler);
 
 async function startServer(){

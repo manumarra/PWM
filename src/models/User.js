@@ -79,16 +79,27 @@ const userSchema = new Schema({
       message: "La Partita IVA deve contenere esattamente 11 cifre numeriche"
     }
   },
-  image: {
-    type: String,
-    default: "/assets/defaultAvatar.jpeg",
-    validate: {
-      validator: function() {
-        return (this.role) === "restaurateur" ? true : false;
-      },
-      message: "L'immagine deve appartenere ad un ristoratore!"
-    }
-  },
+image: {
+  type: String,
+  validate: {
+    validator: function(val) {
+      // 1. Se il valore è quello di default o è assente, è valido per chiunque (compresi i customer)
+      if (!val || val === "/assets/defaultAvatar.jpeg") {
+        return true;
+      }
+      // 2. Se viene passata un'immagine personalizzata, verifichiamo il ruolo
+      // Nota: in findByIdAndUpdate il documento si recupera dalla query o this
+      const role = this.role || (this.getUpdate ? this.getUpdate().$set?.role : null);
+      
+      // Se non conosciamo il ruolo in update o se è restaurateur, lo lasciamo passare
+      if (role) {
+        return role === "restaurateur";
+      }
+      return true;
+    },
+    message: "L'immagine personalizzata può essere impostata solo da un ristoratore!"
+  }
+},
   address: addressSchema,
   active: { type: Boolean, default: true } // Per consentire disattivazione/cancellazione profilo
 }, { timestamps: true });

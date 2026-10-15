@@ -1,64 +1,135 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-  </head>
-  <body>
-
-    <!-- 1. Header con Navbar iniettata da navbars.js -->
-    <header id="navbar-container"></header>
-
-    <!-- 2. Contenuto principale della Dashboard -->
-    <main class="container my-4 flex-grow-1">
-      <h1 class="h3 fw-bold mb-4">Pannello di Controllo</h1>
-      <p class="text-secondary">Benvenuto nella gestione CLIENTE.</p>
-    </main>
-
-    <!--CANVAS-->
-    <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas" aria-labelledby="userOffcanvasLabel"></div>
-    <!--MODAL DATA-->
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true"></div>
-
-    <!--modal credential-->
-    <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
-    <!--modal delete-->
-    <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>    
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Scegli il tuo Ristorante</title>
   
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Stile Condiviso Unificato -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="customer-home-page d-flex flex-column">
+
+  <!-- Header con Navbar dinamica -->
+  <header id="navbar-container"></header>
+
+  <!-- Toast notifiche -->
+  <div id="alert-container" class="position-fixed top-0 end-0 p-3 toast-feedback-container"></div>
+
+  <!-- Offcanvas Utente & Modali Credenziali -->
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas" aria-labelledby="userOffcanvasLabel"></div>
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true"></div>
+  <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
+  <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>
+
+  <!-- Contenuto Principale -->
+  <main class="container my-4 flex-grow-1">
+
+    <!-- Hero Banner Vivace Ambra -->
+    <section class="customer-hero-banner mb-5">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-8">
+          <div class="city-pill-badge mb-3">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>Consegna a <strong id="customerCityLabel">TUTTE le città</strong></span>
+          </div>
+          <h1 class="customer-hero-title mb-2">I migliori ristoranti intorno a te</h1>
+          <p class="customer-hero-subtitle mb-0">Ordina dai locali più amati della tua zona e ricevi i piatti caldi a casa tua.</p>
+        </div>
+        <div class="col-12 col-md-4 text-md-end mt-4 mt-md-0">
+          <span class="fs-1">🍔🍕🍣</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Barra di Ricerca Veloce Ristoranti -->
+    <div class="row mb-4 align-items-center">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-warning"></i>
+          </span>
+          <input type="search" id="searchRestaurantInput" class="form-control border-start-0" placeholder="Cerca ristorante per nome...">
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-8 text-md-end mt-2 mt-md-0">
+        <span class="text-secondary small" id="restaurantCountLabel">Caricamento locali...</span>
+      </div>
+    </div>
+
+    <!-- Griglia dei Ristoranti -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="restaurantsGrid"></div>
+
+    <!-- Stato Nessun Ristorante Trovato -->
+    <div class="text-center py-5 d-none" id="emptyRestaurantsMsg">
+      <i class="bi bi-shop-window fs-1 text-warning d-block mb-3"></i>
+      <h4 class="fw-bold">Nessun ristorante disponibile al momento</h4>
+      <p class="text-secondary small mb-0">Non ci sono ancora ristoratori registrati nella tua città.</p>
+    </div>
+
+    <!-- Spinner di caricamento -->
+    <div class="text-center py-5" id="loadingSpinner">
+      <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Caricamento...</span>
+      </div>
+    </div>
+
+  </main>
 
 
-    <footer id="homeFooter" class="site-footer"></footer>
+  <section class="ticker-section">
+  <!-- Primo gruppo identico -->
+  <div class="ticker-group">
+      <div class="ticker-item"><span class="ticker-icon">🍔</span> Smash Burger</div>
+      <div class="ticker-item"><span class="ticker-icon">🍗</span> Crispy Chicken</div>
+      <div class="ticker-item"><span class="ticker-icon">🍟</span> Patatine Dippers</div>
+      <div class="ticker-item"><span class="ticker-icon">🥤</span> Milkshake e Drink</div>
+      <div class="ticker-item"><span class="ticker-icon">🔥</span> Offerte Lampo</div>
+      <div class="ticker-item"><span class="ticker-icon">🌱</span> Opzioni Vegane</div>
+      <div class="ticker-item"><span class="ticker-icon">🥓</span> Bacon Cheese</div>
+      <div class="ticker-item"><span class="ticker-icon">🍦</span> Dessert e Dolci</div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <!-- Script componenti non a modulo -->
-    <script src="/components/navbars.js"></script>
-    <script src="/components/footer.js"></script>
-    <script src="/components/logout.js"></script>
+  <!-- Secondo gruppo gemello (senza interruzioni) -->
+  <div class="ticker-group" aria-hidden="true">
+      <div class="ticker-item"><span class="ticker-icon">🍔</span> Smash Burger</div>
+      <div class="ticker-item"><span class="ticker-icon">🍗</span> Crispy Chicken</div>
+      <div class="ticker-item"><span class="ticker-icon">🍟</span> Patatine Dippers</div>
+      <div class="ticker-item"><span class="ticker-icon">🥤</span> Milkshake e Drink</div>
+      <div class="ticker-item"><span class="ticker-icon">🔥</span> Offerte Lampo</div>
+      <div class="ticker-item"><span class="ticker-icon">🌱</span> Opzioni Vegane</div>
+      <div class="ticker-item"><span class="ticker-icon">🥓</span> Bacon Cheese</div>
+      <div class="ticker-item"><span class="ticker-icon">🍦</span> Dessert e Dolci</div>
+  </div>
+  </section>
+  <!-- Footer -->
+  <footer id="homeFooter" class="mt-auto"></footer>
 
-    <!-- Script di montaggio e inizializzazione (type="module") -->
-    <script type="module">
-      import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
-      import "/components/alerts.js";
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-      // 1. Inietta navbar e footer
-      getNavbar(2, "navbar-container");
-      getFooter();
+  <!-- Inizializzazione Componenti Comuni e Controller -->
+  <script src="/components/navbars.js"></script>
+  <script src="/components/footer.js"></script>
+  <script src="/components/logout.js"></script>
 
-      // 2. Inietta il canvas (che contiene #footerLogout) e la modale dati
-      getCanvas();
+  <script type="module">
+    import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
+    import "/components/alerts.js";
 
-      getCanvasContent();
-      // 3. Inietta il footer di logout e i form di modifica/eliminazione credenziali
-      getFooterLogoutAndForm();
+    getNavbar(2, "navbar-container");
+    getFooter();
+    getCanvas();
+    getCanvasContent();
+    getFooterLogoutAndForm();
 
-      // 4. Ora che i form esistono fisicamente nel DOM, carica gli ascoltatori degli eventi
-      import("/utils/common/deleteOrUpdateCredential.js");
-      
-    </script>
-    <script src="/utils/common/userHome.js" type="module"></script>
-  </body>
+    import("/utils/common/deleteOrUpdateCredential.js");
+  </script>
+  <script src="/utils/common/userHome.js" type="module"></script>
+  <script src="/utils/customer/home.js" type="module"></script>
+</body>
 </html>

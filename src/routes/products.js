@@ -4,15 +4,6 @@ import * as productRepo from "../repositories/productRepository.js";
 
 const router = Router();
 
-// GET /api/products/restaurant/:restaurantId
-router.get("/restaurant/:restaurantId", AW(async (req, res) => {
-    const { restaurantId } = req.params;
-
-    const products = await productRepo.getProductsByRestaurant(restaurantId);
-    res.json({status: "ok", data: products });
-  })
-);
-
 // POST /api/products/create
 router.post(
   "/create",
@@ -29,6 +20,15 @@ router.post(
 
     const newProduct = await productRepo.createProduct(req.body);
     res.status(201).json({ status: "ok", data: newProduct });
+  })
+);
+
+// GET /api/products/restaurant/:restaurantId
+router.get("/restaurant/:restaurantId", AW(async (req, res) => {
+    const { restaurantId } = req.params;
+
+    const products = await productRepo.getProductsByRestaurant(restaurantId);
+    res.json({status: "ok", data: products });
   })
 );
 

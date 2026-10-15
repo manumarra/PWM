@@ -51,6 +51,24 @@ export async function deleteUser(payload) {
   return data;
 }
 
+export async function getRestaurantsByCity(city) {
+  const response = await fetch(`/api/users/restaurants/${encodeURIComponent(city)}`, {
+    method: "GET"
+  });
+  const data = await response.json().catch(()=> null);
+  checkResponse(response, data);
+  return data;
+}
+
+export async function getAllRestaurants() {
+  const response = await fetch("/api/users/restaurants", {
+    method: "GET"
+  });
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
+}
+
 function checkResponse(response, data) {
 
   if (!response.ok) {

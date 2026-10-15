@@ -131,12 +131,12 @@ const canvasBodyContentCustomer = `
 <ul class="nav nav-pills flex-column gap-2">
   <li class="nav-item">
     <a class="nav-link " href="#">
-      <i class="bi bi-gear"></i> Impostazioni Locale
+      <i class="bi bi-gear"></i> Dati pagamento
     </a>
   </li>
   <li class="nav-item">
     <a class="nav-link" href="#">
-      <i class="bi bi-clock-history"></i> Orari di Apertura
+      <i class="bi bi-clock-history"></i> Preferenze
     </a>
   </li>
 </ul>

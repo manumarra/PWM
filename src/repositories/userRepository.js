@@ -1,6 +1,10 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
-export const createUser = (userData) => User.create(userData);
+
+export const createUser = (userData) => {
+  if(userData.role === "restaurateur") userData.image = "/assets/defaultAvatar.jpeg";
+  return User.create(userData);
+}
 
 export const getUserByEmail = (email) => User.findByEmail(email);
 
@@ -40,3 +44,9 @@ export const deleteUser = async (id) => {
 
   return deleteUser;
 } 
+
+export const getRestaurantsByCity = (city) => {
+  return User.find({"address.city": { $regex: `^${city.trim()}$`, $options: "i" }, "role": "restaurateur"}).select("name image phone address").lean();
+}
+
+export const getAllRestaurants = () => User.find({"role": "restaurateur"}).select("name image phone address").lean();

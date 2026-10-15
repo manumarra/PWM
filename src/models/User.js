@@ -11,7 +11,7 @@ const addressSchema = new Schema({
   city:    { type: String, required: [true, "Città obbligatoria"], trim: true, match: [/^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s\-']{2,50}$/, "Nome città può contenere solo caratteri"] },
   zip:     { type: String, required: [true, "CAP obbligatorio"], match: [/^\d{5}$/, "CAP non valido (5 cifre)"] },
   country: { type: String, default: "ITA", uppercase: true, required: [true, "Stato obbligatorio"], maxlength: [3, "Stato: massimo 3 caratteri"], minlength:[2, "Stato: minimo 2 caratteri"] }
-}, { _id: false }); // Nessun _id per il subdocument come da slide
+}, { _id: false });
 
 const userSchema = new Schema({
   name: { 
@@ -68,7 +68,7 @@ const userSchema = new Schema({
     required: [true, "Ruolo obbligatorio"]
   },
   // Partita IVA: gestita solo se il ruolo è ristoratore
-ivaNumber: {
+  ivaNumber: {
     type: String,
     trim: true,
     validate: {
@@ -81,7 +81,13 @@ ivaNumber: {
   },
   image: {
     type: String,
-    default: "/assets/defaultAvatar.jpeg"
+    default: "/assets/defaultAvatar.jpeg",
+    validate: {
+      validator: function() {
+        return (this.role) === "restaurateur" ? true : false;
+      },
+      message: "L'immagine deve appartenere ad un ristoratore!"
+    }
   },
   address: addressSchema,
   active: { type: Boolean, default: true } // Per consentire disattivazione/cancellazione profilo

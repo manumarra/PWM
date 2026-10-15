@@ -62,6 +62,32 @@ const navbars = [`
 
     </div>
   </nav>
+`,
+`
+<nav class="navbar custom-navbar restaurateur-navbar sticky-top">
+  <div class="container-fluid px-3 px-md-4 d-flex align-items-center">
+    
+    <!-- 1. Logo a sinistra -->
+    <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/index.html">
+      <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
+      <span class="">Doremi</span>
+    </a>
+
+    <!-- 2. Link di navigazione principali -->
+    <ul class="navbar-nav d-flex flex-row align-items-center gap-4">
+      <li class="nav-item">
+        <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/customer/home.html">Home</a>
+      </li>
+    </ul>
+
+    <!-- 3. Toggler a destra: apre l'offcanvas presente nella pagina -->
+    <button 
+      class="navbar-toggler rest-custom-toggler- ms-auto d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#userOffcanvas" aria-controls="userOffcanvas" aria-label="Apri pannello profilo">
+      <i class="bi bi-person-circle fs-4 text-white"></i>
+    </button>
+
+  </div>
+</nav>
 `]
 
 function getNavbar(index, navBar) {

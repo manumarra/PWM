@@ -79,6 +79,10 @@ ivaNumber: {
       message: "La Partita IVA deve contenere esattamente 11 cifre numeriche"
     }
   },
+  image: {
+    type: String,
+    default: "/assets/defaultAvatar.jpeg"
+  },
   address: addressSchema,
   active: { type: Boolean, default: true } // Per consentire disattivazione/cancellazione profilo
 }, { timestamps: true });

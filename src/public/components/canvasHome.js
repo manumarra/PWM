@@ -30,7 +30,27 @@ const modalData = `
 
       <div class="modal-body p-4">
         <form id="editProfileForm">
+          ${isRestaurateur ? `
+            <!-- Sezione Foto Profilo (Anteprima + File / URL) -->
+            <div class="mb-4 text-center">
+              <div>
+                <img id="editProfileImgPreview" src="/assets/defaultAvatar.jpeg" alt="Anteprima Foto Profilo" class="profile-modal-avatar-preview" onerror="this.src='/assets/defaultAvatar.jpeg'">
+              </div>
+              
+              <div class="row g-2 text-start">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small" for="editProfileFileInput">Carica dal Computer</label>
+                  <input type="file" id="editProfileFileInput" class="form-control form-control-sm" accept="image/*">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small" for="editProfileImageUrl">Oppure URL Immagine</label>
+                  <input type="url" id="editProfileImageUrl" class="form-control form-control-sm" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+            ` : ``}
 
+          <hr class="profile-divider">
           <div class="row g-2 mb-3">
             <div class="${isRestaurateur ? 'col-12' : 'col-6'}">
               <label class="form-label" for="editName">${isRestaurateur ? 'Nome Attività' : 'Nome'}</label>
@@ -125,7 +145,7 @@ const canvasBodyContentCustomer = `
 const canvasBodyContentRestaurateur = ` 
 <!-- Dati Utente / Locale -->
 <div class="profile-card d-flex align-items-center gap-3 mb-4 p-3 rounded" role="button" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-  <i class="bi bi-person-circle fs-1 text-warning"></i>
+  <img src="/assets/defaultAvatar.jpeg" alt="Foto Profilo" id="profileCardImgContent" class="profile-card-avatar">
   <div>
     <h6 class="mb-0 fw-bold" id="nameUserContent"></h6>
     <small class="text-secondary" id="emailUserContent"></small>

@@ -13,6 +13,7 @@ editForm.addEventListener("submit", async(event) => {
     const currentPassword = editForm.elements["password"].value;
     const name = editForm.elements["nameUser"].value.trim();
     const phone = editForm.elements["phone"].value.trim();
+    const updatedImage = document.getElementById("editProfileImgPreview")?.src || "/assets/defaultAvatar.jpeg";
 
     if(!currentPassword) return showAlert("danger", "Attenzione", "Elemento mancante nel DOM");
 
@@ -31,7 +32,8 @@ editForm.addEventListener("submit", async(event) => {
         updates: {
             name,
             phone,
-            address
+            address,
+            image: updatedImage
         }
     }
 
@@ -72,18 +74,61 @@ function showData() {
     // 1. Popola le etichette dell'Offcanvas
     const nameCanvas = document.getElementById("nameUserContent");
     const restaurantNameCanvas = document.getElementById("emailUserContent");
+    const profileCardImg = document.getElementById("profileCardImg");
+    const navAvatar = document.getElementById("navbarAvatarImg");
+    const profileCardImgContent = document.getElementById("profileCardImgContent");
+
+    if (navAvatar && USER?.image) {
+        navAvatar.src = USER.image;
+    }
 
     if(!isRestaurateur) {
         if (nameCanvas) nameCanvas.textContent = USER.name + " " + USER.surname || "";
 
-    } else { if (nameCanvas) nameCanvas.textContent = USER.name || ""; }
+    } else {
+        if (nameCanvas) nameCanvas.textContent = USER.name || "";
+        if (profileCardImgContent) profileCardImgContent.src = USER.image;     
+        if (profileCardImg) profileCardImg.src = USER.image 
+    }
 
     
     if (restaurantNameCanvas) restaurantNameCanvas.textContent = USER.email || "";
 
     // 2. Popola i campi del form della modale
     const form = document.getElementById("editProfileForm");
+    const previewImg = document.getElementById("editProfileImgPreview");
+    const fileInput = document.getElementById("editProfileFileInput");
+    const urlInput = document.getElementById("editProfileImageUrl");
     if (form) {
+
+        // 1. Mostra la foto salvata attualmente nel localStorage
+        if (previewImg && USER?.image) {
+            previewImg.src = USER.image;
+            if (urlInput && !USER.image.startsWith("data:")) {
+                urlInput.value = USER.image;
+            }
+        }
+
+        // 2. Lettura file locale con FileReader (Base64)
+        fileInput?.addEventListener("change", (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if (previewImg) previewImg.src = event.target.result;
+                if (urlInput) urlInput.value = "";
+            };
+            reader.readAsDataURL(file);
+            }
+        });
+
+        // 3. Modifica immediata da input URL web
+        urlInput?.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if (previewImg) previewImg.src = val || "/assets/defaultAvatar.jpeg";
+            if (val && fileInput) fileInput.value = "";
+        });
+
         form.elements["nameUser"].value = USER.name || "";
 
         if (form.elements["surname"]) form.elements["surname"].value = USER.surname || "";

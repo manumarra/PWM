@@ -57,7 +57,7 @@ const navbars = [`
       <!-- 3. Toggler a destra: apre l'offcanvas presente nella pagina -->
       <button 
         class="navbar-toggler rest-custom-toggler- ms-auto d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#userOffcanvas" aria-controls="userOffcanvas" aria-label="Apri pannello profilo">
-        <i class="bi bi-person-circle fs-4 text-white"></i>
+        <img src="/assets/defaultAvatar.jpeg" alt="Foto Profilo" id="profileCardImg" class="profile-card-avatar">
       </button>
 
     </div>

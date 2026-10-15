@@ -585,6 +585,26 @@ body {
   background-color: var(--amber-hover);
 }
 
+/* Avatar foto profilo nella profile card */
+.profile-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--amber-primary);
+  flex-shrink: 0;
+}
+
+/* Anteprima foto profilo nella modale modifica dati */
+.profile-modal-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--amber-primary);
+  margin-bottom: 0.75rem;
+}
+
 /* =========================================================
    RESPONSIVE MOBILE (< 768px):
    Layout verticale stabile con dissolvenza fluida dei contenuti

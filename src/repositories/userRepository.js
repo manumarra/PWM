@@ -45,8 +45,38 @@ export const deleteUser = async (id) => {
   return deleteUser;
 } 
 
-export const getRestaurantsByCity = (city) => {
-  return User.find({"address.city": { $regex: `^${city.trim()}$`, $options: "i" }, "role": "restaurateur"}).select("name image phone address").lean();
-}
+export const getPaginatedRestaurants = async (queryParams = {}) => {
+  const page = Math.max(1, parseInt(queryParams.page, 10) || 1);
+  const limit = Math.max(1, parseInt(queryParams.limit, 10) || 12);
+  const skip = (page - 1) * limit;
 
-export const getAllRestaurants = () => User.find({"role": "restaurateur"}).select("name image phone address").lean();
+  const filter = { role: "restaurateur" };
+
+  if (queryParams.city && queryParams.city.trim()) {
+    filter["address.city"] = { $regex: `^${queryParams.city.trim()}$`, $options: "i" };
+  }
+
+  if (queryParams.search && queryParams.search.trim()) {
+    filter.name = { $regex: queryParams.search.trim(),$options: "i" };
+  }
+
+  const [data, total] = await Promise.all([
+    User.find(filter)
+      .select("name image phone address")
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    User.countDocuments(filter)
+  ]);
+
+  return {
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+      hasNext: page * limit < total
+    }
+  };
+};

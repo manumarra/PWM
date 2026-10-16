@@ -363,10 +363,10 @@ body {
 /* =========================================================
    FOOTER FINALE (Stile Notte & Ambra)
    ========================================================= */
-
+   
 .site-footer {
-  background-color: var(--night-dark); /* Sfondo Notte profondo */
-  color: #9CA3AF;                      /* Testo grigio neutro ad alta leggibilità */
+  background-color: var(--night-dark);
+  color: #9CA3AF;                     
   padding: 64px 0 32px;
 }
 
@@ -1533,10 +1533,12 @@ body.customer-home-page {
   flex-direction: column;
 }
 
-.restaurant-card:hover {
+.restaurant-card:hover,
+.restaurant-card:focus-visible {
   transform: translateY(-6px);
-  box-shadow: 0 14px 28px rgba(245, 158, 11, 0.18);
-  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 14px 28px rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+  outline: none;
 }
 
 .restaurant-card-img-wrapper {

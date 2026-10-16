@@ -211,8 +211,7 @@ function populateCategories(products) {
   updateModalCategories(categories);
 }
 
-function 
-updateCounters(products) {
+function updateCounters(products) {
   const availableCount = products.filter((p) => p.available).length;
   const unavailableCount = products.length - availableCount;
   const discountedCount = products.filter((p) => ((p.discount && p.available) || 0) > 0).length;

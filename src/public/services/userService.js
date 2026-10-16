@@ -1,4 +1,3 @@
-// public/services/userService.js
 export async function registerUser(payload) {
   const response = await fetch("/api/users/signup", { 
     method: "POST",
@@ -51,17 +50,12 @@ export async function deleteUser(payload) {
   return data;
 }
 
-export async function getRestaurantsByCity(city) {
-  const response = await fetch(`/api/users/restaurants/${encodeURIComponent(city)}`, {
-    method: "GET"
-  });
-  const data = await response.json().catch(()=> null);
-  checkResponse(response, data);
-  return data;
-}
+export async function getRestaurants({ page = 1, limit = 12, city = "", search = "" } = {}) {
+  const params = new URLSearchParams({ page, limit });
+  if (city) params.append("city", city);
+  if (search) params.append("search", search);
 
-export async function getAllRestaurants() {
-  const response = await fetch("/api/users/restaurants", {
+  const response = await fetch(`/api/users/restaurants?${params.toString()}`, {
     method: "GET"
   });
   const data = await response.json().catch(() => null);

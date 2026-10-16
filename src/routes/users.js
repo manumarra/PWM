@@ -1,20 +1,12 @@
 import {Router} from "express";
 import * as userRepo from "../repositories/userRepository.js";
 import { asyncWrapper as AW} from "../utils/asyncWrapper.js";
-import { getAllRestaurants } from "../public/services/userService.js";
 const router = Router();
 
-router.get("/restaurants", AW(async(req, res) => {
-  const restaurants = await userRepo.getAllRestaurants();
-  res.status(201).json({status: "ok", data: restaurants});
-}));
-
-router.get("/restaurants/:city", AW(async (req, res) => {
-  const { city } = req.params;
-  if(!city) return res.status(401).json({stauts: "fail", mesage: "Città non valida"});
-
-  const restaurants = await userRepo.getRestaurantsByCity(city);
-  res.status(201).json({status: "ok", data: restaurants});
+// GET /api/users/restaurants (con eventuali filtri via query string: ?city=...&page=...&search=...)
+router.get("/restaurants", AW(async (req, res) => {
+  const result = await userRepo.getPaginatedRestaurants(req.query);
+  res.status(200).json({ status: "ok", ...result });
 }));
 
 router.post("/signup", AW(async (req, res) => {

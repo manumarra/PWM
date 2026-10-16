@@ -80,3 +80,8 @@ export const getPaginatedRestaurants = async (queryParams = {}) => {
     }
   };
 };
+
+export const getRestaurantById = (id) =>
+  User.findOne({ _id: id, role: "restaurateur" })
+    .select("name image phone address")
+    .lean();

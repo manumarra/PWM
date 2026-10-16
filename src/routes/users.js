@@ -9,6 +9,15 @@ router.get("/restaurants", AW(async (req, res) => {
   res.status(200).json({ status: "ok", ...result });
 }));
 
+// GET /api/users/restaurants/:id
+router.get("/restaurants/:id", AW(async (req, res) => {
+  const restaurant = await userRepo.getRestaurantById(req.params.id);
+  if (!restaurant) {
+    return res.status(404).json({ status: "fail", message: "Ristorante non trovato" });
+  }
+  res.status(200).json({ status: "ok", data: restaurant });
+}));
+
 router.post("/signup", AW(async (req, res) => {
   
   const { email } = req.body;

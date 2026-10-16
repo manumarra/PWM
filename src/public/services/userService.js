@@ -63,6 +63,15 @@ export async function getRestaurants({ page = 1, limit = 12, city = "", search =
   return data;
 }
 
+export async function getRestaurantById(restaurantId) {
+  const response = await fetch(`/api/users/restaurants/${encodeURIComponent(restaurantId)}`, {
+    method: "GET"
+  });
+  const data = await response.json().catch(() => null);
+  checkResponse(response, data);
+  return data;
+}
+
 function checkResponse(response, data) {
 
   if (!response.ok) {

@@ -1624,7 +1624,7 @@ body.customer-home-page {
   color: #ffffff;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
   background-color: var(--night-dark); /* Fallback */
-  margin: 1.5rem 1.5rem 2.5rem;
+  margin: 1.5rem 0 2.5rem;
 }
 
 /* Sfondo con immagine e overlay gradiente scuro/ambra */
@@ -1732,4 +1732,35 @@ body.customer-home-page {
     gap: 12px;
     flex-direction: column;
   }
+}
+
+/* =========================================================
+   CUSTOMER CART (RESTAURANT MENU PAGE)
+   ========================================================= */
+.customer-cart-container {
+  /* top = altezza navbar + margine di respiro */
+  top: 110px; 
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+/* Contenitore piatti nel carrello */
+.cart-items-container {
+  max-height: 45vh;
+}
+
+/* Scrollbar minimale per il carrello */
+.cart-items-container::-webkit-scrollbar {
+  width: 5px;
+}
+.cart-items-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-subtle);
+  border-radius: 10px;
+}
+.cart-items-container::-webkit-scrollbar-thumb:hover {
+  background-color: #9CA3AF;
+}
+
+.cart-product {
+  max-width: 60%;
 }

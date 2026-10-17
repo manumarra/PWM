@@ -26,22 +26,18 @@
   <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
   <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>
 
-    <!-- Hero Banner del Ristorante (Popolato via JS) -->
+<main class="container my-4 flex-grow-1">
+
+    <!-- Hero Banner del Ristorante -->
     <section class="restaurant-hero-banner d-none" id="restaurantHero">
-      <!-- Sfondi con overlay -->
       <div class="restaurant-hero-bg" id="heroBgImage"></div>
       <div class="restaurant-hero-overlay"></div>
-
-      <!-- Contenuto in primo piano -->
       <div class="restaurant-hero-content">
         <div class="restaurant-meta-badges">
           <span class="badge-status-open">Aperto</span>
           <span class="badge-category" id="restaurantCategoryLabel">Ristorante</span>
         </div>
-
         <h1 class="restaurant-hero-name" id="restaurantNameLabel">Nome Ristorante</h1>
-
-        <!-- Dettagli e recapiti -->
         <div class="restaurant-details-row">
           <div class="restaurant-detail-item">
             <i class="bi bi-geo-alt-fill"></i>
@@ -50,10 +46,6 @@
           <div class="restaurant-detail-item">
             <i class="bi bi-telephone-fill"></i>
             <span id="restaurantPhoneLabel">Telefono non disponibile</span>
-          </div>
-          <div class="restaurant-detail-item">
-            <i class="bi bi-clock-fill"></i>
-            <span>Orario d'apertura</span>
           </div>
         </div>
       </div>
@@ -65,6 +57,89 @@
         <span class="visually-hidden">Caricamento locale...</span>
       </div>
     </div>
+
+    <!-- Layout a 2 Colonne: Menù a Sinistra, Carrello a Destra -->
+    <div class="row gx-lg-5">
+      
+      <!-- LATO SINISTRO: Prodotti e Filtri (8 colonne su PC) -->
+      <div class="col-12 col-lg-8">
+        
+        <!-- Barra Ricerca & Filtri -->
+        <div class="row g-3 mb-4 mt-1">
+          <div class="col-12 col-md-5">
+            <div class="input-group">
+              <span class="input-group-text menu-input-icon"><i class="bi bi-search"></i></span>
+              <input type="search" id="menuSearchInput" class="form-control menu-search-input" placeholder="Cerca piatto...">
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <select id="menuCategorySelect" class="form-select menu-filter-select">
+              <option value="">Tutte le categorie</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <select id="menuStatusSelect" class="form-select menu-filter-select">
+              <option value="all">Tutti</option>
+              <option value="available">Disponibili</option>
+              <option value="unavailable">Esauriti</option>
+              <option value="discounted">In offerta</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Badge Contatori -->
+        <div class="menu-summary-bar mb-4 px-1">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex flex-wrap align-items-center gap-2 gap-sm-3 small">
+              <span>In offerta: <strong id="countDiscounted" class="count-discounted">0</strong></span>
+              <span class="d-none d-sm-inline">•</span>
+              <span>Disponibili: <strong id="countAvailable" class="count-available">0</strong></span>
+            </div>
+            <div id="renderedCounter" class="small ms-auto ms-sm-0"></div>
+          </div>
+        </div>
+
+        <!-- Griglia Prodotti -->
+        <div id="menuCardsContainer" class="row row-cols-1 row-cols-md-2 g-4 mb-5"></div>
+      </div>
+
+      <!-- LATO DESTRO: Carrello (4 colonne su PC, scivola in basso su mobile) -->
+      <div class="col-12 col-lg-4 mt-5 mt-lg-0">
+        <!-- Container Sticky che scende con lo scroll -->
+        <div class="customer-cart-container sticky-top">
+          <div class="card border-0 shadow-lg rounded-4 p-2">
+            <div class="card-body">
+              <h4 class="fw-bold mb-4"><i class="bi bi-bag-check-fill text-warning me-2"></i> Il tuo Ordine</h4>
+              
+              <!-- Lista Piatti nel carrello -->
+              <div id="cartItemsContainer" class="cart-items-container d-flex flex-column gap-3 mb-3 overflow-y-auto">
+                <!-- Messaggio carrello vuoto di default -->
+                <div class="text-center text-secondary small py-4" id="emptyCartMsg">
+                  <i class="bi bi-cart-x fs-1 d-block mb-2 opacity-50"></i>
+                  Il carrello è vuoto.<br>Aggiungi i piatti che desideri!
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-danger btn-sm px-2 py-1 d-none" id="emptyCartBtn" title="Svuota carrello">
+                <i class="bi bi-trash3"></i>
+              </button>
+
+              <!-- Checkout Footer -->
+              <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <span class="fw-semibold text-secondary">Totale</span>
+                  <span class="fs-4 fw-bold">€ <span id="cartTotalPrice">0.00</span></span>
+                </div>
+                <button type="button" class="btn btn-amber w-100 fw-bold py-2 shadow-sm" id="checkoutBtn" disabled>
+                  Vai al Pagamento
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
 
 
   <!-- Footer -->

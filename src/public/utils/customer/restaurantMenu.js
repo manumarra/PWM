@@ -2,6 +2,8 @@ import { getRestaurantById } from "/services/userService.js";
 import { getRestaurantProducts } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
 import { createMenuCardElement } from "/utils/restaurateur/menuCards.js";
+import { initCart, addToCart } from "/utils/customer/cart.js";
+import { getCustomerCartMarkup } from "/components/cart.js";
 
 const heroSection = document.getElementById("restaurantHero");
 const heroSpinner = document.getElementById("heroSpinner");
@@ -20,21 +22,14 @@ const countUnavailableEl = document.getElementById("countUnavailable");
 const countDiscountedEl = document.getElementById("countDiscounted");
 const renderedCounterEl = document.getElementById("renderedCounter");
 
-// Referenze DOM del carrello
-const cartItemsContainer = document.getElementById("cartItemsContainer");
-const emptyCartMsg = document.getElementById("emptyCartMsg");
-const cartTotalPrice = document.getElementById("cartTotalPrice");
-const checkoutBtn = document.getElementById("checkoutBtn");
-const emptyCartBtn = document.getElementById("emptyCartBtn");
-
 // Variabili di stato
 let allProducts = [];
 let filteredProducts = [];
-let cart = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const restaurantId = urlParams.get("restaurantId");
+  const cartMountPoint = document.getElementById("cartMountPoint");
 
   if (!restaurantId) {
     showAlert("danger", "Attenzione", "Nessun ristorante selezionato");
@@ -50,6 +45,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   categorySelect?.addEventListener("change", applyFilters);
   statusSelect?.addEventListener("change", applyFilters);
+
+  if (cartMountPoint) {
+    cartMountPoint.innerHTML = getCustomerCartMarkup();
+    initCart();
+  }
+
+  // Inizializzazione carrello
+  initCart({
+    containerId: "cartItemsContainer",
+    emptyMsgId: "emptyCartMsg",
+    totalId: "cartTotalPrice",
+    checkoutBtnId: "checkoutBtn"
+  });
 
   await loadRestaurantDetails(restaurantId);
 });
@@ -182,96 +190,3 @@ function updateCounters(products) {
   if (countUnavailableEl) countUnavailableEl.textContent = unavailableCount;
   if (countDiscountedEl) countDiscountedEl.textContent = discountedCount;
 }
-
-function addToCart(product) {
-  // Controlla se il piatto è già nel carrello
-  const existingItem = cart.find(item => item.product._id === product._id);
-  
-  if (existingItem) {
-    existingItem.qty += 1;
-  } else {
-    cart.push({ product: product, qty: 1 });
-  }
-
-  showAlert("success", "Carrello", `${product.nameMeal} aggiunto al tuo ordine!`);
-  updateCartUI();
-}
-
-function changeCartQuantity(productId, delta) {
-  const item = cart.find(item => item.product._id === productId);
-  if (!item) return;
-
-  item.qty += delta;
-
-  // Se la quantità scende a 0 o meno, rimuovilo dal carrello
-  if (item.qty <= 0) {
-    cart = cart.filter(i => i.product._id !== productId);
-  }
-
-  updateCartUI();
-}
-
-function updateCartUI() {
-  if (!cartItemsContainer) return;
-  
-  // Svuotiamo il contenitore dei piatti
-  cartItemsContainer.innerHTML = "";
-  let total = 0;
-
-  if (cart.length === 0) {
-    // Carrello vuoto: disabilita entrambi i pulsanti
-    cartItemsContainer.appendChild(emptyCartMsg);
-    if (checkoutBtn) checkoutBtn.disabled = true;
-    if(emptyCartMsg) emptyCartMsg.classList.remove("d-none");
-    if (emptyCartBtn) emptyCartBtn.classList.add("d-none");
-  } else {
-    // Ci sono piatti nel carrello: abilita i pulsanti
-    emptyCartMsg.classList.add("d-none");
-    if (checkoutBtn) checkoutBtn.disabled = false;
-    if (emptyCartBtn) emptyCartBtn.classList.remove("d-none")
-
-    cart.forEach(item => {
-      const p = item.product;
-      const basePrice = Number(p.price) || 0;
-      const discountVal = Number(p.discount) || 0;
-      const finalPrice = discountVal > 0 ? basePrice - (basePrice * discountVal / 100) : basePrice;
-
-      total += finalPrice * item.qty;
-
-      const row = document.createElement("div");
-      row.className = "d-flex justify-content-between align-items-center bg-light p-2 rounded";
-      
-      row.innerHTML = `
-        <div class="d-flex flex-column cart-product">
-          <span class="fw-semibold text-truncate small" title="${p.nameMeal}">${p.nameMeal}</span>
-          <span class="text-secondary small">€${(item.qty*finalPrice).toFixed(2)}</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-sm btn-outline-secondary px-2 py-0 fw-bold btn-decrease" data-id="${p._id}">-</button>
-          <span class="fw-bold small px-1">${item.qty}</span>
-          <button class="btn btn-sm btn-outline-secondary px-2 py-0 fw-bold btn-increase" data-id="${p._id}">+</button>
-        </div>
-      `;
-
-      // Eventi pulsanti + e -
-      row.querySelector(".btn-decrease").addEventListener("click", () => changeCartQuantity(p._id, -1));
-      row.querySelector(".btn-increase").addEventListener("click", () => changeCartQuantity(p._id, 1));
-
-      cartItemsContainer.appendChild(row);
-    });
-  }
-
-  // Aggiorna il totale stampato
-  if (cartTotalPrice) {
-    cartTotalPrice.textContent = total.toFixed(2);
-  }
-}
-
-// Listener per svuotare il carrello
-emptyCartBtn?.addEventListener("click", () => {
-  if (cart.length === 0) return;
-    cart = []; // Svuota l'array
-    updateCartUI(); // Ridisegna l'interfaccia
-    showAlert("danger", "Carrello svuotato", "Tutti i piatti sono stati rimossi.");
-  }
-);

@@ -1170,7 +1170,9 @@ body.menu-builder-page {
 }
 
 .menu-item-card-modern.is-unavailable {
-  opacity: 0.6;
+  filter: grayscale(70%);
+  position: relative;
+  cursor: not-allowed;
 }
 
 /* Badge di stato a pillola */
@@ -1763,4 +1765,28 @@ body.customer-home-page {
 
 .cart-product {
   max-width: 60%;
+}
+
+/* =========================================================
+   CUSTOMER HOME: TEMA VIVACE AMBRA
+   ========================================================= */
+
+body.customer-home-page {
+  /* Percorso dell'immagine di sfondo verticale con i bordi colorati */
+  background-image: url('/assets/sfondo-menu.jpeg');
+  
+  /* Copre interamente lo schermo senza distorsioni */
+  background-size: cover;
+  
+  /* Centra l'immagine orizzontalmente e verticalmente */
+  background-position: center;
+  
+  /* L'IMMAGINE RESTA FISSA E NON SCORRE CON LA PAGINA */
+  background-attachment: fixed;
+  
+  /* Colore di fallback di sicurezza */
+  background-color: #FDFBF7;
+  
+  color: var(--night-dark);
+  min-height: 100vh;
 }

@@ -58,6 +58,7 @@ export function createMenuCardElement(product, options = {}) {
   } else {
     cardTooltip = "Clicca per personalizzare il piatto";
   }
+
   col.innerHTML = `
     <div class="card h-100 menu-item-card-modern ${!isAvailable ? 'is-unavailable' : ''} w-100" title="${cardTooltip}">
       <div class="menu-item-img-wrapper">

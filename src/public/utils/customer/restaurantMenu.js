@@ -2,6 +2,7 @@ import { getRestaurantById } from "/services/userService.js";
 import { getRestaurantProducts } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
 import { createMenuCardElement } from "/utils/restaurateur/menuCards.js";
+import { sortMenuProducts, updateCounters } from "/utils/restaurateur/menu.js";
 import { initCart, addToCart } from "/utils/customer/cart.js";
 import { getCustomerCartMarkup } from "/components/cart.js";
 
@@ -17,9 +18,6 @@ const menuCardsContainer = document.getElementById("menuCardsContainer");
 const searchInput = document.getElementById("menuSearchInput");
 const categorySelect = document.getElementById("menuCategorySelect");
 const statusSelect = document.getElementById("menuStatusSelect");
-const countAvailableEl = document.getElementById("countAvailable");
-const countUnavailableEl = document.getElementById("countUnavailable");
-const countDiscountedEl = document.getElementById("countDiscounted");
 const renderedCounterEl = document.getElementById("renderedCounter");
 
 // Variabili di stato
@@ -46,18 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   categorySelect?.addEventListener("change", applyFilters);
   statusSelect?.addEventListener("change", applyFilters);
 
-  if (cartMountPoint) {
-    cartMountPoint.innerHTML = getCustomerCartMarkup();
-    initCart();
-  }
-
-  // Inizializzazione carrello
-  initCart({
-    containerId: "cartItemsContainer",
-    emptyMsgId: "emptyCartMsg",
-    totalId: "cartTotalPrice",
-    checkoutBtnId: "checkoutBtn"
-  });
+  if (cartMountPoint) cartMountPoint.innerHTML = getCustomerCartMarkup();
 
   await loadRestaurantDetails(restaurantId);
 });
@@ -71,6 +58,7 @@ async function loadRestaurantDetails(restaurantId) {
     if (!restaurant || !response) {
       throw new Error("Ristorante non disponibile");
     }
+    initCart(restaurant);
 
     if (bgImg) {
       const imgSrc = restaurant.image || "/assets/sfondoCibi.jpg";
@@ -94,19 +82,6 @@ async function fetchAndLoadProducts(restaurantId) {
     populateCategories(allProducts);
     updateCounters(allProducts);
     applyFilters();
-}
-
-function sortMenuProducts(products) {
-  const getRank = (p) => {
-    if ((p.discount || 0) > 0 && p.available) return 1;
-    if (p.available) return 2;
-    return 3;
-  };
-
-  return [...products].sort((a, b) => {
-    const diff = getRank(a) - getRank(b);
-    return diff !== 0 ? diff : (a.nameMeal || "").localeCompare(b.nameMeal || "");
-  });
 }
 
 function applyFilters() {
@@ -179,14 +154,4 @@ function populateCategories(products) {
     opt.textContent = cat;
     categorySelect.appendChild(opt);
   });
-}
-
-function updateCounters(products) {
-  const availableCount = products.filter((p) => p.available).length;
-  const unavailableCount = products.length - availableCount;
-  const discountedCount = products.filter((p) => ((p.discount && p.available) || 0) > 0).length;
-
-  if (countAvailableEl) countAvailableEl.textContent = availableCount;
-  if (countUnavailableEl) countUnavailableEl.textContent = unavailableCount;
-  if (countDiscountedEl) countDiscountedEl.textContent = discountedCount;
 }

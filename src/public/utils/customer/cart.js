@@ -1,4 +1,7 @@
 import { showAlert } from "/components/alerts.js";
+import { getStoredUser } from "/utils/common/session.js";
+
+const USER = getStoredUser();
 
 // Stato interno del carrello
 let cart = []; // { product: {...}, qty: 1 }
@@ -13,13 +16,15 @@ let emptyCartBtnEl = null;
 /**
  * Inizializza i riferimenti DOM e gli eventi del carrello
  */
-export function initCart() {
+export function initCart(restaurant) {
   containerEl = document.getElementById("cartItemsContainer");
   emptyMsgEl = document.getElementById("emptyCartMsg");
   totalPriceEl = document.getElementById("cartTotalPrice");
   checkoutBtnEl = document.getElementById("checkoutBtn");
   emptyCartBtnEl = document.getElementById("emptyCartBtn");
 
+  const restaurantName = document.getElementById("restaurantName");
+  if(restaurantName && restaurant?.name) restaurant.textContent = `da ${restaurant.name}`;
   // Listener svuota carrello
   emptyCartBtnEl?.addEventListener("click", () => {
     if (cart.length === 0) return;
@@ -29,7 +34,7 @@ export function initCart() {
   });
 
   checkoutBtnEl?.addEventListener("click", () => {
-    // window.location.href = "/pages/customer/checkout.html";
+    window.location.href = `/pages/customer/order.html?restaurant=${restaurant}&customer=${USER}`;
   });
 
   updateCartUI();
@@ -72,8 +77,7 @@ function changeCartQuantity(productId, delta) {
  */
 function updateCartUI() {
   if (!containerEl) return;
-  
-  containerEl.innerHTML = "";
+  containerEl.innerHTML = "";  
   let total = 0;
 
   if (cart.length === 0) {

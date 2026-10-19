@@ -18,7 +18,6 @@ export function createMenuCardElement(product, options = {}) {
   const hasDiscount = discountVal > 0;
   const finalPrice = hasDiscount ? (basePrice - (basePrice * discountVal / 100)).toFixed(2) : basePrice.toFixed(2);
   const homeMade = (product.mealId === null) ? true : false;
-  console.log("homeee: ", homeMade);
   let statusBadgeMarkup = "";
   if (hasDiscount && isAvailable) {
     statusBadgeMarkup = `<span class="badge-status-pill status-discount"><i class="bi bi-tag-fill me-1"></i>In Offerta</span>`;

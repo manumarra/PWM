@@ -105,7 +105,7 @@ async function loadMenu(restaurantId) {
   }
 }
 
-function sortMenuProducts(products) {
+export function sortMenuProducts(products) {
   const getRank = (p) => {
     if ((p.discount || 0) > 0 && p.available) return 1;
     if (p.available) return 2;
@@ -211,7 +211,7 @@ function populateCategories(products) {
   updateModalCategories(categories);
 }
 
-function updateCounters(products) {
+export function updateCounters(products) {
   const availableCount = products.filter((p) => p.available).length;
   const unavailableCount = products.length - availableCount;
   const discountedCount = products.filter((p) => ((p.discount && p.available) || 0) > 0).length;

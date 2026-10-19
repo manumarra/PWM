@@ -1200,6 +1200,11 @@ body.menu-builder-page {
   border: 1px solid #374151;
 }
 
+.badge-status-pill.status-homemade {
+  background-color: #10a5b9;
+  color: #ffffff;
+}
+
 /* Circoletto percentuale sconto sopra la foto */
 .discount-circle-badge {
   width: 42px;

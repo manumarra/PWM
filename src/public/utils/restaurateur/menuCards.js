@@ -9,17 +9,16 @@ export function createMenuCardElement(product, options = {}) {
   const { onCardClick, onProductUpdated, isCustomerView = false } = options;
 
   const col = document.createElement("div");
-  col.className = "col d-flex"; // Mantiene le card allineate in altezza
+  col.className = "col d-flex";
   col.dataset.productId = product._id;
 
   const isAvailable = Boolean(product.available);
   const discountVal = Number(product.discount) || 0;
   const basePrice = Number(product.price) || 0;
   const hasDiscount = discountVal > 0;
-  const finalPrice = hasDiscount 
-    ? (basePrice - (basePrice * discountVal / 100)).toFixed(2) 
-    : basePrice.toFixed(2);
-
+  const finalPrice = hasDiscount ? (basePrice - (basePrice * discountVal / 100)).toFixed(2) : basePrice.toFixed(2);
+  const homeMade = (product.mealId === null) ? true : false;
+  console.log("homeee: ", homeMade);
   let statusBadgeMarkup = "";
   if (hasDiscount && isAvailable) {
     statusBadgeMarkup = `<span class="badge-status-pill status-discount"><i class="bi bi-tag-fill me-1"></i>In Offerta</span>`;
@@ -28,6 +27,7 @@ export function createMenuCardElement(product, options = {}) {
   } else {
     statusBadgeMarkup = `<span class="badge-status-pill status-inactive"><i class="bi bi-dash-circle me-1"></i>Esaurito</span>`;
   }
+  (homeMade) ? statusBadgeMarkup += ` <span class="badge-status-pill status-homemade"><i class="bi bi-cake2"></i> Homemade</span>` : ``;
 
   // Se siamo nella vista cliente, NON generiamo il blocco comandi in basso
   const dockMarkup = isCustomerView ? '' : `

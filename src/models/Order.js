@@ -72,6 +72,11 @@ const orderSchema = new Schema(
       required: true,
       default: "delivery"
     },
+    verificationCode: {
+      type: String,
+      required: true,
+      default: () => Math.floor(100000 + Math.random() * 900000).toString() // Genera es: "482910"
+    },
     deliveryAddress: {
       type: deliveryAddressSchema,
       required: function () {

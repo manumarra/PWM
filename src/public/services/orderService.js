@@ -1,5 +1,5 @@
 export async function createOrder(orderPayload) {
-  const response = await fetch("/api/orders", {
+  const response = await fetch("/api/orders/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

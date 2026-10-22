@@ -34,7 +34,11 @@ export function initCart(restaurant) {
   });
 
   checkoutBtnEl?.addEventListener("click", () => {
-    window.location.href = `/pages/customer/order.html?restaurant=${restaurant}&customer=${USER}`;
+    sessionStorage.setItem("checkoutCart", JSON.stringify(cart));
+    
+    const restId = restaurant._id;
+    const custId = USER._id;
+    window.location.href = `/pages/customer/checkout.html?restaurantId=${restId}&customerId=${custId}`;
   });
 
   updateCartUI();

@@ -1795,3 +1795,216 @@ body.customer-home-page {
   color: var(--night-dark);
   min-height: 100vh;
 }
+
+
+/* =========================================================
+   CHECKOUT PAGE (Macro-scenario 3)
+   ========================================================= */
+
+.checkout-main {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.checkout-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.checkout-header h2 {
+  color: var(--amber-primary);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.checkout-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.checkout-form-section {
+  flex: 1 1 60%;
+}
+
+.checkout-summary-section {
+  flex: 1 1 35%;
+}
+
+.checkout-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.checkout-section-title {
+  font-weight: 700;
+  border-bottom: 2px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+/* Griglia per i form */
+.form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.input-group-full {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group-half {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-grid label, .credit-card-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--night-light);
+}
+
+.form-grid input, .form-grid textarea, .credit-card-form input {
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+/* Opzioni radio personalizzate */
+.order-type-options, .payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #f9fafb;
+}
+
+.radio-option span {
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.credit-card-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+  background-color: #f4f5f7;
+  border-radius: 8px;
+}
+
+/* OpenStreetMap Placeholder */
+.osm-map-placeholder {
+  margin-top: 20px;
+  width: 100%;
+  height: 200px;
+  background-color: #e9ecef;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--night-light);
+  font-style: italic;
+  border: 1px dashed #ced4da;
+}
+
+/* Riepilogo e Totali */
+.summary-sticky {
+  position: sticky;
+  top: 20px;
+}
+
+.summary-items-list {
+  max-height: 350px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--night-light);
+}
+
+.summary-totals {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 20px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.final-total {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #dc3545;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+.btn-submit-order {
+  width: 100%;
+  background-color: var(--amber-primary);
+  color: var(--night-dark);
+  border: none;
+  padding: 15px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-submit-order:hover {
+  background-color: var(--amber-hover);
+}
+
+/* Responsività Mobile */
+@media (max-width: 768px) {
+  .checkout-form-section, .checkout-summary-section {
+    flex: 1 1 100%;
+  }
+}
+
+/* Mappa OpenStreetMap con Leaflet */
+.osm-map-container {
+  height: 280px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  z-index: 1; /* Fondamentale per non coprire modali o navbar */
+  margin-top: 10px;
+}

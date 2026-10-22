@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Conferma Ordine</title>
+  
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!--Mappa ordini-->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Stile Condiviso Unificato -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="customer-page">
+
+  <header id="navbar-container"></header>
+  <div id="alert-container" class="toast-feedback-container"></div>
+
+  <!-- Offcanvas Utente & Modali Credenziali -->
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas" aria-labelledby="userOffcanvasLabel"></div>
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true"></div>
+  <div class="modal fade" id="editCredentialModal" tabindex="-1" aria-labelledby="editCredentialModalLabel" aria-hidden="true"></div>
+  <div class="modal fade" id="deleteModalToggle2" tabindex="-1" aria-labelledby="deleteModalToggle2Label" aria-hidden="true"></div>
+
+  <main class="checkout-main">
+    <div class="checkout-header">
+      <h2><i class="bi bi-cart-check-fill"></i> Conferma il tuo Ordine</h2>
+      <p id="checkoutRestaurantName">Completa i dettagli per l'invio</p>
+    </div>
+
+    <div class="checkout-layout">
+      <!-- LATO SINISTRO: Modulo Dati e Pagamento -->
+      <section class="checkout-form-section">
+        <form id="checkoutForm">
+          
+          <!-- Tipo di Ordine-->
+          <div class="checkout-card">
+            <h5 class="checkout-section-title">Tipologia di Ritiro</h5>
+            <div class="order-type-options">
+              <label class="radio-option">
+                <input type="radio" name="orderType" value="delivery" checked>
+                <span>Consegna a Domicilio (Delivery)</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="orderType" value="takeaway">
+                <span>Ritiro in Locale (Takeaway)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sezione Dati di Spedizione e OpenStreetMap -->
+          <div class="checkout-card" id="deliveryAddressSection">
+            <h5 class="checkout-section-title">Dettagli di Consegna</h5>
+            
+            <div class="form-grid">
+              <div class="input-group-full">
+                <label for="streetInput">Indirizzo (Via/Piazza) *</label>
+                <input type="text" id="streetInput" placeholder="Es. Via Roma, 10" required>
+              </div>
+              <div class="input-group-half">
+                <label for="cityInput">Città *</label>
+                <input type="text" id="cityInput" placeholder="Es. Firenze" required>
+              </div>
+              <div class="input-group-half">
+                <label for="zipInput">CAP *</label>
+                <input type="text" id="zipInput" placeholder="Es. 50123" pattern="^\d{5}$" required title="CAP non valido (5 cifre)">
+              </div>
+              <div class="input-group-full">
+                <label for="notesInput">Note per il fattorino</label>
+                <textarea id="notesInput" rows="2" placeholder="Es. Citofono Rossi"></textarea>
+              </div>
+            </div>
+
+            <div id="mapStatusText" class="mt-3 mb-2">
+                <p class="text-secondary small m-0">Compila i campi Indirizzo e Città per calcolare la consegna.</p>
+            </div>
+            <!-- Contenitore della mappa -->
+            <div id="osmMapContainer" class="osm-map-container d-none"></div>
+          </div>
+
+          <!-- Sezione Metodo di Pagamento -->
+          <div class="checkout-card">
+            <h5 class="checkout-section-title">Metodo di Pagamento</h5>
+            
+            <div class="payment-options">
+              <label class="radio-option">
+                <input type="radio" name="paymentMethod" value="credit_card" checked>
+                <span>Carta di Credito <i class="bi bi-credit-card-2-front"></i></span>
+              </label>
+              
+              <!-- Campi Carta di Credito -->
+              <div id="creditCardDetails" class="credit-card-form">
+                <div class="input-group-full">
+                  <label>Numero Carta *</label>
+                  <input type="text" id="ccNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+                </div>
+                <div class="input-group-half">
+                  <label>Scadenza *</label>
+                  <input type="text" id="ccExpiry" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="input-group-half">
+                  <label>CVV *</label>
+                  <input type="text" id="ccCvv" placeholder="123" maxlength="3">
+                </div>
+              </div>
+
+              <label class="radio-option">
+                <input type="radio" name="paymentMethod" value="mock">
+                <span>Paga alla Consegna <i class="bi bi-cash-coin"></i></span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- LATO DESTRO: Riepilogo Ordine -->
+      <aside class="checkout-summary-section">
+        <div class="checkout-card summary-sticky">
+          <h4 class="checkout-section-title">Riepilogo</h4>
+          
+          <div id="checkoutItemsContainer" class="summary-items-list">
+             <!-- Elementi popolati tramite JS -->
+             <p class="loading-text">Caricamento carrello...</p>
+          </div>
+
+          <div class="summary-totals">
+            <div class="total-row">
+              <span>Subtotale</span>
+              <span id="checkoutSubtotal">€ 0.00</span>
+            </div>
+            <div class="total-row" id="deliveryFeeRow">
+              <span>Costo di consegna (calcolato in base ai km)</span>
+              <span id="checkoutDeliveryFee">€ 0.00</span>
+            </div>
+            <div class="total-row final-total">
+              <span>Totale Finale</span>
+              <span id="checkoutTotalAmount">€ 0.00</span>
+            </div>
+            
+            <button type="submit" form="checkoutForm" class="btn-submit-order" id="submitOrderBtn">
+              Conferma Ordine
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>  
+
+  <footer id="homeFooter" class="mt-auto site-footer"></footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="/components/navbars.js"></script>
+  <script src="/components/footer.js"></script>
+  <script src="/components/logout.js"></script>
+  
+  <script type="module">
+    import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
+    import "/components/alerts.js";
+
+    getNavbar(2, "navbar-container");
+    getFooter();
+    getCanvas();
+    getCanvasContent();
+    getFooterLogoutAndForm();
+
+    import("/utils/common/deleteOrUpdateCredential.js");
+  </script>
+  <script src="/utils/customer/checkout.js" type="module"></script>
+  <script src="/utils/common/userHome.js" type="module"></script>
+</body>
+</html>

@@ -3,7 +3,7 @@ export function getCustomerCartMarkup() {
         <div class="customer-cart-container sticky-top">
           <div class="card border-0 shadow-lg rounded-4 p-2">
             <div class="card-body">
-              <h4 class="fw-bold mb-4"><i class="bi bi-bag-check-fill text-warning me-2"></i> Il tuo ordine <span class="fs-6 fw-normal text-secondary d-block mt-1" id="restaurantName"></span></h4>
+              <h4 class="fw-bold mb-4" id="restaurantName"></h4>
               
               <!-- Lista Piatti nel carrello -->
               <div id="cartItemsContainer" class="cart-items-container d-flex flex-column gap-3 mb-3 overflow-y-auto">

@@ -24,13 +24,13 @@ export function initCart(restaurant) {
   emptyCartBtnEl = document.getElementById("emptyCartBtn");
 
   const restaurantName = document.getElementById("restaurantName");
-  if(restaurantName && restaurant?.name) restaurant.textContent = `da ${restaurant.name}`;
+  (restaurantName && restaurant?.name) ? restaurantName.textContent = `Il tuo ordine da ${restaurant.name}`: "Il tuo ordine";
   // Listener svuota carrello
   emptyCartBtnEl?.addEventListener("click", () => {
     if (cart.length === 0) return;
     cart = [];
     updateCartUI();
-    showAlert("warning", "Carrello svuotato", "Tutti i piatti sono stati rimossi.");
+    showAlert("danger", "Carrello svuotato", "Tutti i piatti sono stati rimossi.");
   });
 
   checkoutBtnEl?.addEventListener("click", () => {

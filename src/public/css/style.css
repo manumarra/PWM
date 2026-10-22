@@ -2008,3 +2008,90 @@ body.customer-home-page {
   z-index: 1; /* Fondamentale per non coprire modali o navbar */
   margin-top: 10px;
 }
+
+/* =========================================================
+   PAGINA STORICO ORDINI CLIENTE (Macro-scenario 4)
+   ========================================================= */
+
+.order-card-modern {
+  background-color: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.order-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.order-card-header {
+  padding: 16px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-card-body {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.order-card-footer {
+  padding: 16px 20px;
+  background-color: #ffffff;
+  border-top: 1px dashed var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Badge degli Stati */
+.badge-order-status {
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-ordinato { background-color: #e0f2fe; color: #0284c7; }
+.status-preparazione { background-color: #fef08a; color: #854d0e; }
+.status-consegna { background-color: #fed7aa; color: #c2410c; }
+.status-consegnato { background-color: #d1fae5; color: #059669; }
+
+/* Blocco per il codice di verifica OTP (Macro-scenario 4) */
+.otp-verification-box {
+  background: linear-gradient(135deg, var(--night-dark) 0%, #1f2937 100%);
+  border-radius: 12px;
+  padding: 15px;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 15px;
+  border: 1px solid #374151;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.otp-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #9ca3af;
+  margin-bottom: 5px;
+}
+
+.otp-code {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--amber-primary);
+  font-family: monospace;
+}

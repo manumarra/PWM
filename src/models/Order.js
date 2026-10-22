@@ -75,7 +75,7 @@ const orderSchema = new Schema(
     verificationCode: {
       type: String,
       required: true,
-      default: () => Math.floor(100000 + Math.random() * 900000).toString() // Genera es: "482910"
+      default: () => Math.floor(100000 + Math.random() * 900000).toString() //es: "482910"
     },
     deliveryAddress: {
       type: deliveryAddressSchema,
@@ -135,7 +135,7 @@ const orderSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ["ordinato", "in_preparazione", "in consegna", "consegnato"],
+        values: ["ordinato", "in preparazione", "in consegna", "consegnato"],
         message: "Stato ordine non valido"
       },
       default: "ordinato"

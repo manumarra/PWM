@@ -288,8 +288,8 @@ async function handleOrderSubmit(e) {
     showAlert("success", "Ordine Creato!", "Reindirizzamento allo storico...");
     
     setTimeout(() => {
-      window.location.href = "/pages/customer/ordersHistory.html";
-    }, 2000);
+      window.location.href = "/pages/customer/orderHistory.html";
+    }, 500);
 
   } catch (err) {
     showAlert("danger", "Errore", err.message);

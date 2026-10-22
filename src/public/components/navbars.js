@@ -76,7 +76,10 @@ const navbars = [`
     <!-- 2. Link di navigazione principali -->
     <ul class="navbar-nav d-flex flex-row align-items-center gap-4">
       <li class="nav-item">
-        <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/customer/home.html">Home</a>
+        <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/customer/home.html">Ristoranti</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link nav-link-restaurateur" href="/pages/customer/orderHistory.html">Ordini</a>
       </li>
     </ul>
 

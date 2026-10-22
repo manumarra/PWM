@@ -21,8 +21,13 @@ router.post("/create", AW(async (req, res, next) => {
 
 // GET /api/orders/customer/:customerId
 router.get("/customer/:customerId", AW(async (req, res, next) => {
-  const orders = await orderRepo.getOrdersByCustomer(req.params.customerId);
-  res.json({ status: "ok", data: orders });
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 12;
+  
+  const result = await orderRepo.getOrdersByCustomer(req.params.customerId, page, limit);
+  
+  // result contiene già { data: [...], pagination: {...} }
+  res.json({ status: "ok", ...result }); 
 }));
 
 // GET /api/orders/restaurant/:restaurantId

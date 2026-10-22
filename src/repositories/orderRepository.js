@@ -36,8 +36,7 @@ export const getOrdersByRestaurant = (restaurantId) =>
        .populate("customerId", "name phone email") // Recupera i dati del cliente
        .lean();
 
-export const getOrderById = (id) =>
-    Order.find({id}).lean();
+export const getOrderById = (id) => Order.findById(id).lean();
 
 // UPDATE: Aggiornamento dello stato dell'ordine
 export const updateOrderStatus = (id, status) => 

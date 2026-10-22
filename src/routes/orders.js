@@ -48,8 +48,8 @@ router.patch("/update-status/:id", AW(async (req, res, next) => {
   if (status === "consegnato") {
     const order = await orderRepo.getOrderById(req.params.id);
     if (!order) return res.status(404).json({ status: "fail", message: "Ordine non trovato" });
-    
-    if (order.verificationCode !== verificationCode) {
+
+    if (String(order.verificationCode).trim() !== String(verificationCode).trim()) {
       return res.status(400).json({ status: "fail", message: "Codice di verifica errato. Consegna rifiutata." });
     }
   }

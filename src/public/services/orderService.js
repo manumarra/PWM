@@ -26,6 +26,35 @@ export async function getOrdersByCustomer(customerId, page = 1, limit = 12) {
   return data; // { status, data, pagination }
 }
 
+export async function getOrdersByRestaurant(restaurantId) {
+  const response = await fetch(`/api/orders/restaurant/${restaurantId}`, {
+    method: "GET"
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Errore nel recupero degli ordini");
+  }
+
+  return data;
+}
+
+export async function updateOrderStatus(orderId, status, verificationCode = null) {
+  const payload = { status };
+  if (verificationCode) payload.verificationCode = verificationCode;
+
+  const response = await fetch(`/api/orders/update-status/${orderId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.message || "Errore nell'aggiornamento dello stato");
+  return data;
+}
+
 function checkResponse(response, data) {
 
   if (!response.ok) {

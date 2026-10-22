@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Ordini - Food Delivery</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-dark text-white min-vh-100 d-flex flex-column">
+
+  <header id="navbar-container"></header>
+  <div id="alert-container" class="toast-feedback-container"></div>
+
+  <main class="container my-4 flex-grow-1">
+    <div class="dashboard-header mb-4">
+      <h1 class="h3 fw-bold">Gestione Ordini</h1>
+      <p class="dashboard-subtitle">Gestisci lo stato degli ordini e verifica i codici di consegna.</p>
+    </div>
+
+    <!-- Griglia Ordini -->
+    <div class="row g-4" id="restaurateurOrdersGrid">
+      <p class="loading-text">Caricamento ordini in corso...</p>
+    </div>
+  </main>
+
+  <!-- Modali e Offcanvas -->
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas"></div>
+  <div class="modal fade" id="editProfileModal" tabindex="-1"></div>
+  <div class="modal fade" id="editCredentialModal" tabindex="-1"></div>
+  <div class="modal fade" id="deleteModalToggle2" tabindex="-1"></div>    
+
+  <footer id="homeFooter" class="site-footer mt-auto"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/components/navbars.js"></script>
+  <script src="/components/footer.js"></script>
+  <script src="/components/logout.js"></script>
+  
+  <script type="module">
+    import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
+    import "/components/alerts.js";
+
+    getNavbar(1, "navbar-container");
+    getFooter();
+    getCanvas();
+    getCanvasContent();
+    getFooterLogoutAndForm();
+
+    import("/utils/common/deleteOrUpdateCredential.js");
+  </script>
+  <script src="/utils/common/userHome.js" type="module"></script>
+  <script src="/utils/restaurateur/order.js" type="module"></script>
+</body>
+</html>

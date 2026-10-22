@@ -116,7 +116,7 @@ function createOrderCard(order, isActive) {
   let statusText = "";
   switch(order.status) {
     case "ordinato": statusBadgeClass = "status-ordinato"; statusText = "Inviato al locale"; break;
-    case "in_preparazione": statusBadgeClass = "status-preparazione"; statusText = "In preparazione"; break;
+    case "in preparazione": statusBadgeClass = "status-preparazione"; statusText = "In preparazione"; break;
     case "in consegna": statusBadgeClass = "status-consegna"; statusText = "In consegna"; break;
     case "consegnato": statusBadgeClass = "status-consegnato"; statusText = "Consegnato"; break;
   }
@@ -155,7 +155,7 @@ function createOrderCard(order, isActive) {
 
         <div class="order-card-footer">
           <span class="text-secondary small fw-semibold">Totale:</span>
-          <span class="fs-5 fw-bold text-dark">€ ${Number(order.totalAmount).toFixed(2)}</span>
+          <span class="order-total-price">€ ${Number(order.totalAmount).toFixed(2)}</span>
         </div>
       </div>
     </div>

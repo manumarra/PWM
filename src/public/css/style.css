@@ -2095,3 +2095,117 @@ body.customer-home-page {
   color: var(--amber-primary);
   font-family: monospace;
 }
+
+/* =========================================================
+   CARD ORDINI & DASHBOARD (Dark Theme / Ambra)
+   ========================================================= */
+
+.order-card-modern {
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-light);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--amber-primary);
+}
+
+.order-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  border-color: var(--amber-primary);
+}
+
+.order-card-header {
+  padding: 16px 20px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--night-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-card-body {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.order-card-footer {
+  padding: 16px 20px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-top: 1px dashed var(--night-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total-price {
+  color: var(--amber-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Classi esclusive per la Dashboard Ristoratore */
+.dashboard-kpi-card {
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-light);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+.dashboard-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--amber-primary);
+}
+
+.kpi-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+
+.kpi-icon-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--amber-primary);
+}
+
+.kpi-icon-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.kpi-data h3 {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: #ffffff;
+}
+
+.kpi-data span {
+  color: #9CA3AF;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--night-light);
+  padding-bottom: 0.5rem;
+}

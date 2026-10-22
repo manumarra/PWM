@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="customer-page d-flex flex-column min-vh-100 bg-light">
+<body class="customer-page d-flex flex-column min-vh-100">
 
   <header id="navbar-container"></header>
   <div id="alert-container" class="toast-feedback-container"></div>
@@ -27,7 +27,7 @@
     <div class="d-flex align-items-center mb-5 pb-3 border-bottom border-secondary-subtle">
       <i class="bi bi-bag-check-fill fs-1 text-warning me-3"></i>
       <div>
-        <h2 class="fw-bold mb-1 text-dark">I Miei Ordini</h2>
+        <h2 class="fw-bold mb-1">I Miei Ordini</h2>
         <p class="text-secondary small mb-0">Tieni traccia delle tue consegne attive e consulta i tuoi acquisti passati.</p>
       </div>
     </div>
@@ -40,7 +40,7 @@
 
     <!-- SEZIONE 1: Ordini in Corso -->
     <section id="activeOrdersSection" class="mb-5 d-none">
-      <h4 class="fw-bold mb-4 text-dark"><i class="bi bi-bicycle me-2 text-primary"></i>Consegne in arrivo</h4>
+      <h4 class="fw-bold mb-4"><i class="bi bi-bicycle me-2 text-primary"></i>Consegne in arrivo</h4>
       <div id="activeOrdersGrid" class="row row-cols-1 row-cols-lg-2 g-4"></div>
     </section>
 
@@ -59,7 +59,7 @@
     <!-- Messaggio Nessun Ordine -->
     <div id="emptyOrdersMsg" class="text-center py-5 d-none">
       <i class="bi bi-receipt display-1 text-secondary mb-3 opacity-50 d-block"></i>
-      <h4 class="fw-bold text-dark">Nessun ordine trovato</h4>
+      <h4 class="fw-bold">Nessun ordine trovato</h4>
       <p class="text-secondary">Non hai ancora effettuato ordini. Visita i ristoranti per iniziare!</p>
       <a href="/pages/customer/home.html" class="btn btn-warning mt-3 rounded-pill fw-bold px-4">Scopri i Locali</a>
     </div>

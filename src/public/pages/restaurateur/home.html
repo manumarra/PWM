@@ -15,8 +15,44 @@
 
     <!-- 2. Contenuto principale della Dashboard -->
     <main class="container my-4 flex-grow-1">
-      <h1 class="h3 fw-bold mb-4">Pannello di Controllo</h1>
-      <p class="text-secondary">Benvenuto nella gestione RISTORATORE.</p>
+      <div class="mb-4">
+        <h1 class="h3 fw-bold">Pannello di Controllo</h1>
+        <p class="text-secondary">Panoramica del tuo locale e ordini recenti.</p>
+      </div>
+
+      <!-- KPI / Statistiche rapide -->
+      <div class="row g-4 mb-5">
+        <div class="col-12 col-md-6">
+          <div class="dashboard-kpi-card">
+            <div class="kpi-icon kpi-icon-warning"><i class="bi bi-bell-fill"></i></div>
+            <div class="kpi-data">
+              <h3 id="kpiPendingOrders">0</h3>
+              <span>Ordini in Attesa</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="dashboard-kpi-card">
+            <div class="kpi-icon kpi-icon-success"><i class="bi bi-currency-euro"></i></div>
+            <div class="kpi-data">
+              <h3 id="kpiTodayRevenue">€ 0.00</h3>
+              <span>Incasso Odierno</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Ordini Recenti -->
+      <div>
+        <div class="dashboard-recent-header">
+          <h4 class="dashboard-recent-title"><i class="bi bi-receipt-cutoff me-2"></i> Ordini Recenti</h4>
+          <a href="/pages/restaurateur/orders.html" class="btn-view-all">Vedi Tutti</a>
+        </div>
+        
+        <div class="row g-3" id="recentOrdersContainer">
+          <p class="text-secondary">Caricamento ordini in corso...</p>
+        </div>
+      </div>
     </main>
 
     <!--CANVAS-->
@@ -60,5 +96,6 @@
       
     </script>
     <script src="/utils/common/userHome.js" type="module"></script>
+    <script src="/utils/restaurateur/dashboard.js" type="module"></script>
   </body>
 </html>

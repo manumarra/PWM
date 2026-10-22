@@ -50,7 +50,7 @@ const navbars = [`
           <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Catalogo</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="#">Ordini</a>
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/order.html">Ordini</a>
         </li>
       </ul>
 

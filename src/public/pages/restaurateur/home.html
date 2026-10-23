@@ -21,22 +21,59 @@
       </div>
 
       <!-- KPI / Statistiche rapide -->
-      <div class="row g-4 mb-5">
-        <div class="col-12 col-md-6">
-          <div class="dashboard-kpi-card">
-            <div class="kpi-icon kpi-icon-warning"><i class="bi bi-bell-fill"></i></div>
+      <!-- KPI / Statistiche rapide -->
+      
+      <!-- Zona 1: Incasso in evidenza -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="dashboard-kpi-card kpi-revenue-card py-4">
+            <div class="kpi-icon kpi-icon-success"><i class="bi bi-currency-euro"></i></div>
             <div class="kpi-data">
-              <h3 id="kpiPendingOrders">0</h3>
-              <span>Ordini in Attesa</span>
+              <h3 id="kpiTodayRevenue" class="display-5 fw-bold text-white mb-0">€ 0.00</h3>
+              <span class="fs-6">Incasso Odierno</span>
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-6">
-          <div class="dashboard-kpi-card">
-            <div class="kpi-icon kpi-icon-success"><i class="bi bi-currency-euro"></i></div>
-            <div class="kpi-data">
-              <h3 id="kpiTodayRevenue">€ 0.00</h3>
-              <span>Incasso Odierno</span>
+      </div>
+
+      <!-- Zona 2: Tutti e 4 gli stati degli ordini -->
+      <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+          <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+            <div class="kpi-icon kpi-icon-info mx-auto mb-2"><i class="bi bi-inbox-fill"></i></div>
+            <div class="kpi-data text-center">
+              <h3 id="kpiNew" class="mb-1">0</h3>
+              <span>Nuovi</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-6 col-md-3">
+          <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+            <div class="kpi-icon kpi-icon-warning mx-auto mb-2"><i class="bi bi-fire"></i></div>
+            <div class="kpi-data text-center">
+              <h3 id="kpiPrep" class="mb-1">0</h3>
+              <span>In Prep.</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-6 col-md-3">
+          <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+            <div class="kpi-icon kpi-icon-primary mx-auto mb-2"><i class="bi bi-bicycle"></i></div>
+            <div class="kpi-data text-center">
+              <h3 id="kpiDelivery" class="mb-1">0</h3>
+              <span>In Consegna</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-6 col-md-3">
+          <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+            <div class="kpi-icon kpi-icon-success mx-auto mb-2"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="kpi-data text-center">
+              <h3 id="kpiCompleted" class="mb-1">0</h3>
+              <span>Consegnati (Oggi)</span>
             </div>
           </div>
         </div>
@@ -46,7 +83,7 @@
       <div>
         <div class="dashboard-recent-header">
           <h4 class="dashboard-recent-title"><i class="bi bi-receipt-cutoff me-2"></i> Ordini Recenti</h4>
-          <a href="/pages/restaurateur/orders.html" class="btn-view-all">Vedi Tutti</a>
+          <a href="/pages/restaurateur/order.html" class="btn-view-all">Vedi Tutti</a>
         </div>
         
         <div class="row g-3" id="recentOrdersContainer">

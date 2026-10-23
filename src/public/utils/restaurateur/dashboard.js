@@ -2,8 +2,11 @@ import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
 
-const kpiPending = document.getElementById("kpiPendingOrders");
 const kpiRevenue = document.getElementById("kpiTodayRevenue");
+const kpiNew = document.getElementById("kpiNew");
+const kpiPrep = document.getElementById("kpiPrep");
+const kpiDelivery = document.getElementById("kpiDelivery");
+const kpiCompleted = document.getElementById("kpiCompleted");
 const recentContainer = document.getElementById("recentOrdersContainer");
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -23,17 +26,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function renderDashboard(orders) {
-  const pendingOrders = orders.filter(o => o.status === "ordinato" || o.status === "in preparazione");
-  if (kpiPending) kpiPending.textContent = pendingOrders.length;
-
-  const today = new Date();
+const today = new Date();
   today.setHours(0, 0, 0, 0); 
-  
-  const todayRevenue = orders
-    .filter(o => new Date(o.createdAt).getTime() >= today.getTime() && o.status !== "fallito")
-    .reduce((sum, o) => sum + Number(o.totalAmount), 0);
-    
+
+  let countNew = 0, countPrep = 0, countDelivery = 0, countCompletedToday = 0;
+  let todayRevenue = 0;
+
+  orders.forEach(o => {
+    const isToday = new Date(o.createdAt).getTime() >= today.getTime();
+
+    // 1. Conteggi per stato
+    if (o.status === "ordinato") countNew++;
+    else if (o.status === "in preparazione") countPrep++;
+    else if (o.status === "in consegna") countDelivery++;
+    else if (o.status === "consegnato" && isToday) countCompletedToday++;
+
+    // 2. Calcolo incasso (solo quelli di oggi che non sono falliti)
+    if (isToday && o.status !== "fallito") {
+      todayRevenue += Number(o.totalAmount);
+    }
+  });
+
+  // Aggiornamento DOM
   if (kpiRevenue) kpiRevenue.textContent = `€ ${todayRevenue.toFixed(2)}`;
+  if (kpiNew) kpiNew.textContent = countNew;
+  if (kpiPrep) kpiPrep.textContent = countPrep;
+  if (kpiDelivery) kpiDelivery.textContent = countDelivery;
+  if (kpiCompleted) kpiCompleted.textContent = countCompletedToday;
 
   if (!recentContainer) return;
   const recentOrders = orders.slice(0, 4);

@@ -13,15 +13,52 @@
   <header id="navbar-container"></header>
   <div id="alert-container" class="toast-feedback-container"></div>
 
-  <main class="container my-4 flex-grow-1">
+<main class="container-fluid my-4 flex-grow-1">
     <div class="dashboard-header mb-4">
       <h1 class="h3 fw-bold">Gestione Ordini</h1>
       <p class="dashboard-subtitle">Gestisci lo stato degli ordini e verifica i codici di consegna.</p>
     </div>
 
-    <!-- Griglia Ordini -->
-    <div class="row g-4" id="restaurateurOrdersGrid">
-      <p class="loading-text">Caricamento ordini in corso...</p>
+    <!-- Griglia fluida: 4 colonne su schermi larghi, va a capo automaticamente sui piccoli -->
+    <div class="row g-4" id="ordersBoard">
+      
+      <!-- Colonna: Da Accettare (ordinato) -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-2">
+          <h5 class="fw-bold mb-0 text-white"><i class="bi bi-inbox-fill text-info me-2"></i>Nuovi</h5>
+          <span class="badge bg-secondary rounded-pill" id="count-ordinato">0</span>
+        </div>
+        <!-- I div contenitori sono liberi da altezze fisse -->
+        <div id="col-ordinato" class="d-flex flex-column gap-3"></div>
+      </div>
+
+      <!-- Colonna: In Preparazione -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-2">
+          <h5 class="fw-bold mb-0 text-white"><i class="bi bi-fire text-warning me-2"></i>In Preparazione</h5>
+          <span class="badge bg-secondary rounded-pill" id="count-preparazione">0</span>
+        </div>
+        <div id="col-preparazione" class="d-flex flex-column gap-3"></div>
+      </div>
+
+      <!-- Colonna: In Consegna -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-2">
+          <h5 class="fw-bold mb-0 text-white"><i class="bi bi-bicycle text-primary me-2"></i>In Consegna</h5>
+          <span class="badge bg-secondary rounded-pill" id="count-consegna">0</span>
+        </div>
+        <div id="col-consegna" class="d-flex flex-column gap-3"></div>
+      </div>
+
+      <!-- Colonna: Completati -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-2">
+          <h5 class="fw-bold mb-0 text-white"><i class="bi bi-check-circle-fill text-success me-2"></i>Completati</h5>
+          <span class="badge bg-secondary rounded-pill" id="count-consegnato">0</span>
+        </div>
+        <div id="col-consegnato" class="d-flex flex-column gap-3"></div>
+      </div>
+
     </div>
   </main>
 

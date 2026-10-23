@@ -2,15 +2,13 @@ import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant, updateOrderStatus } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
 
-const ordersGrid = document.getElementById("restaurateurOrdersGrid");
-
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getStoredUser();
   if (!user || user.role !== "restaurateur") {
       window.location.href = "/pages/common/login.html";
       return;
   }
-  await loadOrders(user._id);
+  await loadOrders(user._id || user.id);
 });
 
 async function loadOrders(restaurantId) {
@@ -18,17 +16,29 @@ async function loadOrders(restaurantId) {
     const response = await getOrdersByRestaurant(restaurantId);
     renderOrders(response.data || []);
   } catch (error) {
-    ordersGrid.innerHTML = `<p class="text-danger">Errore nel caricamento: ${error.message}</p>`;
+    showAlert("danger", "Errore", "Impossibile caricare gli ordini: " + error.message);
   }
 }
 
 function renderOrders(orders) {
-  if (orders.length === 0) {
-    ordersGrid.innerHTML = `<p class="text-secondary">Nessun ordine presente.</p>`;
-    return;
-  }
+  const colOrdinato = document.getElementById("col-ordinato");
+  const colPreparazione = document.getElementById("col-preparazione");
+  const colConsegna = document.getElementById("col-consegna");
+  const colConsegnato = document.getElementById("col-consegnato");
 
-  ordersGrid.innerHTML = orders.map(o => {
+  // Svuotiamo le colonne
+  colOrdinato.innerHTML = "";
+  colPreparazione.innerHTML = "";
+  colConsegna.innerHTML = "";
+  colConsegnato.innerHTML = "";
+
+  // Contatori
+  let countOrdinato = 0, countPreparazione = 0, countConsegna = 0, countConsegnato = 0;
+
+  // Ordiniamo per data (il più vecchio in alto) così sai quale evadere prima
+  const sortedOrders = [...orders].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+  sortedOrders.forEach(o => {
     const timeStr = new Date(o.createdAt).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
     const customerName = o.customerId?.name || "Cliente Sconosciuto";
     const isDelivery = o.orderType === "delivery";
@@ -36,65 +46,89 @@ function renderOrders(orders) {
         ? `${o.deliveryAddress.street}, ${o.deliveryAddress.city}` 
         : "Asporto (Ritiro in Locale)";
 
-    let statusBadgeClass = "";
-    let statusText = "";
     let actionHtml = "";
 
-    // Gestione degli stati e delle azioni per la card
+    // Azioni in base allo stato
     switch(o.status) {
       case "ordinato": 
-        statusBadgeClass = "status-ordinato"; 
-        statusText = "Nuovo"; 
-        actionHtml = `<button class="btn btn-amber w-100 action-btn" data-id="${o._id}" data-status="in preparazione">Accetta e Prepara</button>`;
+        countOrdinato++;
+        actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in preparazione">Accetta e Prepara</button>`;
         break;
       case "in preparazione": 
-        statusBadgeClass = "status-preparazione"; 
-        statusText = "In preparazione"; 
-        actionHtml = `<button class="btn btn-amber w-100 action-btn" data-id="${o._id}" data-status="in consegna">${isDelivery ? 'Affida al Fattorino' : 'Pronto per Ritiro'}</button>`;
+        countPreparazione++;
+        actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in consegna">${isDelivery ? 'Affida al Fattorino' : 'Pronto per Ritiro'}</button>`;
         break;
       case "in consegna": 
-        statusBadgeClass = "status-consegna"; 
-        statusText = isDelivery ? "In consegna" : "In attesa ritiro"; 
-        
+        countConsegna++;
+        // MACRO-SCENARIO 4: Input OTP
         actionHtml = `
-          <div class="input-group">
-            <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP cliente" maxlength="6">
-            <button class="btn btn-amber action-btn" data-id="${o._id}" data-status="consegnato">Verifica</button>
+          <div class="input-group mt-2">
+            <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP" maxlength="6">
+            <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-status="consegnato">Verifica</button>
           </div>
         `;
         break;
       case "consegnato": 
-        statusBadgeClass = "status-consegnato"; 
-        statusText = "Completato"; 
-        actionHtml = `<span class="text-success fw-bold d-block text-center"><i class="bi bi-check-circle-fill me-2"></i>Consegna Completata</span>`;
+        countConsegnato++;
+        actionHtml = `<span class="text-success fw-bold d-block text-center mt-2"><i class="bi bi-check-circle-fill me-2"></i>Consegna Completata</span>`;
         break;
     }
 
-    return `
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="order-card-modern p-3">
-          <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
-            <div>
-                <h6 class="fw-bold mb-0 text-white">${customerName}</h6>
-                <small class="text-secondary">${timeStr} • ${isDelivery ? "Domicilio" : "Asporto"}</small>
-            </div>
-            <span class="badge-order-status ${statusBadgeClass}">${statusText}</span>
-          </div>
-          
-          <div class="mb-4">
-            <small class="text-secondary d-block mb-1"><i class="bi bi-geo-alt-fill me-1"></i>${address}</small>
-            <span class="order-total-price d-block">€ ${Number(o.totalAmount).toFixed(2)}</span>
-          </div>
 
-          <div class="mt-auto">
-             ${actionHtml}
+    // Generiamo la lista dei piatti per questo ordine
+    const itemsHtml = (o.items || []).map(i => `
+      <div class="d-flex justify-content-between small text-secondary mb-1">
+        <span><strong class="text-white">${i.quantity}x</strong> ${i.nameMeal} </span>
+        <span class="text-white"> €${(i.price * i.quantity).toFixed(2)}</span>
+      </div>
+    `).join("");
+
+    // HTML della singola card senza vincoli di colonna
+    const cardHtml = `
+      <div class="order-card-modern p-3 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
+          <div class="w-100">
+              <h6 class="fw-bold mb-0 text-white text-truncate">${customerName}</h6>
+              <small class="text-secondary">${timeStr} • ${isDelivery ? "Domicilio" : "Asporto"}</small>
           </div>
+        </div>
+        
+        <div class="mb-3 border-bottom border-secondary pb-3">
+          <small class="text-secondary d-block mb-3"><i class="bi bi-geo-alt-fill me-1"></i>${address}</small>
+          ${itemsHtml}
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-auto">
+          <span class="text-secondary small fw-semibold">Totale:</span>
+          <span class="order-total-price">€ ${Number(o.totalAmount).toFixed(2)}</span>
+        </div>
+
+        <div>
+            ${actionHtml}
         </div>
       </div>
     `;
-  }).join("");
 
-  // Aggiungi gli eventi ai nuovi pulsanti
+    // Inseriamo la card nella colonna corretta
+    if (o.status === "ordinato") colOrdinato.insertAdjacentHTML("beforeend", cardHtml);
+    else if (o.status === "in preparazione") colPreparazione.insertAdjacentHTML("beforeend", cardHtml);
+    else if (o.status === "in consegna") colConsegna.insertAdjacentHTML("beforeend", cardHtml);
+    else if (o.status === "consegnato") colConsegnato.insertAdjacentHTML("beforeend", cardHtml);
+  });
+
+  // Mostra messaggi se le colonne sono vuote
+  if (countOrdinato === 0) colOrdinato.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
+  if (countPreparazione === 0) colPreparazione.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
+  if (countConsegna === 0) colConsegna.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
+  if (countConsegnato === 0) colConsegnato.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
+
+  // Aggiorniamo i numeretti visivi
+  document.getElementById("count-ordinato").textContent = countOrdinato;
+  document.getElementById("count-preparazione").textContent = countPreparazione;
+  document.getElementById("count-consegna").textContent = countConsegna;
+  document.getElementById("count-consegnato").textContent = countConsegnato;
+
+  // Event listener per i bottoni
   document.querySelectorAll('.action-btn').forEach(btn => {
       btn.addEventListener('click', handleStatusChange);
   });
@@ -119,11 +153,9 @@ async function handleStatusChange(e) {
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
         
         await updateOrderStatus(orderId, newStatus, verificationCode);
-        showAlert("success", "Operazione completata", "Stato dell'ordine aggiornato.");
         
-        // Ricarica la lista per mostrare i cambiamenti
         const user = getStoredUser();
-        await loadOrders(user._id);
+        await loadOrders(user._id || user.id);
     } catch (error) {
         btn.disabled = false;
         btn.innerHTML = newStatus === "consegnato" ? "Verifica" : "Errore";

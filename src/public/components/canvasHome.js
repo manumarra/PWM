@@ -155,8 +155,8 @@ const canvasBodyContentRestaurateur = `
 <!-- Voci di navigazione pannello -->
 <ul class="nav nav-pills flex-column gap-2">
   <li class="nav-item">
-    <a class="nav-link " href="#">
-      <i class="bi bi-gear"></i> Impostazioni Locale
+    <a class="nav-link " href="/pages/restaurateur/orderHistory.html">
+      <i class="bi bi-calendar3"></i> Storico ordini
     </a>
   </li>
   <li class="nav-item">

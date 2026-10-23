@@ -2209,3 +2209,22 @@ body.customer-home-page {
   border-bottom: 1px solid var(--night-light);
   padding-bottom: 0.5rem;
 }
+
+/* =========================================================
+   KANBAN BOARD ORDINI (orders.html)
+   ========================================================= */
+
+
+/* Stile della scrollbar orizzontale */
+.kanban-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.kanban-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--night-light);
+  border-radius: 10px;
+}
+
+.kanban-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: var(--amber-primary);
+}

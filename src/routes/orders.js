@@ -26,36 +26,48 @@ router.get("/customer/:customerId", AW(async (req, res, next) => {
   
   const result = await orderRepo.getOrdersByCustomer(req.params.customerId, page, limit);
   
-  // result contiene già { data: [...], pagination: {...} }
   res.json({ status: "ok", ...result }); 
 }));
 
 // GET /api/orders/restaurant/:restaurantId
-router.get("/restaurant/:restaurantId", AW(async (req, res, next) => {
+router.get("/restaurant/:restaurantId", AW(async (req, res) => {
   const orders = await orderRepo.getOrdersByRestaurant(req.params.restaurantId);
   res.json({ status: "ok", data: orders });
 }));
 
 // PATCH /api/orders/update-status/:id
-router.patch("/update-status/:id", AW(async (req, res, next) => {
+router.patch("/update-status/:id", AW(async (req, res) => {
   const { status, verificationCode } = req.body;
   
+  // 1. Validazione puramente HTTP
   if (!status) {
     return res.status(400).json({ status: "fail", message: "Stato mancante nel payload" });
   }
 
-  //  Verifica del codice per la consegna
-  if (status === "consegnato") {
-    const order = await orderRepo.getOrderById(req.params.id);
-    if (!order) return res.status(404).json({ status: "fail", message: "Ordine non trovato" });
-
-    if (String(order.verificationCode).trim() !== String(verificationCode).trim()) {
-      return res.status(400).json({ status: "fail", message: "Codice di verifica errato. Consegna rifiutata." });
+  try {
+    // 2. Delega dell'intera logica di business al Repository
+    const updatedOrder = await orderRepo.updateOrderStatus(req.params.id, status, verificationCode);
+    
+    if (!updatedOrder) {
+      return res.status(404).json({ status: "fail", message: "Ordine non trovato" });
     }
-  }
 
-  const updatedOrder = await orderRepo.updateOrderStatus(req.params.id, status);
-  res.json({ status: "ok", data: updatedOrder });
+    res.json({ status: "ok", data: updatedOrder });
+    
+  } catch (error) {
+    // 3. Gestione dell'errore (es. OTP errato o Ordine non trovato)
+    return res.status(400).json({ status: "fail", message: error.message });
+  }
+}));
+
+// GET /api/orders/restaurant/:restaurantId/history
+router.get("/restaurant/:restaurantId/history", AW(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 12;
+  
+  const result = await orderRepo.getRestaurantOrderHistory(req.params.restaurantId, page, limit);
+  
+  res.json({ status: "ok", ...result });
 }));
 
 export default router;

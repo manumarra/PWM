@@ -55,6 +55,20 @@ export async function updateOrderStatus(orderId, status, verificationCode = null
   return data;
 }
 
+export async function getRestaurantOrderHistory(restaurantId, page = 1, limit = 12) {
+  const response = await fetch(`/api/orders/restaurant/${restaurantId}/history?page=${page}&limit=${limit}`, {
+    method: "GET"
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Errore nel recupero dello storico ordini");
+  }
+
+  return data;
+}
+
 function checkResponse(response, data) {
 
   if (!response.ok) {

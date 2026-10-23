@@ -8,6 +8,8 @@ import { initProductModal, openCustomizeModalForEdit, updateModalCategories } fr
 import { createMenuCardElement } from "/utils/restaurateur/menuCards.js";
 import { initMenuMassActions } from "/utils/restaurateur/menuActions.js";
 
+import { sortMenuProducts, updateCounters } from "/utils/common/menuShared.js";
+
 let allProducts = [];
 let filteredProducts = [];
 let currentEditingProductId = null;
@@ -105,18 +107,6 @@ async function loadMenu(restaurantId) {
   }
 }
 
-export function sortMenuProducts(products) {
-  const getRank = (p) => {
-    if ((p.discount || 0) > 0 && p.available) return 1;
-    if (p.available) return 2;
-    return 3;
-  };
-
-  return [...products].sort((a, b) => {
-    const diff = getRank(a) - getRank(b);
-    return diff !== 0 ? diff : (a.nameMeal || "").localeCompare(b.nameMeal || "");
-  });
-}
 
 function applyFilters() {
   const query = searchInput?.value.trim().toLowerCase() || "";
@@ -209,14 +199,4 @@ function populateCategories(products) {
     });
   }
   updateModalCategories(categories);
-}
-
-export function updateCounters(products) {
-  const availableCount = products.filter((p) => p.available).length;
-  const unavailableCount = products.length - availableCount;
-  const discountedCount = products.filter((p) => ((p.discount && p.available) || 0) > 0).length;
-
-  if (countAvailableEl) countAvailableEl.textContent = availableCount;
-  if (countUnavailableEl) countUnavailableEl.textContent = unavailableCount;
-  if (countDiscountedEl) countDiscountedEl.textContent = discountedCount;
 }

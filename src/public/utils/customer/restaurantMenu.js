@@ -2,7 +2,7 @@ import { getRestaurantById } from "/services/userService.js";
 import { getRestaurantProducts } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
 import { createMenuCardElement } from "/utils/restaurateur/menuCards.js";
-import { sortMenuProducts, updateCounters } from "/utils/restaurateur/menu.js";
+import { sortMenuProducts, updateCounters } from "/utils/common/menuShared.js";
 import { initCart, addToCart } from "/utils/customer/cart.js";
 import { getCustomerCartMarkup } from "/components/cart.js";
 
@@ -91,12 +91,21 @@ function applyFilters() {
 
   filteredProducts = allProducts.filter((p) => {
     const matchName = (p.nameMeal || "").toLowerCase().includes(query);
-    const matchCat = !selectedCat || p.category === selectedCat;
+
+    const matchCat =
+      !selectedCat ||
+      String(p.category || "").trim().toLowerCase() ===
+        String(selectedCat).trim().toLowerCase();
 
     let matchStatus = true;
-    if (selectedStatus === "available") matchStatus = p.available === true;
-    else if (selectedStatus === "unavailable") matchStatus = !p.available;
-    else if (selectedStatus === "discounted") matchStatus = (p.discount || 0) > 0;
+
+    if (selectedStatus === "available") {
+      matchStatus = p.available === true;
+    } else if (selectedStatus === "unavailable") {
+      matchStatus = !p.available;
+    } else if (selectedStatus === "discounted") {
+      matchStatus = (p.discount || 0) > 0;
+    }
 
     return matchName && matchCat && matchStatus;
   });
@@ -107,7 +116,6 @@ function applyFilters() {
 
 function renderMenuCards() {
     if (!menuCardsContainer) return;
-
     if(filteredProducts.length === 0) {
         menuCardsContainer.className = "p-3";
         menuCardsContainer.innerHTML = `<div class="menu-empty-msg w-100 text-center">Nessun piatto trovato con i filtri selezionati.</div>`;

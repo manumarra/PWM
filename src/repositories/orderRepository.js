@@ -55,12 +55,23 @@ export const getRestaurantOrderHistory = async (restaurantId, page = 1, limit = 
 // CREATE: Salva un nuovo ordine nel database
 export const createOrder = (orderData) => Order.create(orderData);
 
-// READ: Storico ordini per il RISTORATORE (Dashboard)
-export const getOrdersByRestaurant = (restaurantId) => 
-  Order.find({ restaurantId })
-       .sort({ createdAt: -1 })
-       .populate("customerId", "name phone email")
-       .lean();
+// READ: Ordini per la Dashboard e Kanban (Attivi + Oggi)
+export const getOrdersByRestaurant = (restaurantId) => {
+  // mezzanotte di oggi
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return Order.find({
+    restaurantId,
+    $or: [
+      { status: { $ne: "consegnato" } }, // 1. Prendi TUTTI gli ordini non ancora consegnati (anche vecchi)
+      { createdAt: { $gte: today } }     // 2. OPPURE prendi TUTTI gli ordini creati da stanotte in poi (serve per l'incasso)
+    ]
+  })
+  .sort({ createdAt: -1 })
+  .populate("customerId", "name phone email")
+  .lean();
+};
 
 export const getOrderById = (id) => Order.findById(id).lean();
 

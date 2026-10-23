@@ -12,6 +12,8 @@
   <body class="bg-dark text-white min-vh-100 d-flex flex-column">
     <!-- 1. Header con Navbar iniettata da navbars.js -->
     <header id="navbar-container"></header>
+    <div id="alert-container" class="toast-feedback-container"></div>
+
 
     <!-- 2. Contenuto principale della Dashboard -->
     <main class="container my-4 flex-grow-1">
@@ -20,9 +22,7 @@
         <p class="text-secondary">Panoramica del tuo locale e ordini recenti.</p>
       </div>
 
-      <!-- KPI / Statistiche rapide -->
-      <!-- KPI / Statistiche rapide -->
-      
+      <!-- KPI / Statistiche rapide -->      
       <!-- Zona 1: Incasso in evidenza -->
       <div class="row mb-4">
         <div class="col-12">
@@ -30,7 +30,7 @@
             <div class="kpi-icon kpi-icon-success"><i class="bi bi-currency-euro"></i></div>
             <div class="kpi-data">
               <h3 id="kpiTodayRevenue" class="display-5 fw-bold text-white mb-0">€ 0.00</h3>
-              <span class="fs-6">Incasso Odierno</span>
+              <span class="fs-6">Incasso giornaliero</span>
             </div>
           </div>
         </div>

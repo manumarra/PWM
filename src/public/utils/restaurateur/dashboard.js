@@ -1,6 +1,10 @@
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant } from "/services/orderService.js";
-import { showAlert } from "/components/alerts.js";
+import { showAlert, showToast } from "/components/alerts.js";
+
+// Variabile globale per ricordare gli ID degli ordini
+let knownOrderIds = new Set();
+let isFirstLoad = true;
 
 const kpiRevenue = document.getElementById("kpiTodayRevenue");
 const kpiNew = document.getElementById("kpiNew");
@@ -13,9 +17,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user = getStoredUser();
   if (!user || user.role !== "restaurateur") return;
 
+  // Primo caricamento
+  await loadDashboard(user._id);
+
+  // Polling per aggiornare la dashboard e cercare nuovi ordini ogni 15 secondi
+  setInterval(() => {
+    loadDashboard(user._id);
+  }, 15000);
+});
+
+async function loadDashboard(restaurantId) {
   try {
-    const response = await getOrdersByRestaurant(user._id);
+    const response = await getOrdersByRestaurant(restaurantId);
     const orders = response.data || [];
+    
+    // Logica per i Toast: intercetta i nuovi ordini arrivati in stato "ordinato"
+    if (!isFirstLoad) {
+      orders.forEach(o => {
+        if (!knownOrderIds.has(o._id) && o.status === "ordinato") {
+           const customerName = o.customerId?.name || "Un cliente";
+           showToast(
+             "Nuovo Ordine Ricevuto!", 
+             `Hai appena ricevuto un nuovo ordine da <b>${customerName}</b> per €${Number(o.totalAmount).toFixed(2)}.`, 
+             "success"
+           );
+        }
+      });
+    }
+
+    // Memorizza gli ID per il prossimo ciclo
+    knownOrderIds = new Set(orders.map(o => o._id));
+    isFirstLoad = false;
+    
+    // Aggiorna l'interfaccia della dashboard (i KPI e la lista recenti)
     renderDashboard(orders);
   } catch (error) {
     if (recentContainer) {
@@ -23,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     showAlert("danger", "Errore", error.message);
   }
-});
+}
 
 function renderDashboard(orders) {
 const today = new Date();

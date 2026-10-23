@@ -1,6 +1,10 @@
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant, updateOrderStatus } from "/services/orderService.js";
-import { showAlert } from "/components/alerts.js";
+import { showAlert, showToast } from "/components/alerts.js";
+
+// Variabile globale per ricordare gli ID degli ordini
+let knownOrderIds = new Set();
+let isFirstLoad = true; // Per evitare toast su tutti gli ordini appena carichi la pagina la prima volta
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getStoredUser();
@@ -8,13 +12,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       window.location.href = "/pages/common/login.html";
       return;
   }
-  await loadOrders(user._id || user.id);
+  await loadOrders(user._id);
+
+  setInterval(() => {
+    loadOrders(user._id);
+  }, 15000);
 });
 
 async function loadOrders(restaurantId) {
   try {
     const response = await getOrdersByRestaurant(restaurantId);
-    renderOrders(response.data || []);
+    const orders = response.data || [];
+    
+    // Controlla se ci sono ordini NUOVI rispetto all'ultimo caricamento
+    if (!isFirstLoad) {
+      orders.forEach(o => {
+        // Se l'ID non è tra quelli conosciuti e lo stato è "ordinato" (nuovo), spara il toast
+        if (!knownOrderIds.has(o._id) && o.status === "ordinato") {
+           const customerName = o.customerId?.name || "Un cliente";
+           showToast("Nuovo Ordine Ricevuto!", `Hai appena ricevuto un nuovo ordine da <b>${customerName}</b> per €${Number(o.totalAmount).toFixed(2)}.`, "success");
+        }
+      });
+    }
+
+    // Aggiorna l'elenco degli ordini conosciuti per il prossimo refresh
+    knownOrderIds = new Set(orders.map(o => o._id));
+    isFirstLoad = false; // Dal prossimo caricamento in poi, faremo scattare i toast
+    
+    renderOrders(orders);
   } catch (error) {
     showAlert("danger", "Errore", "Impossibile caricare gli ordini: " + error.message);
   }
@@ -26,7 +51,6 @@ function renderOrders(orders) {
   const colConsegna = document.getElementById("col-consegna");
   const colConsegnato = document.getElementById("col-consegnato");
 
-  // Svuotiamo le colonne
   colOrdinato.innerHTML = "";
   colPreparazione.innerHTML = "";
   colConsegna.innerHTML = "";
@@ -35,8 +59,21 @@ function renderOrders(orders) {
   // Contatori
   let countOrdinato = 0, countPreparazione = 0, countConsegna = 0, countConsegnato = 0;
 
-  // Ordiniamo per data (il più vecchio in alto) così sai quale evadere prima
-  const sortedOrders = [...orders].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  // Mezzanotte di oggi
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Filtriamo gli ordini: TUTTI gli attivi + SOLO i consegnati di oggi
+  const activeAndTodayOrders = orders.filter(o => {
+    if (o.status !== "consegnato") return true; // Mantieni sempre gli ordini in corso (anche di ieri sera)
+    
+    // Se è consegnato, mantienilo solo se è stato creato oggi
+    const orderDate = new Date(o.createdAt);
+    return orderDate.getTime() >= today.getTime(); 
+  });
+
+  // (il più vecchio in alto)
+  const sortedOrders = [...activeAndTodayOrders].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   sortedOrders.forEach(o => {
     const timeStr = new Date(o.createdAt).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });

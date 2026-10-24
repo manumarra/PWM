@@ -165,28 +165,32 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
-/* 2. Cura delle voci di testo (scritte della navbar) */
+/* 2. Cura delle voci di navigazione (Stile Pillola & Glow) */
 .restaurateur-navbar .nav-link-restaurateur {
-  font-size: 1.05rem;            /* Testo leggibile e proporzionato */
-  font-weight: 500;
-  color: #9CA3AF;                /* Grigio tenue raffinato di default */
-  padding: 6px 12px;
-  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9CA3AF;
+  padding: 8px 18px;            
+  border-radius: 50px;  
   letter-spacing: 0.3px;
-  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent; /* Predispone un bordo per transizioni morbide */
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Hover sui link */
+/*leggero alone e micro-sollevamento */
 .restaurateur-navbar .nav-link-restaurateur:hover {
   color: #FFFFFF;
-  background-color: rgba(255, 255, 255, 0.05); /* Leggero alone moderno */
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
-/* Voce attiva (Home) */
 .restaurateur-navbar .nav-link-restaurateur.active {
-  color: var(--amber-primary, #F59E0B) !important;
-  font-weight: 600;
-  background-color: rgba(245, 158, 11, 0.1);    /* Sfondo ambra molto tenue */
+  color: var(--night-dark, #111827) !important; 
+  background-color: var(--amber-primary, #F59E0B) !important;
+  border-color: var(--amber-primary, #F59E0B);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); /* Ombra colorata luminosa */
+  transform: translateY(0); 
 }
 
 /* 3. Icona/Pulsante toggler proporzionato all'altezza della barra */
@@ -2256,3 +2260,33 @@ body.customer-home-page {
   background-color: rgba(99, 102, 241, 0.15);
   color: #6366F1; /* Indaco per "In Consegna" */
 }
+
+/* =========================================================
+   DIFFERENZIAZIONE VISIVA: DELIVERY VS TAKEAWAY
+   ========================================================= */
+
+/* Consegna a Domicilio (Delivery) - Accento Blu */
+.order-card-modern.is-delivery {
+  border-left: 4px solid #3B82F6; 
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.08), var(--night-dark) 4%);
+}
+
+.order-card-modern.is-delivery:hover {
+  border-color: #3B82F6;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+}
+
+/* Ritiro in Locale (Takeaway) - Accento Ambra */
+.order-card-modern.is-takeaway {
+  border-left: 4px solid var(--amber-primary); 
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.08), var(--night-dark) 4%);
+}
+
+.order-card-modern.is-takeaway:hover {
+  border-color: var(--amber-primary);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+}
+
+/* Colori per le icone di testo */
+.icon-delivery { color: #3B82F6; }
+.icon-takeaway { color: var(--amber-primary); }

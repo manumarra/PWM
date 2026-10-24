@@ -92,10 +92,7 @@ function applyFilters() {
   filteredProducts = allProducts.filter((p) => {
     const matchName = (p.nameMeal || "").toLowerCase().includes(query);
 
-    const matchCat =
-      !selectedCat ||
-      String(p.category || "").trim().toLowerCase() ===
-        String(selectedCat).trim().toLowerCase();
+    const matchCat = !selectedCat || String(p.category || "").trim().toLowerCase() === String(selectedCat).trim().toLowerCase();
 
     let matchStatus = true;
 

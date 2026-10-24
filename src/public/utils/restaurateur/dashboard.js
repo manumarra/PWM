@@ -87,6 +87,10 @@ const today = new Date();
   if (kpiPrep) kpiPrep.textContent = countPrep;
   if (kpiDelivery) kpiDelivery.textContent = countDelivery;
   if (kpiCompleted) kpiCompleted.textContent = countCompletedToday;
+  
+  // Salva count ordini nel localStorage e aggiorna la navbar
+  localStorage.setItem("newOrdersCount", countNew);
+  if (typeof window.updateNavBadge === "function") window.updateNavBadge();
 
   if (!recentContainer) return;
   const recentOrders = orders.slice(0, 4);

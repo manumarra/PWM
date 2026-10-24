@@ -1,5 +1,3 @@
-// public/components/alert.js
-
 function alertElement() {
   let alertBox = document.getElementById("statusAlert");
 
@@ -68,7 +66,6 @@ export function showToast(title, message, type = "info", containerId = "alert-co
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  // Assicurati che il contenitore sia in alto a destra e fixato (classi standard di Bootstrap per i toast-container)
   if (!container.classList.contains("toast-container")) {
     container.className = "toast-container position-fixed top-0 end-0 p-3";
     container.style.zIndex = "1080"; // Sopra la navbar

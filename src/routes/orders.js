@@ -45,7 +45,6 @@ router.patch("/update-status/:id", AW(async (req, res) => {
   }
 
   try {
-    // 2. Delega dell'intera logica di business al Repository
     const updatedOrder = await orderRepo.updateOrderStatus(req.params.id, status, verificationCode);
     
     if (!updatedOrder) {

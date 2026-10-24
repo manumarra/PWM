@@ -91,13 +91,23 @@ function renderOrders(orders) {
         countOrdinato++;
         actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in preparazione">Accetta e Prepara</button>`;
         break;
+        
       case "in preparazione": 
         countPreparazione++;
-        actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in consegna">${isDelivery ? 'Affida al Fattorino' : 'Pronto per Ritiro'}</button>`;
+        if (isDelivery) {
+            actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in consegna">Affida al Fattorino</button>`;
+        } else {
+            actionHtml = `
+              <div class="input-group mt-2">
+                <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP" maxlength="6">
+                <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-status="consegnato">Verifica e Consegna</button>
+              </div>
+            `;
+        }
         break;
+        
       case "in consegna": 
         countConsegna++;
-        // MACRO-SCENARIO 4: Input OTP
         actionHtml = `
           <div class="input-group mt-2">
             <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP" maxlength="6">
@@ -105,6 +115,7 @@ function renderOrders(orders) {
           </div>
         `;
         break;
+        
       case "consegnato": 
         countConsegnato++;
         actionHtml = `<span class="text-success fw-bold d-block text-center mt-2"><i class="bi bi-check-circle-fill me-2"></i>Consegna Completata</span>`;
@@ -112,7 +123,7 @@ function renderOrders(orders) {
     }
 
 
-    // Generiamo la lista dei piatti per questo ordine
+    // lista dei piatti per questo ordine
     const itemsHtml = (o.items || []).map(i => `
       <div class="d-flex justify-content-between small text-secondary mb-1">
         <span><strong class="text-white">${i.quantity}x</strong> ${i.nameMeal} </span>
@@ -120,9 +131,11 @@ function renderOrders(orders) {
       </div>
     `).join("");
 
-    // HTML della singola card senza vincoli di colonna
+    const typeClass = isDelivery ? 'is-delivery' : 'is-takeaway';
+    const typeIcon = isDelivery ? '<i class="bi bi-bicycle icon-delivery me-1"></i>' : '<i class="bi bi-shop icon-takeaway me-1"></i>';
+    // HTML della singola card
     const cardHtml = `
-      <div class="order-card-modern p-3 h-100">
+      <div class="order-card-modern p-3 h-100 ${typeClass}">
         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
           <div class="w-100">
               <h6 class="fw-bold mb-0 text-white text-truncate">${customerName}</h6>
@@ -146,25 +159,27 @@ function renderOrders(orders) {
       </div>
     `;
 
-    // Inseriamo la card nella colonna corretta
+    // card nella colonna corretta
     if (o.status === "ordinato") colOrdinato.insertAdjacentHTML("beforeend", cardHtml);
     else if (o.status === "in preparazione") colPreparazione.insertAdjacentHTML("beforeend", cardHtml);
     else if (o.status === "in consegna") colConsegna.insertAdjacentHTML("beforeend", cardHtml);
     else if (o.status === "consegnato") colConsegnato.insertAdjacentHTML("beforeend", cardHtml);
   });
 
-  // Mostra messaggi se le colonne sono vuote
+  // colonne vuote
   if (countOrdinato === 0) colOrdinato.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
-  if (countPreparazione === 0) colPreparazione.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
-  if (countConsegna === 0) colConsegna.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
-  if (countConsegnato === 0) colConsegnato.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine.</p>`;
+  if (countPreparazione === 0) colPreparazione.innerHTML = `<p class="text-secondary small text-center mt-4">Nessuna preparazione.</p>`;
+  if (countConsegna === 0) colConsegna.innerHTML = `<p class="text-secondary small text-center mt-4">Nessuna consegna.</p>`;
+  if (countConsegnato === 0) colConsegnato.innerHTML = `<p class="text-secondary small text-center mt-4">Nessun ordine consegnato.</p>`;
 
-  // Aggiorniamo i numeretti visivi
   document.getElementById("count-ordinato").textContent = countOrdinato;
   document.getElementById("count-preparazione").textContent = countPreparazione;
   document.getElementById("count-consegna").textContent = countConsegna;
   document.getElementById("count-consegnato").textContent = countConsegnato;
 
+  localStorage.setItem("newOrdersCount", countOrdinato);
+  if (typeof window.updateNavBadge === "function") window.updateNavBadge();
+  
   // Event listener per i bottoni
   document.querySelectorAll('.action-btn').forEach(btn => {
       btn.addEventListener('click', handleStatusChange);
@@ -192,7 +207,7 @@ async function handleStatusChange(e) {
         await updateOrderStatus(orderId, newStatus, verificationCode);
         
         const user = getStoredUser();
-        await loadOrders(user._id || user.id);
+        await loadOrders(user._id);
     } catch (error) {
         btn.disabled = false;
         btn.innerHTML = newStatus === "consegnato" ? "Verifica" : "Errore";

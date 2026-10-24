@@ -50,7 +50,13 @@ const navbars = [`
           <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Catalogo</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/order.html">Ordini</a>
+          <a class="nav-link nav-link-restaurateur position-relative" href="/pages/restaurateur/order.html">
+            Ordini
+            <!-- Pallino rosso Notifica (nascosto di default con d-none) -->
+            <span id="navOrdersBadge" class="position-absolute top-25 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle d-none" style="padding: 0.35rem !important;">
+              <span class="visually-hidden">Nuovi ordini</span>
+            </span>
+          </a>
         </li>
       </ul>
 
@@ -105,3 +111,24 @@ function getNavbar(index, navBar) {
     container.innerHTML = navbars[index];
 
 }
+
+// Funzione globale per aggiornare il pallino rosso leggendo il localStorage
+window.updateNavBadge = function() {
+    const newOrders = parseInt(localStorage.getItem("newOrdersCount") || "0");
+    const navOrdersBadge = document.getElementById("navOrdersBadge");
+    
+    if (navOrdersBadge) {
+        if (newOrders > 0) {
+            navOrdersBadge.classList.remove("d-none");
+        } else {
+            navOrdersBadge.classList.add("d-none");
+        }
+    }
+};
+
+// Ascolta le modifiche fatte da ALTRE SCHEDE del browser in tempo reale
+window.addEventListener("storage", (event) => {
+    if (event.key === "newOrdersCount") {
+        window.updateNavBadge();
+    }
+});

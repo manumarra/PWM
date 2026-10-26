@@ -89,18 +89,18 @@ function renderOrders(orders) {
     switch(o.status) {
       case "ordinato": 
         countOrdinato++;
-        actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in preparazione">Accetta e Prepara</button>`;
+        actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-name="${customerName}" data-status="in preparazione">Accetta e Prepara</button>`;
         break;
         
       case "in preparazione": 
         countPreparazione++;
         if (isDelivery) {
-            actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-status="in consegna">Affida al Fattorino</button>`;
+            actionHtml = `<button class="btn btn-amber w-100 action-btn fw-bold" data-id="${o._id}" data-name="${customerName}" data-status="in consegna">Affida al Fattorino</button>`;
         } else {
             actionHtml = `
               <div class="input-group mt-2">
                 <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP" maxlength="6">
-                <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-status="consegnato">Verifica e Consegna</button>
+                <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-name="${customerName}" data-status="consegnato">Verifica e Consegna</button>
               </div>
             `;
         }
@@ -111,14 +111,14 @@ function renderOrders(orders) {
         actionHtml = `
           <div class="input-group mt-2">
             <input type="text" class="form-control bg-dark text-white border-secondary" id="otp-${o._id}" placeholder="Codice OTP" maxlength="6">
-            <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-status="consegnato">Verifica</button>
+            <button class="btn btn-amber action-btn fw-bold" data-id="${o._id}" data-name="${customerName}" data-status="consegnato">Verifica</button>
           </div>
         `;
         break;
         
       case "consegnato": 
         countConsegnato++;
-        actionHtml = `<span class="text-success fw-bold d-block text-center mt-2"><i class="bi bi-check-circle-fill me-2"></i>Consegna Completata</span>`;
+        actionHtml = `<span class="text-success fw-bold d-block text-center mt-2" data-name="${customerName}"><i class="bi bi-check-circle-fill me-2"></i>Consegna Completata</span>`;
         break;
     }
 
@@ -189,11 +189,13 @@ function renderOrders(orders) {
 async function handleStatusChange(e) {
     const btn = e.currentTarget;
     const orderId = btn.getAttribute('data-id');
+    const customerName = btn.getAttribute('data-name');
     const newStatus = btn.getAttribute('data-status');
     let verificationCode = null;
-
+    let showStr = `spostato ${newStatus}`;
     if (newStatus === "consegnato") {
         const otpInput = document.getElementById(`otp-${orderId}`);
+        showStr = "CONSEGNATO";
         verificationCode = otpInput.value.trim();
         if (!verificationCode) {
             return showAlert("danger", "Attenzione", "Inserisci il codice di verifica fornito dal cliente.");
@@ -205,7 +207,7 @@ async function handleStatusChange(e) {
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
         
         await updateOrderStatus(orderId, newStatus, verificationCode);
-        
+        showAlert("success", `Ordine di ${customerName}`, showStr);
         const user = getStoredUser();
         await loadOrders(user._id);
     } catch (error) {

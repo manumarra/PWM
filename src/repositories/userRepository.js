@@ -1,10 +1,15 @@
-import User from "../models/User.js";
+import User, { MODEL_BY_ROLE, UPDATABLE_FIELDS } from "../models/User.js";
 import Product from "../models/Product.js";
 
 export const createUser = (userData) => {
-  if(userData.role === "restaurateur") userData.image = "/assets/defaultAvatar.jpeg";
-  return User.create(userData);
-}
+  const Model = MODEL_BY_ROLE[userData.role];
+  if (!Model) {
+    const err = new Error("Ruolo non valido");
+    err.status = 400;
+    throw err;
+  }
+  return Model.create(userData);
+};
 
 export const getUserByEmail = (email) => User.findByEmail(email);
 
@@ -17,22 +22,15 @@ export const comparePassword = async (user, password) => {
 export const toPublicJSON = (user) => user.toPublicJSON();
 
 export const updateUser = async (id, updates) => {
-  // Se il payload contiene la password, usiamo .save() per attivare .pre("save")
-  if (updates.password) {
-    const user = await User.findById(id);
-    if (!user) return null;
-    // Assegna tutte le proprietà arrivate nel payload
-    Object.assign(user, updates);
-    await user.save();
-    return user;
+  const user = await User.findById(id);
+  if (!user) return null;
+
+  for (const field of UPDATABLE_FIELDS[user.role]) {
+    if (updates[field] !== undefined) user[field] = updates[field];
   }
 
-  // Altrimenti usiamo il consueto findByIdAndUpdate delle slide
-  return User.findByIdAndUpdate(
-    id, 
-    { $set: updates }, 
-    { returnDocument: 'after', runValidators: true }
-  );
+  await user.save();
+  return user;
 };
 
 export const deleteUser = async (id) => {
@@ -42,7 +40,7 @@ export const deleteUser = async (id) => {
 
   if (deletedUser.role === "restaurateur") await Product.deleteMany({restaurantId: id});
 
-  return deleteUser;
+  return deletedUser;
 } 
 
 export const getPaginatedRestaurants = async (queryParams = {}) => {

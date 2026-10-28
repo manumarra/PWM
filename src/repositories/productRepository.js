@@ -1,6 +1,10 @@
 // src/repositories/productRepository.js
 import Product from "../models/Product.js";
 
+const PRODUCT_UPDATABLE_FIELDS = [
+  "nameMeal", "category", "price", "image", "ingredients", "mealId", "available", "discount"
+];
+
 // CREATE: normalizza i campi e salva il prodotto
 export const createProduct = async (productData) => {
   const { restaurantId, nameMeal, price, ingredients, category, image, mealId } = productData;
@@ -26,18 +30,24 @@ export const getProductsByRestaurant = (restaurantId) =>
 // READ: singolo prodotto
 export const getProductById = (id) => Product.findById(id).lean();
 
-// UPDATE: aggiorna campi prodotto
-export const updateProduct = (id, updates) => {
-  if(updates.category) updates.category = categoryFormatter(updates.category)
-  return Product.findByIdAndUpdate(
-    id,
-    { $set: updates },
+// UPDATE: solo se il prodotto appartiene al ristorante
+export const updateProduct = (id, restaurantId, updates) => {
+  const safe = {};
+  for (const field of PRODUCT_UPDATABLE_FIELDS) {
+    if (updates[field] !== undefined) safe[field] = updates[field];
+  }
+  if (safe.category) safe.category = categoryFormatter(safe.category);
+
+  return Product.findOneAndUpdate(
+    { _id: id, restaurantId },
+    { $set: safe },
     { returnDocument: "after", runValidators: true }
   );
-}
+};
 
-// DELETE: singolo prodotto
-export const deleteProduct = (id) => Product.findByIdAndDelete(id);
+// DELETE: singolo prodotto, solo se del ristorante
+export const deleteProduct = (id, restaurantId) =>
+  Product.findOneAndDelete({ _id: id, restaurantId });
 
 // DELETE: svuota menù
 export const deleteAllProduct = (restaurantId) => Product.deleteMany({ restaurantId });

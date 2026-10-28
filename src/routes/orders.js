@@ -1,71 +1,89 @@
 import { Router } from "express";
 import { asyncWrapper as AW } from "../utils/asyncWrapper.js";
 import * as orderRepo from "../repositories/orderRepository.js";
+import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 
-// POST /api/orders/create
-router.post("/create", AW(async (req, res, next) => {
-  const { customerId, restaurantId, items, orderType, totalAmount } = req.body;
+const parsePagination = (query) => {
+  const page = Math.max(parseInt(query.page) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(query.limit) || 12, 1), 50);
+  return { page, limit };
+};
 
-  if (!customerId || !restaurantId || !items || items.length === 0 || totalAmount === undefined) {
+// POST /api/orders/create (solo clienti; il cliente è quello del token)
+router.post("/create", requireAuth, requireRole("customer"), AW(async (req, res) => {
+  const {
+    restaurantId, items, orderType, subtotal, totalAmount,
+    distanceKm, deliveryFee, deliveryAddress, payment
+  } = req.body;
+
+  if (!restaurantId || !Array.isArray(items) || items.length === 0 || totalAmount === undefined) {
     return res.status(400).json({
       status: "fail",
-      message: "Dati incompleti: customerId, restaurantId, items e totalAmount sono obbligatori"
+      message: "Dati incompleti: restaurantId, items e totalAmount sono obbligatori"
     });
   }
 
-  const newOrder = await orderRepo.createOrder(req.body);
+  const newOrder = await orderRepo.createOrder({
+    customerId: req.user.id,
+    restaurantId, items, orderType, subtotal, totalAmount,
+    distanceKm, deliveryFee, deliveryAddress,
+    payment: {
+      provider: payment?.provider,
+      method: payment?.method,
+      last4Digits: payment?.last4Digits
+    }
+  });
   res.status(201).json({ status: "ok", data: newOrder });
 }));
 
-// GET /api/orders/customer/:customerId
-router.get("/customer/:customerId", AW(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 12;
-  
-  const result = await orderRepo.getOrdersByCustomer(req.params.customerId, page, limit);
-  
-  res.json({ status: "ok", ...result }); 
+// GET /api/orders/customer/:customerId (solo i propri ordini)
+router.get("/customer/:customerId", requireAuth, requireRole("customer"), AW(async (req, res) => {
+  if (req.params.customerId !== req.user.id) {
+    return res.status(403).json({ status: "fail", message: "Operazione non consentita" });
+  }
+  const { page, limit } = parsePagination(req.query);
+  const result = await orderRepo.getOrdersByCustomer(req.user.id, page, limit);
+  res.json({ status: "ok", ...result });
 }));
 
-// GET /api/orders/restaurant/:restaurantId
-router.get("/restaurant/:restaurantId", AW(async (req, res) => {
-  const orders = await orderRepo.getOrdersByRestaurant(req.params.restaurantId);
+// GET /api/orders/restaurant/:restaurantId (ordini del proprio ristorante)
+router.get("/restaurant/:restaurantId", requireAuth, requireRole("restaurateur"), AW(async (req, res) => {
+  if (req.params.restaurantId !== req.user.id) {
+    return res.status(403).json({ status: "fail", message: "Operazione non consentita" });
+  }
+  const orders = await orderRepo.getOrdersByRestaurant(req.user.id);
   res.json({ status: "ok", data: orders });
 }));
 
-// PATCH /api/orders/update-status/:id
-router.patch("/update-status/:id", AW(async (req, res) => {
+// PATCH /api/orders/update-status/:id (solo il ristorante proprietario)
+router.patch("/update-status/:id", requireAuth, requireRole("restaurateur"), AW(async (req, res) => {
   const { status, verificationCode } = req.body;
-  
-  // 1. Validazione puramente HTTP
+
   if (!status) {
     return res.status(400).json({ status: "fail", message: "Stato mancante nel payload" });
   }
 
   try {
-    const updatedOrder = await orderRepo.updateOrderStatus(req.params.id, status, verificationCode);
-    
+    const updatedOrder = await orderRepo.updateOrderStatus(req.params.id, req.user.id, status, verificationCode);
+
     if (!updatedOrder) {
       return res.status(404).json({ status: "fail", message: "Ordine non trovato" });
     }
-
     res.json({ status: "ok", data: updatedOrder });
-    
   } catch (error) {
-    // 3. Gestione dell'errore (es. OTP errato o Ordine non trovato)
     return res.status(400).json({ status: "fail", message: error.message });
   }
 }));
 
 // GET /api/orders/restaurant/:restaurantId/history
-router.get("/restaurant/:restaurantId/history", AW(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 12;
-  
-  const result = await orderRepo.getRestaurantOrderHistory(req.params.restaurantId, page, limit);
-  
+router.get("/restaurant/:restaurantId/history", requireAuth, requireRole("restaurateur"), AW(async (req, res) => {
+  if (req.params.restaurantId !== req.user.id) {
+    return res.status(403).json({ status: "fail", message: "Operazione non consentita" });
+  }
+  const { page, limit } = parsePagination(req.query);
+  const result = await orderRepo.getRestaurantOrderHistory(req.user.id, page, limit);
   res.json({ status: "ok", ...result });
 }));
 

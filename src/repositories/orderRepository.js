@@ -75,26 +75,36 @@ export const getOrdersByRestaurant = (restaurantId) => {
 
 export const getOrderById = (id) => Order.findById(id).lean();
 
-// UPDATE: Aggiornamento dello stato dell'ordine con Regole di Business
-export const updateOrderStatus = async (id, status, verificationCode) => {
-  // Se lo stato è "consegnato", verifica l'OTP
-  if (status === "consegnato") {
-    const order = await Order.findById(id).lean();
-    
-    if (!order) {
-      throw new Error("Ordine non trovato");
-    }
-    
-    // Controllo strict con conversione a stringa e pulizia spazi
-    if (String(order.verificationCode).trim() !== String(verificationCode).trim()) {
+// Transizioni di stato consentite, per tipo di ordine
+const FLOW = {
+  delivery: {
+    "ordinato": ["in preparazione"],
+    "in preparazione": ["in consegna"],
+    "in consegna": ["consegnato"]
+  },
+  takeaway: {
+    "ordinato": ["in preparazione"],
+    "in preparazione": ["consegnato"]
+  }
+};
+
+// UPDATE: stato ordine con regole di business (solo il ristorante proprietario)
+export const updateOrderStatus = async (id, restaurantId, newStatus, verificationCode) => {
+  const order = await Order.findOne({ _id: id, restaurantId });
+  if (!order) return null;
+
+  const allowed = FLOW[order.orderType]?.[order.status] || [];
+  if (!allowed.includes(newStatus)) {
+    throw new Error(`Transizione non consentita: da "${order.status}" a "${newStatus}"`);
+  }
+
+  if (newStatus === "consegnato") {
+    if (!verificationCode || String(order.verificationCode) !== String(verificationCode).trim()) {
       throw new Error("Codice di verifica errato. Consegna rifiutata.");
     }
   }
 
-  // Se i controlli passano (o se lo stato non è "consegnato"), esegue l'aggiornamento
-  return Order.findByIdAndUpdate(
-    id, 
-    { $set: { status: status } }, 
-    { returnDocument: 'after', runValidators: true }
-  ).lean();
+  order.status = newStatus;
+  await order.save();
+  return order.toObject();
 };

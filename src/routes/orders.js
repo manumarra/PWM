@@ -13,28 +13,7 @@ const parsePagination = (query) => {
 
 // POST /api/orders/create (solo clienti; il cliente è quello del token)
 router.post("/create", requireAuth, requireRole("customer"), AW(async (req, res) => {
-  const {
-    restaurantId, items, orderType, subtotal, totalAmount,
-    distanceKm, deliveryFee, deliveryAddress, payment
-  } = req.body;
-
-  if (!restaurantId || !Array.isArray(items) || items.length === 0 || totalAmount === undefined) {
-    return res.status(400).json({
-      status: "fail",
-      message: "Dati incompleti: restaurantId, items e totalAmount sono obbligatori"
-    });
-  }
-
-  const newOrder = await orderRepo.createOrder({
-    customerId: req.user.id,
-    restaurantId, items, orderType, subtotal, totalAmount,
-    distanceKm, deliveryFee, deliveryAddress,
-    payment: {
-      provider: payment?.provider,
-      method: payment?.method,
-      last4Digits: payment?.last4Digits
-    }
-  });
+  const newOrder = await orderRepo.createOrder(req.user.id, req.body);
   res.status(201).json({ status: "ok", data: newOrder });
 }));
 

@@ -135,6 +135,18 @@ function createOrderCard(order, isActive) {
     `;
   }
 
+    // Tempo di attesa per il ritiro in locale
+  let waitBox = "";
+  if (isActive && order.orderType === "takeaway") {
+    const readyAt = new Date(dateObj.getTime() + order.estimatedTimeMinutes * 60000)
+      .toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    waitBox = `
+      <div class="small text-warning mb-2">
+        <i class="bi bi-clock-history me-1"></i> Ritiro previsto verso le ${readyAt} (circa ${order.estimatedTimeMinutes} min)
+      </div>
+    `;
+  }
+
   return `
     <div class="col">
       <div class="order-card-modern">
@@ -150,7 +162,7 @@ function createOrderCard(order, isActive) {
           <div class="mb-3 border-bottom pb-3">
             ${itemsHtml}
           </div>
-          ${otpBox}
+          ${waitBox}${otpBox}
         </div>
 
         <div class="order-card-footer">

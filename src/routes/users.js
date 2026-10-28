@@ -1,6 +1,8 @@
 import {Router} from "express";
 import * as userRepo from "../repositories/userRepository.js";
 import { asyncWrapper as AW} from "../utils/asyncWrapper.js";
+import { requireAuth, setAuthCookie, clearAuthCookie } from "../middleware/auth.js";
+
 const router = Router();
 
 // GET /api/users/restaurants (con eventuali filtri via query string: ?city=...&page=...&search=...)
@@ -60,6 +62,7 @@ router.post("/login", AW(async (req, res) => {
       message: "Credenziali non valide"
     });
   }
+  setAuthCookie(res, user);
 
   // 4. Risposta per il frontend (include il ruolo per il redirect)
   res.status(200).json({
@@ -69,69 +72,75 @@ router.post("/login", AW(async (req, res) => {
   });
 }));
 
-router.put("/update", AW(async (req, res) => {
-  const {currentPassword, id, updates} = req.body;
+router.post("/logout", (req, res) => {
+  clearAuthCookie(res);
+  res.status(200).json({ status: "ok", message: "Logout eseguito" });
+});
+
+// Restituisce l'utente della sessione corrente (utile per verificare il cookie)
+router.get("/me", requireAuth, AW(async (req, res) => {
+  const user = await userRepo.getUserById(req.user.id);
+  if (!user) {
+    clearAuthCookie(res);
+    return res.status(401).json({ status: "fail", message: "Utente non trovato" });
+  }
+  res.status(200).json({ status: "ok", data: userRepo.toPublicJSON(user) });
+}));
+
+router.put("/update", requireAuth, AW(async (req, res) => {
+  const { currentPassword, updates } = req.body;
+  const id = req.user.id;
+
+  if (!updates || typeof updates !== "object") {
+    return res.status(400).json({ status: "fail", message: "Dati da modificare mancanti" });
+  }
+
   const checkUser = await userRepo.getUserById(id);
   if (!checkUser) {
-      return res.status(401).json({
-      status: "fail",
-      message: "Credenziali non valide"
-    });
+    clearAuthCookie(res);
+    return res.status(401).json({ status: "fail", message: "Utente non trovato" });
   }
 
   const checkPassword = await userRepo.comparePassword(checkUser, currentPassword);
   if (!checkPassword) {
-    return res.status(401).json({
-      status: "fail",
-      message: "Password non valida"
-    });
+    return res.status(403).json({ status: "fail", message: "Password non valida" });
   }
 
-
-  if(req.body.confirmPassword) {
-    const confirmPassword = req.body.confirmPassword;
-    const newPassword = req.body.updates.password;
-    if(confirmPassword !== newPassword) {
-      return res.status(401).json({
-        status: "fail",
-        message: "Le nuove password devono coincidere"
-      });
+  if (req.body.confirmPassword) {
+    if (req.body.confirmPassword !== updates.password) {
+      return res.status(400).json({ status: "fail", message: "Le nuove password devono coincidere" });
     }
   }
-  
+
   const user = await userRepo.updateUser(id, updates);
   return res.status(200).json({
     status: "ok",
     message: "Modifica avvenuta con successo",
     data: userRepo.toPublicJSON(user)
   });
-
 }));
 
-router.delete("/delete", AW(async(req, res) => {
-  const {id, password} = req.body;
+router.delete("/delete", requireAuth, AW(async (req, res) => {
+  const { password } = req.body;
+  const id = req.user.id;
 
   const checkUser = await userRepo.getUserById(id);
   if (!checkUser) {
-      return res.status(401).json({
-      status: "fail",
-      message: "Credenziali non valide"
-    });
+    clearAuthCookie(res);
+    return res.status(401).json({ status: "fail", message: "Utente non trovato" });
   }
 
   const checkPassword = await userRepo.comparePassword(checkUser, password);
   if (!checkPassword) {
-    return res.status(401).json({
-      status: "fail",
-      message: "Password non valida"
-    });
+    return res.status(403).json({ status: "fail", message: "Password non valida" });
   }
 
   const deleted = await userRepo.deleteUser(id);
   if (!deleted) {
     return res.status(404).json({ status: "fail", message: "Utente non trovato" });
   }
-  res.status(200).json({status: "ok", message: "Account eliminato con successo"});
+  clearAuthCookie(res);
+  res.status(200).json({ status: "ok", message: "Account eliminato con successo" });
 }));
 
 export default router;

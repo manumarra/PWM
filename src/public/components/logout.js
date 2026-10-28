@@ -97,5 +97,16 @@ function getFooterLogoutAndForm() {
     editFormContainer.innerHTML = credentialForm;
     deleteFormContainer.innerHTML = deleteAccountModal;
     footerContainer.innerHTML = logoutButton;
+    
+    document.getElementById("btnLogout").addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+            await fetch("/api/users/logout", { method: "POST" });
+        } finally {
+            localStorage.removeItem("user");
+            localStorage.removeItem("newOrdersCount");
+            window.location.href = "/index.html";
+        }
+    });
 
 }

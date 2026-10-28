@@ -7,10 +7,13 @@ import mealRoutes from "./routes/meals.js";
 import productRoutes from "./routes/products.js";
 import orderRoutes from "./routes/orders.js";
 import { mongoErrorHandler } from "./middleware/errorHandler.js";
+import cookieParser from "cookie-parser";
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static("./src/public"));
 app.use("/api/users", userRoutes);
 app.use("/api/meals", mealRoutes);

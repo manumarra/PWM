@@ -33,7 +33,7 @@ const navbars = [`
     <div class="container-fluid px-3 px-md-4 d-flex align-items-center">
       
       <!-- 1. Logo a sinistra -->
-      <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/index.html">
+      <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/pages/restaurateur/home.html">
         <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
         <span class="">Doremi</span>
       </a>
@@ -74,7 +74,7 @@ const navbars = [`
   <div class="container-fluid px-3 px-md-4 d-flex align-items-center">
     
     <!-- 1. Logo a sinistra -->
-    <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/index.html">
+    <a class="navbar-brand brand-logo d-flex align-items-center gap-2 me-4" href="/pages/customer/home.html">
       <img src="/assets/doremi.png" alt="Logo" width="45" height="36" class="d-inline-block align-text-top">
       <span class="">Doremi</span>
     </a>

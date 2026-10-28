@@ -4,6 +4,10 @@ import { setStoredUser } from "/utils/common/session.js";
 
 const loginForm = document.getElementById("loginForm");
 
+if (new URLSearchParams(window.location.search).get("expired")) {
+    showAlert("danger", "Sessione scaduta", "Effettua di nuovo l'accesso per continuare.");
+}
+
 loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     
@@ -19,14 +23,14 @@ loginForm.addEventListener("submit", async (event) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showAlert("danger", "Attenzione", "Inserisci un indirizzo email valido.");
-        emailInput.focus();
+        loginForm.elements["email"].focus();
         return;
     }
 
     // Verifica lunghezza minima password
     if (password.length < 6) {
         showAlert("danger", "Attenzione", "La password deve contenere almeno 6 caratteri.");
-        passwordInput.focus();
+        loginForm.elements["password"].focus();
         return;
     }
 

@@ -66,4 +66,10 @@ router.get("/restaurant/:restaurantId/history", requireAuth, requireRole("restau
   res.json({ status: "ok", ...result });
 }));
 
+// POST /api/orders/quote (anteprima di prezzi, consegna e attesa)
+router.post("/quote", requireAuth, requireRole("customer"), AW(async (req, res) => {
+  const quote = await orderRepo.buildQuote(req.body);
+  res.json({ status: "ok", data: quote });
+}));
+
 export default router;

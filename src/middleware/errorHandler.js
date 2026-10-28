@@ -25,9 +25,10 @@ export function mongoErrorHandler(err, req, res, next) {
         });
     }
 
-    if (err.status === 400) {
-        return res.status(400).json({ status: "fail", message: err.message });
+    if (err.status) {
+        return res.status(err.status).json({ status: "fail", message: err.message });
     }
+    
 // Altri errori
     console.error("Errore interno del server:", err);
     return res.status(500).json({

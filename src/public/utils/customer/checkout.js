@@ -1,8 +1,8 @@
 import { getStoredUser } from "/utils/common/session.js";
 import { getRestaurantById } from "/services/userService.js";
-import { createOrder } from "/services/orderService.js";
-import { getCoordinatesFromAddress } from "/services/mapService.js";
+import { createOrder, getQuote } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
+
 
 // Riferimenti DOM
 const form = document.getElementById("checkoutForm");
@@ -23,6 +23,7 @@ const zipInput = document.getElementById("zipInput");
 const notesInput = document.getElementById("notesInput");
 
 const mapStatusText = document.getElementById("mapStatusText");
+const estimatedTimeEl = document.getElementById("estimatedTimeText");
 
 // Variabili di stato
 let cart = [];
@@ -33,7 +34,7 @@ let currentUser = null;
 let subtotal = 0;
 let deliveryFee = 0;
 let distanceKm = 0;
-const FEE_PER_KM = 1.5; // Tariffa euro per chilometro
+let lastQuoteRequest = 0;
 let mapInstance = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -63,13 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupEventListeners();
   renderSummary();
   
-  // precompilato, calcoliamo subito
-  if (streetInput.value && cityInput.value) {
-    calculateDistanceAndFee();
-  } else {
-    // Altrimenti disabilitiamo il pulsante finché non inserisce un indirizzo valido
-    submitBtn.disabled = true;
-  }
+  refreshQuote();
 });
 
 async function loadRestaurantData() {
@@ -98,18 +93,14 @@ function setupEventListeners() {
       if (!isDelivery) { // TAKEAWAY
         deliveryFee = 0;
         distanceKm = 0;
-        
         if (mapInstance !== null) {
           mapInstance.remove();
           mapInstance = null;
         }
         osmMapContainer.classList.add("d-none");
-        
-        submitBtn.disabled = false;
-      } else {
-        calculateDistanceAndFee();
+        updateTotals();
       }
-      updateTotals();
+      refreshQuote();
     });
   });
 
@@ -124,7 +115,7 @@ function setupEventListeners() {
   let timeout = null;
   const triggerMapUpdate = () => {
     clearTimeout(timeout);
-    timeout = setTimeout(calculateDistanceAndFee, 1200);
+    timeout = setTimeout(refreshQuote, 1200);
   };
 
   streetInput.addEventListener("input", triggerMapUpdate);
@@ -165,65 +156,71 @@ function updateTotals() {
   totalAmountEl.textContent = `€ ${total.toFixed(2)}`;
 }
 
-async function calculateDistanceAndFee() {
+async function refreshQuote() {
+  const isDelivery = document.querySelector('input[name="orderType"]:checked').value === "delivery";
   const street = streetInput.value.trim();
   const city = cityInput.value.trim();
 
-  submitBtn.disabled = true; 
+  submitBtn.disabled = true;
 
-  if (!street || !city || !currentRestaurant || !currentRestaurant.address) {
+  if (isDelivery && (!street || !city)) {
     mapStatusText.innerHTML = `<p class="text-secondary small m-0">Compila i campi Indirizzo e Città per calcolare la consegna.</p>`;
     osmMapContainer.classList.add("d-none");
     return;
   }
 
-  mapStatusText.innerHTML = `<p class="loading-text m-0">Calcolo distanza esatta in corso...</p>`;
+  if (isDelivery) {
+    mapStatusText.innerHTML = `<p class="loading-text m-0">Calcolo del percorso in corso...</p>`;
+  }
 
+  const requestId = ++lastQuoteRequest;
   try {
-    const custCoords = await getCoordinatesFromAddress(street, city);
-    const restCoords = await getCoordinatesFromAddress(
-      currentRestaurant.address.street, 
-      currentRestaurant.address.city
-    );
+    const res = await getQuote({
+      restaurantId,
+      orderType: isDelivery ? "delivery" : "takeaway",
+      items: cart.map(item => ({ productId: item.product._id, quantity: item.qty })),
+      deliveryAddress: isDelivery ? { street, city } : undefined
+    });
+    if (requestId !== lastQuoteRequest) return; // c'è una richiesta più recente
+    const q = res.data;
 
-    distanceKm = calculateHaversine(restCoords.lat, restCoords.lon, custCoords.lat, custCoords.lon);
-    deliveryFee = Math.max(1.5, distanceKm * FEE_PER_KM); 
-    
-    mapStatusText.innerHTML = `
-      <p class="text-success m-0 fw-bold">
-        <i class="bi bi-geo-alt-fill"></i> Distanza verificata: ${distanceKm.toFixed(1)} km
-      </p>
-    `;
-    
-    // mappa visiva
-    renderMap(restCoords.lat, restCoords.lon, custCoords.lat, custCoords.lon);
-    
+    subtotal = q.subtotal;
+    deliveryFee = q.deliveryFee;
+    distanceKm = q.distanceKm;
+    estimatedTimeEl.textContent = `Tempo di attesa stimato: circa ${q.estimatedTimeMinutes} minuti`;
+
+    if (isDelivery) {
+      const label = q.route.method === "road"
+        ? "Distanza stradale"
+        : "Distanza in linea d'aria (percorso non disponibile)";
+      mapStatusText.innerHTML = `
+        <p class="text-success m-0 fw-bold">
+          <i class="bi bi-geo-alt-fill"></i> ${label}: ${q.distanceKm.toFixed(1)} km
+        </p>
+      `;
+      renderMap(q.route);
+    }
+
     submitBtn.disabled = false;
     updateTotals();
-    
   } catch (error) {
-    mapStatusText.innerHTML = `
-      <p class="text-danger fw-bold m-0">
-        <i class="bi bi-exclamation-triangle-fill"></i> Indirizzo non trovato. Impossibile procedere.
-      </p>
-    `;
-    osmMapContainer.classList.add("d-none");
-    deliveryFee = 0; 
+    if (requestId !== lastQuoteRequest) return;
+    deliveryFee = 0;
     distanceKm = 0;
-    submitBtn.disabled = true; 
+    estimatedTimeEl.textContent = "";
+    osmMapContainer.classList.add("d-none");
     updateTotals();
-  }
-}
 
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-  const R = 6371; 
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
+    if (isDelivery) {
+      mapStatusText.innerHTML = "";
+      const msg = document.createElement("p");
+      msg.className = "text-danger fw-bold m-0";
+      msg.textContent = error.message;
+      mapStatusText.appendChild(msg);
+    } else {
+      showAlert("danger", "Attenzione", error.message);
+    }
+  }
 }
 
 async function handleOrderSubmit(e) {
@@ -298,29 +295,30 @@ async function handleOrderSubmit(e) {
   }
 }
 
-function renderMap(restLat, restLon, custLat, custLon) {
+function renderMap(route) {
   osmMapContainer.classList.remove("d-none");
 
   if (mapInstance !== null) {
     mapInstance.remove();
   }
 
-  // init mappa
   mapInstance = L.map('osmMapContainer');
 
-  //layer grafici di OpenStreetMap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(mapInstance);
 
-  //Marker
-  const restMarker = L.marker([restLat, restLon]).addTo(mapInstance).bindPopup(`<b>${currentRestaurant.name}</b><br>Partenza`);
-  const custMarker = L.marker([custLat, custLon]).addTo(mapInstance).bindPopup("<b>La tua consegna</b><br>Arrivo");
+  L.marker([route.restaurant.lat, route.restaurant.lon]).addTo(mapInstance)
+    .bindPopup(`<b>${currentRestaurant.name}</b><br>Partenza`);
+  L.marker([route.customer.lat, route.customer.lon]).addTo(mapInstance)
+    .bindPopup("<b>La tua consegna</b><br>Arrivo");
 
-  //Linea rossa tra il ristorante e il cliente
-  const latlngs = [[restLat, restLon], [custLat, custLon]];
-  const polyline = L.polyline(latlngs, {color: '#dc3545', weight: 4, dashArray: '5, 10'}).addTo(mapInstance);
+  // Percorso stradale (continuo) oppure linea d'aria (tratteggiata)
+  const polyline = L.polyline(route.path, {
+    color: '#dc3545',
+    weight: 4,
+    dashArray: route.method === "road" ? null : '5, 10'
+  }).addTo(mapInstance);
 
-  // Centra automaticamente lo zoom per includere entrambi i punti
   mapInstance.fitBounds(polyline.getBounds(), { padding: [40, 40] });
 }

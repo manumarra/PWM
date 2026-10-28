@@ -12,6 +12,17 @@ export async function createOrder(orderPayload) {
   return data;
 }
 
+export async function getQuote(payload) {
+  const response = await fetch("/api/orders/quote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.message || "Impossibile calcolare il preventivo");
+  return data;
+}
+
 export async function getOrdersByCustomer(customerId, page = 1, limit = 12) {
   const response = await fetch(`/api/orders/customer/${customerId}?page=${page}&limit=${limit}`, {
     method: "GET"

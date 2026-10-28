@@ -190,7 +190,7 @@ export const MODEL_BY_ROLE = {
 // `role`, `active`, `email`, `_id` NON sono modificabili da qui.
 export const UPDATABLE_FIELDS = {
   customer: ["name", "surname", "phone", "address", "paymentMethod", "preferences", "password"],
-  restaurateur: ["name", "phone", "address", "location", "image", "ivaNumber", "password"]
+  restaurateur: ["name", "phone", "address", "image", "ivaNumber", "password"]
 };
 
 export default User;

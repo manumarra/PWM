@@ -2,6 +2,7 @@ import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import { Restaurant } from "../models/User.js";
+import { geocode, drivingRoute } from "../public/services/geoService.js";
 
 // READ: Storico ordini per il CLIENTE
 export const getOrdersByCustomer = async (customerId, page = 1, limit = 12) => {
@@ -56,19 +57,41 @@ export const getRestaurantOrderHistory = async (restaurantId, page = 1, limit = 
 };
 
 // ── Parametri di calcolo (da motivare nella relazione) ──
-const BASE_PREP_MINUTES = 10;   // tempo minimo di preparazione
-const MINUTES_PER_ITEM = 2;     // minuti per ogni piatto in coda, compresi quelli del nuovo ordine
+const BASE_PREP_MINUTES = 10;        // tempo minimo di preparazione
+const MINUTES_PER_ITEM = 2;          // minuti per ogni piatto in coda, compresi quelli del nuovo ordine
+const TRAVEL_MINUTES_PER_KM = 3;     // tempo di viaggio per le consegne
 const MAX_ITEM_QUANTITY = 20;
 const QUEUE_STATUSES = ["ordinato", "in preparazione"];
 
+const DELIVERY_MIN_FEE = 1.5;        // costo minimo di consegna (€)
+const DELIVERY_FEE_PER_KM = 1.5;     // tariffa per km (€)
+const MAX_DELIVERY_KM = 25;          // oltre questa distanza non si consegna
+
+const round1 = (n) => Math.round(n * 10) / 10;
 const round2 = (n) => Math.round(n * 100) / 100;
 const badRequest = (message) => Object.assign(new Error(message), { status: 400 });
 const countItems = (items) => items.reduce((sum, i) => sum + i.quantity, 0);
 
-// CREATE: prezzi, totale e tempo di attesa sono calcolati qui, non dal client
-export const createOrder = async (customerId, data) => {
-  const { restaurantId, items, orderType, deliveryAddress, distanceKm, deliveryFee, payment } = data;
+// Coordinate del ristorante: geocodificate una volta e salvate nel profilo
+async function getRestaurantCoords(restaurantId) {
+  const restaurant = await Restaurant.findById(restaurantId);
+  if (!restaurant) throw badRequest("Ristorante non valido");
 
+  if (restaurant.location?.lat == null || restaurant.location?.lon == null) {
+    try {
+      const coords = await geocode(restaurant.address.street, restaurant.address.city);
+      restaurant.location = coords;
+      await restaurant.save();
+    } catch (err) {
+      if (err.status === 400) throw badRequest("Impossibile localizzare il ristorante");
+      throw err;
+    }
+  }
+  return { lat: restaurant.location.lat, lon: restaurant.location.lon };
+}
+
+// Preventivo: prezzi, consegna, totale e attesa, tutto calcolato dal server
+export const buildQuote = async ({ restaurantId, items, orderType, deliveryAddress }) => {
   if (!["takeaway", "delivery"].includes(orderType)) {
     throw badRequest("Tipo ordine non valido");
   }
@@ -106,29 +129,65 @@ export const createOrder = async (customerId, data) => {
 
   const subtotal = round2(orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0));
 
-  // TODO (prossimo passo): distanza e costo di consegna calcolati dal server
-  const isDelivery = orderType === "delivery";
-  const fee = isDelivery ? round2(Math.max(0, Number(deliveryFee) || 0)) : 0;
-  const km = isDelivery ? Math.max(0, Number(distanceKm) || 0) : 0;
+  // Consegna: distanza stradale (OSRM) e costo in base ai km
+  let distanceKm = 0;
+  let deliveryFee = 0;
+  let route = null;
 
-  // Tempo di attesa: dipende dai piatti già in coda al ristorante
+  if (orderType === "delivery") {
+    const street = String(deliveryAddress?.street ?? "").trim();
+    const city = String(deliveryAddress?.city ?? "").trim();
+    if (!street || !city) throw badRequest("Indirizzo di consegna obbligatorio");
+
+    const restaurantCoords = await getRestaurantCoords(restaurantId);
+    const customerCoords = await geocode(street, city);
+    const result = await drivingRoute(restaurantCoords, customerCoords);
+
+    distanceKm = round1(result.km);
+    if (distanceKm > MAX_DELIVERY_KM) {
+      throw badRequest(`Indirizzo fuori dall'area di consegna (massimo ${MAX_DELIVERY_KM} km)`);
+    }
+    deliveryFee = round2(Math.max(DELIVERY_MIN_FEE, distanceKm * DELIVERY_FEE_PER_KM));
+    route = { method: result.method, path: result.path, restaurant: restaurantCoords, customer: customerCoords };
+  }
+
+  // Attesa: piatti già in coda al ristorante + quelli di questo ordine (+ viaggio se consegna)
   const queued = await Order.find({ restaurantId, status: { $in: QUEUE_STATUSES } })
     .select("items.quantity")
     .lean();
   const queuedItems = queued.reduce((sum, o) => sum + countItems(o.items), 0);
-  const estimatedTimeMinutes = BASE_PREP_MINUTES + MINUTES_PER_ITEM * (queuedItems + countItems(orderItems));
+  const estimatedTimeMinutes =
+    BASE_PREP_MINUTES +
+    MINUTES_PER_ITEM * (queuedItems + countItems(orderItems)) +
+    Math.round(distanceKm * TRAVEL_MINUTES_PER_KM);
+
+  return {
+    items: orderItems,
+    subtotal,
+    distanceKm,
+    deliveryFee,
+    totalAmount: round2(subtotal + deliveryFee),
+    estimatedTimeMinutes,
+    route
+  };
+};
+
+// CREATE: salva l'ordine usando solo i valori del preventivo calcolato dal server
+export const createOrder = async (customerId, data) => {
+  const quote = await buildQuote(data);
+  const { restaurantId, orderType, deliveryAddress, payment } = data;
 
   return Order.create({
     customerId,
     restaurantId,
-    items: orderItems,
     orderType,
-    deliveryAddress: isDelivery ? deliveryAddress : undefined,
-    distanceKm: km,
-    deliveryFee: fee,
-    subtotal,
-    totalAmount: round2(subtotal + fee),
-    estimatedTimeMinutes,
+    items: quote.items,
+    deliveryAddress: orderType === "delivery" ? deliveryAddress : undefined,
+    distanceKm: quote.distanceKm,
+    deliveryFee: quote.deliveryFee,
+    subtotal: quote.subtotal,
+    totalAmount: quote.totalAmount,
+    estimatedTimeMinutes: quote.estimatedTimeMinutes,
     payment: {
       provider: payment?.provider,
       method: payment?.method,

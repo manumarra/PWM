@@ -29,6 +29,10 @@ export const updateUser = async (id, updates) => {
     if (updates[field] !== undefined) user[field] = updates[field];
   }
 
+  if (user.role === "restaurateur" && updates.address !== undefined) {
+    user.set("location", undefined); // verrà geocodificata di nuovo al prossimo preventivo
+  }
+
   await user.save();
   return user;
 };

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ALLERGENS } from "../public/utils/common/allergens.js";
 
 const {Schema} = mongoose;
 
@@ -11,7 +12,9 @@ const mealSchema = new Schema({
     instructions: {type: String},
     image: {type: String},
     ingredients: [{type: String}],
-    measures: [{type: String}]
+    measures: [{type: String}],
+    measures: [{type: String}],
+    allergens: [{ type: String, enum: ALLERGENS }]
 }, {timestamps: true});
 
 

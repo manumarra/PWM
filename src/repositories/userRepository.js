@@ -1,5 +1,6 @@
 import User, { MODEL_BY_ROLE, UPDATABLE_FIELDS } from "../models/User.js";
 import Product from "../models/Product.js";
+import { escapeRegex } from "../public/utils/common/regex.js";
 
 export const createUser = (userData) => {
   const Model = MODEL_BY_ROLE[userData.role];
@@ -49,22 +50,35 @@ export const deleteUser = async (id) => {
 
 export const getPaginatedRestaurants = async (queryParams = {}) => {
   const page = Math.max(1, parseInt(queryParams.page, 10) || 1);
-  const limit = Math.max(1, parseInt(queryParams.limit, 10) || 12);
+  const limit = Math.min(Math.max(1, parseInt(queryParams.limit, 10) || 12), 100);
   const skip = (page - 1) * limit;
 
   const filter = { role: "restaurateur" };
 
-  if (queryParams.city && queryParams.city.trim()) {
-    filter["address.city"] = { $regex: `^${queryParams.city.trim()}$`, $options: "i" };
+  const city = String(queryParams.city ?? "").trim();
+  if (city) {
+    filter["address.city"] = { $regex: `^${escapeRegex(city)}$`, $options: "i" };
   }
 
-  if (queryParams.search && queryParams.search.trim()) {
-    filter.name = { $regex: queryParams.search.trim(),$options: "i" };
+  const search = String(queryParams.search ?? "").trim();
+  if (search) {
+    filter.name = { $regex: escapeRegex(search), $options: "i" };
+  }
+
+  // Ricerca del ristorante per piatto: ristoranti che vendono (disponibile) quel piatto
+  const dish = String(queryParams.dish ?? "").trim();
+  if (dish) {
+    const ids = await Product.distinct("restaurantId", {
+      nameMeal: { $regex: escapeRegex(dish), $options: "i" },
+      available: true
+    });
+    filter._id = { $in: ids };
   }
 
   const [data, total] = await Promise.all([
     User.find(filter)
       .select("name image phone address")
+      .sort({ name: 1 })
       .skip(skip)
       .limit(limit)
       .lean(),

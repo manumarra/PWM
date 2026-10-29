@@ -6,8 +6,8 @@ const router = Router();
 
 // GET /api/meals/catalog?page=1&limit=12&category=...&search=...
 router.get("/catalog", AW(async (req, res) => {
-    const { page, limit, category, search } = req.query;
-    const result = await repo.getPaginatedMeals({ page, limit, category, search });
+    const { page, limit, category, search, ingredient } = req.query;
+    const result = await repo.getPaginatedMeals({ page, limit, category, search, ingredient });
     res.json({ status: "ok", data: result.data, pagination: result.pagination });
   })
 );

@@ -53,4 +53,10 @@ router.delete("/restaurant/:restaurantId", requireAuth, requireRole("restaurateu
   res.json({ status: "ok", message: "Lista prodotti eliminata con successo" });
 }));
 
+// GET /api/products/search (pubblica)
+router.get("/search", AW(async (req, res) => {
+  const result = await productRepo.searchProducts(req.query);
+  res.json({ status: "ok", ...result });
+}));
+
 export default router;

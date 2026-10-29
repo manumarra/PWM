@@ -5,6 +5,7 @@ import { createMenuCardElement } from "/utils/restaurateur/menuCards.js";
 import { sortMenuProducts, updateCounters } from "/utils/common/menuShared.js";
 import { initCart, addToCart } from "/utils/customer/cart.js";
 import { getCustomerCartMarkup } from "/components/cart.js";
+import { renderAllergenCheckboxes } from "/utils/common/dishUi.js";
 
 const heroSection = document.getElementById("restaurantHero");
 const heroSpinner = document.getElementById("heroSpinner");
@@ -23,6 +24,7 @@ const renderedCounterEl = document.getElementById("renderedCounter");
 // Variabili di stato
 let allProducts = [];
 let filteredProducts = [];
+let avoidAllergens = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -43,6 +45,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   categorySelect?.addEventListener("change", applyFilters);
   statusSelect?.addEventListener("change", applyFilters);
+
+  const allergenList = document.getElementById("allergenFilterList");
+  const allergenLabel = document.getElementById("allergenFilterLabel");
+  if (allergenList) {
+    renderAllergenCheckboxes(allergenList, (selected) => {
+      avoidAllergens = selected;
+      if (allergenLabel) {
+        allergenLabel.textContent = selected.length ? `Allergeni (${selected.length})` : "Senza allergeni";
+      }
+      applyFilters();
+    });
+  }
 
   if (cartMountPoint) cartMountPoint.innerHTML = getCustomerCartMarkup();
 
@@ -104,7 +118,8 @@ function applyFilters() {
       matchStatus = (p.discount || 0) > 0;
     }
 
-    return matchName && matchCat && matchStatus;
+    const matchAllergens = avoidAllergens.every((a) => !(p.allergens || []).includes(a));
+    return matchName && matchCat && matchStatus && matchAllergens;
   });
 
   filteredProducts = sortMenuProducts(filteredProducts);

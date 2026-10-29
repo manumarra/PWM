@@ -64,26 +64,35 @@
       <!-- LATO SINISTRO: Prodotti e Filtri (8 colonne su PC) -->
       <div class="col-12 col-lg-8">
         
-        <!-- Barra Ricerca & Filtri -->
         <div class="row g-3 mb-4 mt-1">
-          <div class="col-12 col-md-5">
+          <div class="col-12 col-md-4">
             <div class="input-group">
               <span class="input-group-text menu-input-icon"><i class="bi bi-search"></i></span>
               <input type="search" id="menuSearchInput" class="form-control menu-search-input" placeholder="Cerca piatto...">
             </div>
           </div>
-          <div class="col-6 col-md-4">
+          <div class="col-6 col-md-3">
             <select id="menuCategorySelect" class="form-select menu-filter-select">
               <option value="">Tutte le categorie</option>
             </select>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-2">
             <select id="menuStatusSelect" class="form-select menu-filter-select">
               <option value="all">Tutti</option>
               <option value="available">Disponibili</option>
               <option value="unavailable">Esauriti</option>
               <option value="discounted">In offerta</option>
             </select>
+          </div>
+          <div class="col-12 col-md-3">
+            <div class="dropdown">
+              <button class="btn menu-filter-select w-100 text-start d-flex justify-content-between align-items-center"
+                      type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <span id="allergenFilterLabel">Senza allergeni</span>
+                <i class="bi bi-chevron-down"></i>
+              </button>
+              <div class="dropdown-menu allergen-filter-list p-2" id="allergenFilterList"></div>
+            </div>
           </div>
         </div>
 

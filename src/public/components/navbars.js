@@ -85,6 +85,9 @@ const navbars = [`
         <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/customer/home.html">Ristoranti</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link nav-link-restaurateur" href="/pages/customer/dishSearch.html">Piatti</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link nav-link-restaurateur" href="/pages/customer/orderHistory.html">Ordini</a>
       </li>
     </ul>

@@ -1,5 +1,6 @@
 import { updateProduct } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
+import { escapeHtml, allergenBadgesMarkup } from "/utils/common/dishUi.js";
 
 /**
  * Crea l'elemento DOM (colonna + card) per un singolo piatto del menù
@@ -61,7 +62,7 @@ export function createMenuCardElement(product, options = {}) {
   col.innerHTML = `
     <div class="card h-100 menu-item-card-modern ${!isAvailable ? 'is-unavailable' : ''} w-100" title="${cardTooltip}">
       <div class="menu-item-img-wrapper">
-        <img src="${product.image || '/assets/defaultMeal.jpeg'}" class="w-100 h-100 object-fit-cover" alt="${product.nameMeal}">
+          <img src="${escapeHtml(product.image || '/assets/defaultMeal.jpeg')}" class="w-100 h-100 object-fit-cover" alt="${escapeHtml(product.nameMeal)}">
         
         <div class="position-absolute top-0 start-0 m-2">
           ${statusBadgeMarkup}
@@ -76,7 +77,7 @@ export function createMenuCardElement(product, options = {}) {
 
       <div class="card-body d-flex flex-column p-3 flex-grow-1">
         <span class="badge align-self-start mb-2 px-2 py-1 small menu-item-category-badge">
-          ${product.category || 'Altro'}
+          ${escapeHtml(product.category || 'Altro')}
         </span>
         
         <h5 class="card-title fw-bold mb-1 text-truncate text-white" title="${product.nameMeal}">
@@ -84,8 +85,9 @@ export function createMenuCardElement(product, options = {}) {
         </h5>
         
         <p class="card-text small flex-grow-1 text-truncate-2 mb-3 menu-item-ingredients">
-          ${Array.isArray(product.ingredients) ? product.ingredients.join(", ") : ""}
+          ${Array.isArray(product.ingredients) ? product.ingredients.map((i) => escapeHtml(i)).join(", ") : ""}
         </p>
+        ${allergenBadgesMarkup(product.allergens)}
 
         <div class="d-flex align-items-baseline gap-2 mb-1 mt-auto">
           ${hasDiscount ? `

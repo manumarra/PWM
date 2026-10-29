@@ -59,3 +59,16 @@ export async function updateProduct(productId, updates) {
   checkResponse(response,data);
   return data;
 }
+
+export async function searchProducts(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      query.append(key, value);
+    }
+  });
+
+  const response = await fetch(`/api/products/search?${query.toString()}`, { method: "GET" });
+  const data = await response.json().catch(() => null);
+  return checkResponse(response, data, { fallback: "Errore nella ricerca dei piatti" });
+}

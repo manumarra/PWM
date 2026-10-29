@@ -10,6 +10,7 @@ let hasNextPage = true;
 let isLoading = false;
 let currentCity = "";
 let currentSearch = "";
+let currentDish = "";
 
 const cityLabel = document.getElementById("customerCityLabel");
 const searchInput = document.getElementById("searchRestaurantInput");
@@ -18,6 +19,7 @@ const emptyRestaurantsMsg = document.getElementById("emptyRestaurantsMsg");
 const scrollSentinel = document.getElementById("scrollSentinel");
 const scrollSpinner = document.getElementById("scrollSpinner");
 const restaurantsGrid = document.getElementById("restaurantsGrid");
+const dishInput = document.getElementById("searchDishInput");
 
 document.addEventListener("DOMContentLoaded", async () => {
   currentCity = USER?.address?.city || "";
@@ -28,13 +30,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Ricerca con debounce: azzera la paginazione e ricarica dal server
   let debounceTimer = null;
-  searchInput?.addEventListener("input", (e) => {
+  const onFilterChange = () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-      currentSearch = e.target.value.trim();
+      currentSearch = searchInput?.value.trim() || "";
+      currentDish = dishInput?.value.trim() || "";
       resetAndReload();
     }, 300);
-  });
+  };
+  searchInput?.addEventListener("input", onFilterChange);
+  dishInput?.addEventListener("input", onFilterChange);
 
   setupInfiniteScroll();
   await loadNextBatch();
@@ -54,7 +59,8 @@ async function loadNextBatch() {
       page: currentPage,
       limit: LIMIT,
       city: currentCity,
-      search: currentSearch
+      search: currentSearch,
+      dish: currentDish
     });
 
     const restaurants = response?.data || [];

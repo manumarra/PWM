@@ -2290,3 +2290,35 @@ body.customer-home-page {
 /* Colori per le icone di testo */
 .icon-delivery { color: #3B82F6; }
 .icon-takeaway { color: var(--amber-primary); }
+
+/************************************/
+/* ---------- Allergeni ---------- */
+/************************************/
+.allergen-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--amber-primary);
+}
+
+.allergen-badge {
+  padding: 1px 8px;
+  border: 1px solid var(--amber-primary);
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--amber-primary);
+}
+
+.allergen-filter-list {
+  min-width: 240px;
+  max-height: 280px;
+  overflow-y: auto;
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-light);
+}
+
+.allergen-filter-list .form-check-label {
+  color: #ffffff;
+}

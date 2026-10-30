@@ -56,3 +56,11 @@ export async function getRestaurantOrderHistory(restaurantId, page = 1, limit = 
   const data = await response.json().catch(() => null);
   return checkResponse(response, data, { fallback: "Errore nel recupero dello storico ordini" });
 }
+
+export async function getRestaurantStats(restaurantId, days = 30) {
+  const response = await fetch(`/api/orders/restaurant/${restaurantId}/stats?days=${days}`, {
+    method: "GET"
+  });
+  const data = await response.json().catch(() => null);
+  return checkResponse(response, data, { fallback: "Errore nel recupero delle statistiche" });
+}

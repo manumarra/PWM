@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistiche - Food Delivery</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-dark text-white min-vh-100 d-flex flex-column">
+
+  <header id="navbar-container"></header>
+  <div id="alert-container" class="toast-feedback-container"></div>
+
+  <main class="container my-4 flex-grow-1">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div class="dashboard-header">
+        <h1 class="h3 fw-bold mb-1">Statistiche</h1>
+        <p class="dashboard-subtitle mb-0">Andamento di ordini, incassi e piatti più venduti.</p>
+      </div>
+      <div class="btn-group" role="group" aria-label="Periodo" id="periodButtons">
+        <button type="button" class="btn btn-outline-warning btn-sm" data-days="7">7 giorni</button>
+        <button type="button" class="btn btn-outline-warning btn-sm active" data-days="30">30 giorni</button>
+        <button type="button" class="btn btn-outline-warning btn-sm" data-days="90">90 giorni</button>
+      </div>
+    </div>
+
+    <div id="statsEmpty" class="alert alert-secondary d-none">
+      Nessun ordine nel periodo selezionato.
+    </div>
+
+    <!-- Indicatori -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+          <div class="kpi-icon kpi-icon-info mx-auto mb-2"><i class="bi bi-receipt"></i></div>
+          <div class="kpi-data text-center">
+            <h3 id="kpiOrders" class="mb-1">0</h3>
+            <span>Ordini</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+          <div class="kpi-icon kpi-icon-success mx-auto mb-2"><i class="bi bi-currency-euro"></i></div>
+          <div class="kpi-data text-center">
+            <h3 id="kpiRevenue" class="mb-1">€ 0.00</h3>
+            <span>Incasso</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+          <div class="kpi-icon kpi-icon-warning mx-auto mb-2"><i class="bi bi-basket-fill"></i></div>
+          <div class="kpi-data text-center">
+            <h3 id="kpiAverage" class="mb-1">€ 0.00</h3>
+            <span>Scontrino medio</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="dashboard-kpi-card h-100 flex-column text-center p-3">
+          <div class="kpi-icon kpi-icon-primary mx-auto mb-2"><i class="bi bi-check-circle-fill"></i></div>
+          <div class="kpi-data text-center">
+            <h3 id="kpiDelivered" class="mb-1">0 (0%)</h3>
+            <span>Consegnati</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grafici -->
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-lg-8">
+        <div class="stats-panel">
+          <h2 class="stats-panel-title">Incasso e ordini per giorno</h2>
+          <div class="stats-chart-wrap"><canvas id="dailyChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="stats-panel">
+          <h2 class="stats-panel-title">Consegna o ritiro</h2>
+          <div class="stats-chart-wrap"><canvas id="typeChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+      <div class="col-12 col-lg-7">
+        <div class="stats-panel">
+          <h2 class="stats-panel-title">Ordini per fascia oraria</h2>
+          <div class="stats-chart-wrap"><canvas id="hourChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-5">
+        <div class="stats-panel">
+          <h2 class="stats-panel-title">Piatti più venduti</h2>
+          <div id="topDishesList"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modali e Offcanvas -->
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="userOffcanvas"></div>
+  <div class="modal fade" id="editProfileModal" tabindex="-1"></div>
+  <div class="modal fade" id="editCredentialModal" tabindex="-1"></div>
+  <div class="modal fade" id="deleteModalToggle2" tabindex="-1"></div>
+
+  <footer id="homeFooter" class="site-footer mt-auto"></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/components/navbars.js"></script>
+  <script src="/components/footer.js"></script>
+  <script src="/components/logout.js"></script>
+
+  <script type="module">
+    import { getCanvas, getCanvasContent } from "/components/canvasHome.js";
+    import "/components/alerts.js";
+
+    getNavbar(1, "navbar-container");
+    getFooter();
+    getCanvas();
+    getCanvasContent();
+    getFooterLogoutAndForm();
+
+    import("/utils/common/deleteOrUpdateCredential.js");
+  </script>
+  <script src="/utils/common/userHome.js" type="module"></script>
+  <script src="/utils/restaurateur/stats.js" type="module"></script>
+</body>
+</html>

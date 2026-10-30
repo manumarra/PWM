@@ -249,3 +249,91 @@ export const updateOrderStatus = async (id, restaurantId, newStatus, verificatio
   await order.save();
   return order.toObject();
 };
+
+// ── Statistiche del ristorante ──
+const STATS_TIMEZONE = "Europe/Rome";
+
+// Etichette "YYYY-MM-DD" (data italiana) degli ultimi N giorni, dal più vecchio a oggi
+const buildDayLabels = (span) => {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: STATS_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit"
+  });
+  const now = Date.now();
+  const labels = [];
+  for (let i = span - 1; i >= 0; i--) labels.push(fmt.format(new Date(now - i * 86400000)));
+  return [...new Set(labels)];
+};
+
+export const getRestaurantStats = async (restaurantId, days = 30) => {
+  const span = Math.min(Math.max(parseInt(days, 10) || 30, 1), 365);
+  const labels = buildDayLabels(span);
+  const coarseStart = new Date(Date.now() - (span + 1) * 86400000); // pre-filtro grossolano
+
+  const [result] = await Order.aggregate([
+    { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId), createdAt: { $gte: coarseStart } } },
+    {
+      $addFields: {
+        day: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: STATS_TIMEZONE } },
+        hour: { $hour: { date: "$createdAt", timezone: STATS_TIMEZONE } }
+      }
+    },
+    { $match: { day: { $gte: labels[0] } } }, // filtro esatto sui giorni italiani del periodo
+    {
+      $facet: {
+        totals: [{
+          $group: {
+            _id: null,
+            orders: { $sum: 1 },
+            revenue: { $sum: "$totalAmount" },
+            delivered: { $sum: { $cond: [{ $eq: ["$status", "consegnato"] }, 1, 0] } },
+            deliveryOrders: { $sum: { $cond: [{ $eq: ["$orderType", "delivery"] }, 1, 0] } },
+            takeawayOrders: { $sum: { $cond: [{ $eq: ["$orderType", "takeaway"] }, 1, 0] } }
+          }
+        }],
+        byDay: [{ $group: { _id: "$day", orders: { $sum: 1 }, revenue: { $sum: "$totalAmount" } } }],
+        byHour: [{ $group: { _id: "$hour", orders: { $sum: 1 } } }],
+        topDishes: [
+          { $unwind: "$items" },
+          {
+            $group: {
+              _id: "$items.nameMeal",
+              quantity: { $sum: "$items.quantity" },
+              revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+            }
+          },
+          { $sort: { quantity: -1, revenue: -1, _id: 1 } },
+          { $limit: 5 }
+        ]
+      }
+    }
+  ]);
+
+  const totals = result.totals[0] || { orders: 0, revenue: 0, delivered: 0, deliveryOrders: 0, takeawayOrders: 0 };
+
+  // Giorni senza ordini a zero, così il grafico è continuo
+  const dayMap = new Map(result.byDay.map((d) => [d._id, d]));
+  const allDays = [...new Set([...labels, ...dayMap.keys()])].sort();
+  const daily = allDays.map((day) => ({
+    day,
+    orders: dayMap.get(day)?.orders || 0,
+    revenue: round2(dayMap.get(day)?.revenue || 0)
+  }));
+
+  const hourMap = new Map(result.byHour.map((h) => [h._id, h.orders]));
+  const hourly = Array.from({ length: 24 }, (_, hour) => ({ hour, orders: hourMap.get(hour) || 0 }));
+
+  return {
+    days: span,
+    totals: {
+      orders: totals.orders,
+      revenue: round2(totals.revenue),
+      averageOrder: totals.orders ? round2(totals.revenue / totals.orders) : 0,
+      delivered: totals.delivered,
+      deliveryOrders: totals.deliveryOrders,
+      takeawayOrders: totals.takeawayOrders
+    },
+    daily,
+    hourly,
+    topDishes: result.topDishes.map((d) => ({ name: d._id, quantity: d.quantity, revenue: round2(d.revenue) }))
+  };
+};

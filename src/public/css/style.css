@@ -2322,3 +2322,37 @@ body.customer-home-page {
 .allergen-filter-list .form-check-label {
   color: #ffffff;
 }
+
+/* ---------- Statistiche ---------- */
+.stats-panel {
+  height: 100%;
+  padding: 1.25rem;
+  background-color: var(--night-dark);
+  border: 1px solid var(--night-light);
+  border-radius: 16px;
+}
+
+.stats-panel-title {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.stats-chart-wrap {
+  position: relative;
+  height: 280px;
+}
+
+.stats-bar {
+  height: 6px;
+  overflow: hidden;
+  background-color: var(--night-light);
+  border-radius: 3px;
+}
+
+.stats-bar > span {
+  display: block;
+  height: 100%;
+  background-color: var(--amber-primary);
+}

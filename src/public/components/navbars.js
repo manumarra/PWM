@@ -44,12 +44,6 @@ const navbars = [`
           <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/home.html">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/menu.html">Menù</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Catalogo</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link nav-link-restaurateur position-relative" href="/pages/restaurateur/order.html">
             Ordini
             <!-- Pallino rosso Notifica (nascosto di default con d-none) -->
@@ -57,6 +51,15 @@ const navbars = [`
               <span class="visually-hidden">Nuovi ordini</span>
             </span>
           </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/menu.html">Il tuo Menù</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/productBuilder.html">Catalogo</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/stats.html">Statistiche</a>
         </li>
       </ul>
 

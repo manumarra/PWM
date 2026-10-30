@@ -72,4 +72,13 @@ router.post("/quote", requireAuth, requireRole("customer"), AW(async (req, res) 
   res.json({ status: "ok", data: quote });
 }));
 
+// GET /api/orders/restaurant/:restaurantId/stats?days=30 (solo il proprio ristorante)
+router.get("/restaurant/:restaurantId/stats", requireAuth, requireRole("restaurateur"), AW(async (req, res) => {
+  if (req.params.restaurantId !== req.user.id) {
+    return res.status(403).json({ status: "fail", message: "Operazione non consentita" });
+  }
+  const stats = await orderRepo.getRestaurantStats(req.user.id, req.query.days);
+  res.json({ status: "ok", data: stats });
+}));
+
 export default router;

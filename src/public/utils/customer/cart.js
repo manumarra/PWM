@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { showAlert } from "/components/alerts.js";
 import { getStoredUser } from "/utils/common/session.js";
 
@@ -109,7 +110,7 @@ function updateCartUI() {
       
       row.innerHTML = `
         <div class="d-flex flex-column" style="max-width: 60%;">
-          <span class="fw-semibold text-truncate small">${p.nameMeal}</span>
+          <span class="fw-semibold text-truncate small">${escapeHtml(p.nameMeal)}</span>
           <span class="text-secondary small">€${(item.qty*finalPrice).toFixed(2)}</span>
         </div>
         <div class="d-flex align-items-center gap-2">

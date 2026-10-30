@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getRestaurants } from "/services/userService.js";
 import { showAlert } from "/components/alerts.js";
@@ -109,13 +110,13 @@ function appendRestaurants(restaurants) {
     col.innerHTML = `
       <div class="restaurant-card" data-restaurant-id="${restaurant._id}">
         <div class="restaurant-card-img-wrapper">
-          <img src="${restImage}" alt="${restaurant.name}" onerror="this.src='/assets/defaultAvatar.jpeg'">
+          <img src="${escapeHtml(restImage)}" alt="${escapeHtml(restaurant.name)}" onerror="this.src='/assets/defaultAvatar.jpeg'">
           <span class="restaurant-card-badge">Aperto</span>
         </div>
         
         <div class="card-body p-3 d-flex flex-column justify-content-between flex-grow-1">
           <div>
-            <h5 class="restaurant-card-title text-truncate" title="${restaurant.name}">${restaurant.name}</h5>
+            <h5 class="restaurant-card-title text-truncate" title="${escapeHtml(restaurant.name)}">${escapeHtml(restaurant.name)}</h5>
             
             <div class="restaurant-info-row mb-1">
               <i class="bi bi-geo-alt-fill restaurant-info-icon"></i>

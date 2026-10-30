@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getRestaurantById } from "/services/userService.js";
 import { createOrder, getQuote } from "/services/orderService.js";
@@ -140,7 +141,7 @@ function renderSummary() {
     const row = document.createElement("div");
     row.className = "total-row";
     row.innerHTML = `
-      <span><strong>${item.qty}x</strong> ${p.nameMeal}</span>
+      <span><strong>${item.qty}x</strong> ${escapeHtml(p.nameMeal)}</span>
       <span>€${lineTotal.toFixed(2)}</span>
     `;
     itemsContainer.appendChild(row);
@@ -309,7 +310,7 @@ function renderMap(route) {
   }).addTo(mapInstance);
 
   L.marker([route.restaurant.lat, route.restaurant.lon]).addTo(mapInstance)
-    .bindPopup(`<b>${currentRestaurant.name}</b><br>Partenza`);
+    .bindPopup(`<b>${escapeHtml(currentRestaurant.name)}</b><br>Partenza`);
   L.marker([route.customer.lat, route.customer.lon]).addTo(mapInstance)
     .bindPopup("<b>La tua consegna</b><br>Arrivo");
 

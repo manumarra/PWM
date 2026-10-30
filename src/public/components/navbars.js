@@ -41,7 +41,7 @@ const navbars = [`
       <!-- 2. Link di navigazione principali -->
       <ul class="navbar-nav d-flex flex-row align-items-center gap-4">
         <li class="nav-item">
-          <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/restaurateur/home.html">Home</a>
+          <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/home.html">Home</a>
         </li>
         <li class="nav-item">
           <a class="nav-link nav-link-restaurateur" href="/pages/restaurateur/menu.html">Menù</a>
@@ -82,7 +82,7 @@ const navbars = [`
     <!-- 2. Link di navigazione principali -->
     <ul class="navbar-nav d-flex flex-row align-items-center gap-4">
       <li class="nav-item">
-        <a class="nav-link nav-link-restaurateur active" aria-current="page" href="/pages/customer/home.html">Ristoranti</a>
+        <a class="nav-link nav-link-restaurateur" href="/pages/customer/home.html">Ristoranti</a>
       </li>
       <li class="nav-item">
         <a class="nav-link nav-link-restaurateur" href="/pages/customer/dishSearch.html">Piatti</a>
@@ -102,17 +102,42 @@ const navbars = [`
 </nav>
 `]
 
+// Pagine senza un link proprio nella navbar: evidenziano la voce della loro sezione
+const NAV_SECTION_ALIASES = {
+    "/pages/customer/restaurantMenu.html": "/pages/customer/home.html",
+    "/pages/customer/checkout.html": "/pages/customer/home.html",
+    "/pages/restaurateur/orderHistory.html": "/pages/restaurateur/order.html"
+};
+
+// Evidenzia nella navbar la voce che corrisponde alla pagina corrente
+function highlightActiveNavLink(container) {
+    const currentPath = window.location.pathname;
+    const activePath = NAV_SECTION_ALIASES[currentPath] || currentPath;
+
+    container.querySelectorAll(".nav-link").forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        const isActive = href.startsWith("/") && link.pathname === activePath;
+
+        link.classList.toggle("active", isActive);
+        if (isActive) {
+            link.setAttribute("aria-current", "page");
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+}
+
 function getNavbar(index, navBar) {
     if (index < 0 || index >= navbars.length) {
         throw new Error("Indice del navbar non valido");
-    }   
+    }
     const container = document.getElementById(navBar);
     if (!container) {
         console.error("Elemento con id 'homeNavBar' non trovato nel DOM!");
         return;
     }
     container.innerHTML = navbars[index];
-
+    highlightActiveNavLink(container);
 }
 
 // Funzione globale per aggiornare il pallino rosso leggendo il localStorage

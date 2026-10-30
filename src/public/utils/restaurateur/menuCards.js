@@ -80,8 +80,8 @@ export function createMenuCardElement(product, options = {}) {
           ${escapeHtml(product.category || 'Altro')}
         </span>
         
-        <h5 class="card-title fw-bold mb-1 text-truncate text-white" title="${product.nameMeal}">
-          ${product.nameMeal}
+        <h5 class="card-title fw-bold mb-1 text-truncate text-white" title="${escapeHtml(product.nameMeal)}">
+          ${escapeHtml(product.nameMeal)}
         </h5>
         
         <p class="card-text small flex-grow-1 text-truncate-2 mb-3 menu-item-ingredients">

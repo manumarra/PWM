@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getRestaurantOrderHistory } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
@@ -75,7 +76,7 @@ function renderHistoryOrders(orders) {
     
     const itemsHtml = (o.items || []).map(i => `
       <div class="d-flex justify-content-between small text-secondary mb-1">
-        <span><strong class="text-white">${i.quantity}x</strong> ${i.nameMeal} </span>
+        <span><strong class="text-white">${i.quantity}x</strong> ${escapeHtml(i.nameMeal)} </span>
         <span class="text-white"> €${(i.price * i.quantity).toFixed(2)}</span>
       </div>
     `).join("");

@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { getRestaurantProducts, deleteProduct, deleteAllProduct } from "/services/productService.js";
 import { showAlert } from "/components/alerts.js";
 
@@ -80,14 +81,14 @@ export async function loadCurrentRestaurantMenu() {
 
       item.innerHTML = `
         <div class="d-flex align-items-center gap-2 text-truncate pe-2">
-          <img src="${product.image || '/assets/defaultMeal.jpeg'}" width="42" height="42" class="rounded object-fit-cover" alt="${product.nameMeal}" onerror="this.src='/assets/defaultMeal.jpeg'">
+          <img src="${escapeHtml(product.image || '/assets/defaultMeal.jpeg')}" width="42" height="42" class="rounded object-fit-cover" alt="${escapeHtml(product.nameMeal)}" onerror="this.src='/assets/defaultMeal.jpeg'">
           <div class="text-truncate">
-            <div class="fw-semibold text-white text-truncate">${product.nameMeal}</div>
+            <div class="fw-semibold text-white text-truncate">${escapeHtml(product.nameMeal)}</div>
             <small class="text-warning">${Number(product.price).toFixed(2)} €</small>
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-secondary">${product.category || 'Altro'}</span>
+          <span class="badge bg-secondary">${escapeHtml(product.category || 'Altro')}</span>
           <button type="button" class="btn-delete-recent" title="Rimuovi piatto dal menù" aria-label="Rimuovi piatto dal menù">
             <i class="bi bi-trash3"></i>
           </button>

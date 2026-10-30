@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 let modalElement = null;
 let modalInstance = null;
 let activeModalMeal = null;
@@ -285,7 +286,7 @@ function renderIngredientPills() {
     const pill = document.createElement("span");
     pill.className = "ingredient-pill";
     pill.innerHTML = `
-      <span>${ing}</span>
+      <span>${escapeHtml(ing)}</span>
       <button type="button" class="btn-remove-tag" aria-label="Rimuovi">&times;</button>
     `;
 

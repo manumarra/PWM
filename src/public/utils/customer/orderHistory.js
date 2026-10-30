@@ -1,3 +1,4 @@
+import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByCustomer } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
@@ -107,7 +108,7 @@ function createOrderCard(order, isActive) {
   
   const itemsHtml = order.items.map(i => `
     <div class="d-flex justify-content-between small text-secondary mb-1">
-      <span>${i.quantity}x ${i.nameMeal}</span>
+      <span>${i.quantity}x ${escapeHtml(i.nameMeal)}</span>
       <span>€${(i.price * i.quantity).toFixed(2)}</span>
     </div>
   `).join("");
@@ -152,7 +153,7 @@ function createOrderCard(order, isActive) {
       <div class="order-card-modern">
         <div class="order-card-header">
           <div>
-            <h6 class="fw-bold mb-0 text-truncate">${restName}</h6>
+            <h6 class="fw-bold mb-0 text-truncate">${escapeHtml(restName)}</h6>
             <small class="text-secondary">${dateStr} alle ${timeStr}</small>
           </div>
           <span class="badge-order-status ${statusBadgeClass}">${statusText}</span>

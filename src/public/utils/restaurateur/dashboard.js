@@ -1,10 +1,6 @@
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant } from "/services/orderService.js";
-import { showAlert, showToast } from "/components/alerts.js";
-
-// Variabile globale per ricordare gli ID degli ordini
-let knownOrderIds = new Set();
-let isFirstLoad = true;
+import { showAlert } from "/components/alerts.js";
 
 const kpiRevenue = document.getElementById("kpiTodayRevenue");
 const kpiNew = document.getElementById("kpiNew");
@@ -20,37 +16,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Primo caricamento
   await loadDashboard(user._id);
 
-  // Polling per aggiornare la dashboard e cercare nuovi ordini ogni 15 secondi
-  setInterval(() => {
-    loadDashboard(user._id);
-  }, 15000);
+  // Il notificatore globale (orderNotifier.js) fa il polling: qui basta ascoltare
+  window.addEventListener("restaurant-orders:updated", (event) => {
+    renderDashboard(event.detail.orders);
+  });
 });
 
 async function loadDashboard(restaurantId) {
   try {
     const response = await getOrdersByRestaurant(restaurantId);
-    const orders = response.data || [];
-    
-    // Logica per i Toast: intercetta i nuovi ordini arrivati in stato "ordinato"
-    if (!isFirstLoad) {
-      orders.forEach(o => {
-        if (!knownOrderIds.has(o._id) && o.status === "ordinato") {
-           const customerName = o.customerId?.name || "Un cliente";
-           showToast(
-             "Nuovo Ordine Ricevuto!", 
-             `Hai appena ricevuto un nuovo ordine da <b>${customerName}</b> per €${Number(o.totalAmount).toFixed(2)}.`, 
-             "success"
-           );
-        }
-      });
-    }
-
-    // Memorizza gli ID per il prossimo ciclo
-    knownOrderIds = new Set(orders.map(o => o._id));
-    isFirstLoad = false;
-    
-    // Aggiorna l'interfaccia della dashboard (i KPI e la lista recenti)
-    renderDashboard(orders);
+    renderDashboard(response.data || []);
   } catch (error) {
     if (recentContainer) {
       recentContainer.innerHTML = `<p class="text-danger small">Impossibile caricare gli ordini: ${error.message}</p>`;

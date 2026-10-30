@@ -1,11 +1,7 @@
 import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByRestaurant, updateOrderStatus } from "/services/orderService.js";
-import { showAlert, showToast } from "/components/alerts.js";
-
-// Variabile globale per ricordare gli ID degli ordini
-let knownOrderIds = new Set();
-let isFirstLoad = true; // Per evitare toast su tutti gli ordini appena carichi la pagina la prima volta
+import { showAlert } from "/components/alerts.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getStoredUser();
@@ -15,32 +11,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   await loadOrders(user._id);
 
-  setInterval(() => {
-    loadOrders(user._id);
-  }, 15000);
+  // Il notificatore globale (orderNotifier.js) fa il polling: qui basta ascoltare
+  window.addEventListener("restaurant-orders:updated", (event) => {
+    renderOrders(event.detail.orders);
+  });
 });
 
 async function loadOrders(restaurantId) {
   try {
     const response = await getOrdersByRestaurant(restaurantId);
-    const orders = response.data || [];
-    
-    // Controlla se ci sono ordini NUOVI rispetto all'ultimo caricamento
-    if (!isFirstLoad) {
-      orders.forEach(o => {
-        // Se l'ID non è tra quelli conosciuti e lo stato è "ordinato" (nuovo), spara il toast
-        if (!knownOrderIds.has(o._id) && o.status === "ordinato") {
-           const customerName = o.customerId?.name || "Un cliente";
-           showToast("Nuovo Ordine Ricevuto!", `Hai appena ricevuto un nuovo ordine da <b>${customerName}</b> per €${Number(o.totalAmount).toFixed(2)}.`, "success");
-        }
-      });
-    }
-
-    // Aggiorna l'elenco degli ordini conosciuti per il prossimo refresh
-    knownOrderIds = new Set(orders.map(o => o._id));
-    isFirstLoad = false; // Dal prossimo caricamento in poi, faremo scattare i toast
-    
-    renderOrders(orders);
+    renderOrders(response.data || []);
   } catch (error) {
     showAlert("danger", "Errore", "Impossibile caricare gli ordini: " + error.message);
   }

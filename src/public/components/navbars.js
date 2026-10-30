@@ -138,6 +138,12 @@ function getNavbar(index, navBar) {
     }
     container.innerHTML = navbars[index];
     highlightActiveNavLink(container);
+
+    // Navbar del ristoratore: pallino ordini e notifiche su tutte le sue pagine
+    if (index === 1) {
+        window.updateNavBadge();
+        import("/utils/restaurateur/orderNotifier.js").catch(console.error);
+    }
 }
 
 // Funzione globale per aggiornare il pallino rosso leggendo il localStorage

@@ -86,33 +86,29 @@
           <!-- Sezione Metodo di Pagamento -->
           <div class="checkout-card">
             <h5 class="checkout-section-title">Metodo di Pagamento</h5>
-            
-            <div class="payment-options">
-              <label class="radio-option">
-                <input type="radio" name="paymentMethod" value="credit_card" checked>
-                <span>Carta di Credito <i class="bi bi-credit-card-2-front"></i></span>
-              </label>
-              
-              <!-- Campi Carta di Credito -->
-              <div id="creditCardDetails" class="credit-card-form">
-                <div class="input-group-full">
-                  <label>Numero Carta *</label>
-                  <input type="text" id="ccNumber" placeholder="0000 0000 0000 0000" maxlength="19">
-                </div>
-                <div class="input-group-half">
-                  <label>Scadenza *</label>
-                  <input type="text" id="ccExpiry" placeholder="MM/YY" maxlength="5">
-                </div>
-                <div class="input-group-half">
-                  <label>CVV *</label>
-                  <input type="text" id="ccCvv" placeholder="123" maxlength="3">
-                </div>
-              </div>
 
-              <label class="radio-option">
-                <input type="radio" name="paymentMethod" value="mock">
-                <span>Paga alla Consegna <i class="bi bi-cash-coin"></i></span>
-              </label>
+            <!-- Stripe attivo: il pagamento avviene sulla pagina sicura di Stripe -->
+            <div id="stripePaymentInfo" class="payment-info d-none">
+              <p class="mb-2"><i class="bi bi-credit-card-2-front me-2"></i><strong>Carta di credito o prepagata</strong></p>
+              <p class="small text-secondary mb-0">
+                Dopo aver confermato verrai portato alla pagina sicura di Stripe per pagare.
+                I dati della carta non passano da questo sito.
+              </p>
+            </div>
+
+            <!-- Pagamento simulato (nessuna chiave Stripe configurata) -->
+            <div id="mockPaymentInfo" class="d-none">
+              <p class="small text-secondary">Pagamento simulato: nessun addebito reale.</p>
+              <div class="payment-options">
+                <label class="radio-option">
+                  <input type="radio" name="paymentMethod" value="credit_card" checked>
+                  <span>Carta di Credito <i class="bi bi-credit-card-2-front"></i></span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="paymentMethod" value="prepaid_card">
+                  <span>Carta Prepagata <i class="bi bi-credit-card"></i></span>
+                </label>
+              </div>
             </div>
           </div>
         </form>

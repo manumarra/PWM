@@ -2356,3 +2356,22 @@ body.customer-home-page {
   height: 100%;
   background-color: var(--amber-primary);
 }
+
+
+/* ---------- Pagamenti ---------- */
+.status-pagamento { background-color: #fef3c7; color: #b45309; }
+.status-fallito { background-color: #e5e7eb; color: #4b5563; }
+
+.payment-pending-box {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px dashed var(--amber-primary);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.payment-info {
+  padding: 15px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}

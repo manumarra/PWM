@@ -10,6 +10,11 @@ const router = Router();
 
 const fail = (res, status, message) => res.status(status).json({ status: "fail", message });
 
+// GET /api/payments/config (pubblica): il frontend sa se i pagamenti online sono attivi
+router.get("/config", (req, res) => {
+  res.json({ status: "ok", data: { stripeEnabled: stripeService.stripeEnabled } });
+});
+
 // POST /api/payments/checkout/:orderId
 // Nuova sessione di pagamento per un ordine Stripe ancora in attesa ("Riprendi pagamento")
 router.post("/checkout/:orderId", requireAuth, requireRole("customer"), AW(async (req, res) => {

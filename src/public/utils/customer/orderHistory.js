@@ -2,6 +2,7 @@ import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getOrdersByCustomer } from "/services/orderService.js";
 import { showAlert } from "/components/alerts.js";
+import { resumePayment } from "/services/paymentService.js";
 
 const spinner = document.getElementById("loadingOrdersSpinner");
 const activeSection = document.getElementById("activeOrdersSection");
@@ -82,8 +83,8 @@ function setupIntersectionObserver() {
 
 function renderOrders(orders) {
   // Dividiamo gli ordini (in corso vs passati)
-  const activeOrders = orders.filter(o => o.status !== "consegnato");
-  const pastOrders = orders.filter(o => o.status === "consegnato");
+  const pastOrders = orders.filter(o => o.status === "consegnato" || o.payment?.status === "fallito");
+  const activeOrders = orders.filter(o => !pastOrders.includes(o));
 
   if (activeOrders.length > 0) {
     activeSection.classList.remove("d-none");
@@ -122,9 +123,46 @@ function createOrderCard(order, isActive) {
     case "consegnato": statusBadgeClass = "status-consegnato"; statusText = "Consegnato"; break;
   }
 
+  // Stato del pagamento: finché non è pagato, l'ordine non è stato inviato al locale
+  const paymentStatus = order.payment?.status;
+  const isPaid = paymentStatus === "completato";
+  let paymentBox = "";
+  let cardInfo = "";
+
+  if (paymentStatus === "in_attesa") {
+    statusBadgeClass = "status-pagamento";
+    statusText = "In attesa di pagamento";
+    if (order.payment?.provider === "stripe") {
+      paymentBox = `
+        <div class="payment-pending-box">
+          <div class="small mb-2">
+            <i class="bi bi-credit-card-2-front me-1"></i> Completa il pagamento per inviare l'ordine al locale.
+          </div>
+          <button type="button" class="btn btn-warning btn-sm w-100 fw-bold" data-resume-payment="${escapeHtml(order._id)}">
+            Riprendi pagamento
+          </button>
+        </div>
+      `;
+    }
+  } else if (paymentStatus === "fallito") {
+    statusBadgeClass = "status-fallito";
+    statusText = "Pagamento scaduto";
+    paymentBox = `
+      <div class="small text-secondary mt-2">
+        Il tempo per pagare è scaduto: l'ordine non è stato inviato al locale.
+      </div>
+    `;
+  } else if (isPaid && order.payment?.last4Digits) {
+    cardInfo = `
+      <div class="small text-secondary mt-2">
+        <i class="bi bi-credit-card me-1"></i> Pagato con carta •••• ${escapeHtml(order.payment.last4Digits)}
+      </div>
+    `;
+  }
+
   // Riquadro per il codice di verifica OTP
   let otpBox = "";
-  if (isActive && order.verificationCode) {
+  if (isActive && isPaid && order.verificationCode) {
     otpBox = `
       <div class="otp-verification-box">
         <div class="otp-label"><i class="bi bi-shield-lock-fill me-1"></i> Codice di Consegna</div>
@@ -136,9 +174,9 @@ function createOrderCard(order, isActive) {
     `;
   }
 
-    // Tempo di attesa per il ritiro in locale
+  // Tempo di attesa per il ritiro in locale
   let waitBox = "";
-  if (isActive && order.orderType === "takeaway") {
+   if (isActive && isPaid && order.orderType === "takeaway") {
     const readyAt = new Date(dateObj.getTime() + order.estimatedTimeMinutes * 60000)
       .toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
     waitBox = `
@@ -163,7 +201,7 @@ function createOrderCard(order, isActive) {
           <div class="mb-3 border-bottom pb-3">
             ${itemsHtml}
           </div>
-          ${waitBox}${otpBox}
+          ${waitBox}${otpBox}${paymentBox}${cardInfo}
         </div>
 
         <div class="order-card-footer">
@@ -174,3 +212,21 @@ function createOrderCard(order, isActive) {
     </div>
   `;
 }
+
+// "Riprendi pagamento": nuova sessione Stripe per un ordine in attesa
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-resume-payment]");
+  if (!button) return;
+
+  button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = "Apertura di Stripe...";
+
+  try {
+    window.location.href = await resumePayment(button.dataset.resumePayment);
+  } catch (error) {
+    showAlert("danger", "Errore", error.message);
+    button.disabled = false;
+    button.textContent = originalLabel;
+  }
+});

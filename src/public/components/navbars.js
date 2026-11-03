@@ -109,7 +109,8 @@ const navbars = [`
 const NAV_SECTION_ALIASES = {
     "/pages/customer/restaurantMenu.html": "/pages/customer/home.html",
     "/pages/customer/checkout.html": "/pages/customer/home.html",
-    "/pages/restaurateur/orderHistory.html": "/pages/restaurateur/order.html"
+    "/pages/restaurateur/orderHistory.html": "/pages/restaurateur/order.html",
+    "/pages/customer/paymentResult.html": "/pages/customer/orderHistory.html"
 };
 
 // Evidenzia nella navbar la voce che corrisponde alla pagina corrente

@@ -2,6 +2,7 @@ import { escapeHtml } from "/utils/common/dishUi.js";
 import { getStoredUser } from "/utils/common/session.js";
 import { getRestaurantById } from "/services/userService.js";
 import { createOrder, getQuote } from "/services/orderService.js";
+import { getPaymentConfig } from "/services/paymentService.js";
 import { showAlert } from "/components/alerts.js";
 
 
@@ -14,7 +15,8 @@ const totalAmountEl = document.getElementById("checkoutTotalAmount");
 const submitBtn = document.getElementById("submitOrderBtn");
 
 const deliveryAddressSection = document.getElementById("deliveryAddressSection");
-const creditCardDetails = document.getElementById("creditCardDetails");
+const stripePaymentInfo = document.getElementById("stripePaymentInfo");
+const mockPaymentInfo = document.getElementById("mockPaymentInfo");
 const osmMapContainer = document.getElementById("osmMapContainer");
 const restaurantNameEl = document.getElementById("checkoutRestaurantName");
 
@@ -37,6 +39,7 @@ let deliveryFee = 0;
 let distanceKm = 0;
 let lastQuoteRequest = 0;
 let mapInstance = null;
+let stripeEnabled = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -105,12 +108,8 @@ function setupEventListeners() {
     });
   });
 
-  // Toggle Metodo Pagamento
-  document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
-    radio.addEventListener("change", (e) => {
-      creditCardDetails.style.display = e.target.value === "credit_card" ? "flex" : "none";
-    });
-  });
+  // Metodo di pagamento: Stripe oppure simulato
+  setupPaymentUi();
 
   // Debounce per calcolare la distanza
   let timeout = null;
@@ -225,40 +224,28 @@ async function refreshQuote() {
 }
 
 async function handleOrderSubmit(e) {
+  // Invio ordine: con Stripe il cliente viene mandato alla pagina di pagamento
   e.preventDefault();
-  
+
   if (!form.checkValidity()) {
     form.reportValidity();
     return;
   }
-  
-  const orderType = document.querySelector('input[name="orderType"]:checked').value;
-  const payMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-  
-  const itemsPayload = cart.map(item => {
-    const p = item.product;
-    const finalPrice = p.discount > 0 ? p.price - (p.price * p.discount / 100) : p.price;
-    return {
-      productId: p._id,
-      nameMeal: p.nameMeal,
-      price: finalPrice,
-      quantity: item.qty
-    };
-  });
 
+  const orderType = document.querySelector('input[name="orderType"]:checked').value;
+  const payRadio = document.querySelector('input[name="paymentMethod"]:checked');
+  const idleLabel = stripeEnabled ? "Paga con carta" : "Conferma Ordine";
+
+  // Il server ricalcola prezzi, consegna e totale: qui servono solo le scelte del cliente
   const orderData = {
-    customerId: customerId,
     restaurantId: restaurantId,
-    items: itemsPayload,
-    orderType: orderType,
-    subtotal: Number(subtotal.toFixed(2)),
-    totalAmount: Number((subtotal + deliveryFee).toFixed(2)),
-    payment: {
-      provider: payMethod === "credit_card" ? "stripe" : "mock",
-      method: payMethod === "credit_card" ? "credit_card" : "prepaid_card",
-      status: "in_attesa"
-    }
+    items: cart.map(item => ({ productId: item.product._id, quantity: item.qty })),
+    orderType: orderType
   };
+
+  if (!stripeEnabled && payRadio) {
+    orderData.payment = { method: payRadio.value }; // pagamento simulato
+  }
 
   if (orderType === "delivery") {
     orderData.deliveryAddress = {
@@ -267,32 +254,42 @@ async function handleOrderSubmit(e) {
       zip: zipInput.value.trim(),
       notes: notesInput.value.trim()
     };
-    orderData.distanceKm = Number(distanceKm.toFixed(1));
-    orderData.deliveryFee = Number(deliveryFee.toFixed(2));
-  }
-
-  if (payMethod === "credit_card") {
-    const ccNum = document.getElementById("ccNumber").value.replace(/\s/g, "");
-    if (ccNum.length >= 4) orderData.payment.last4Digits = ccNum.slice(-4);
   }
 
   try {
     submitBtn.disabled = true;
     submitBtn.textContent = "Elaborazione in corso...";
 
-    await createOrder(orderData);
-    
+    const result = await createOrder(orderData);
+
+    // Il carrello è diventato un ordine: lo svuoto in ogni caso
     sessionStorage.removeItem("checkoutCart");
+
+    if (result.checkoutUrl) {
+      submitBtn.textContent = "Reindirizzamento a Stripe...";
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+
     showAlert("success", "Ordine Creato!", "Reindirizzamento allo storico...");
-    
     setTimeout(() => {
       window.location.href = "/pages/customer/orderHistory.html";
     }, 500);
 
   } catch (err) {
+    // Ordine creato ma pagamento non avviato (es. Stripe non raggiungibile): si riprende dallo storico
+    if (err.status === 502 && err.data?.orderId) {
+      sessionStorage.removeItem("checkoutCart");
+      showAlert("danger", "Pagamento non avviato", "Il tuo ordine è nello storico: potrai completare il pagamento da lì.");
+      setTimeout(() => {
+        window.location.href = "/pages/customer/orderHistory.html";
+      }, 2500);
+      return;
+    }
+
     showAlert("danger", "Errore", err.message);
     submitBtn.disabled = false;
-    submitBtn.textContent = "Conferma Ordine";
+    submitBtn.textContent = idleLabel;
   }
 }
 
@@ -323,3 +320,22 @@ function renderMap(route) {
 
   mapInstance.fitBounds(polyline.getBounds(), { padding: [40, 40] });
 }
+
+// Legge dal server se i pagamenti online (Stripe) sono attivi e mostra il blocco corrispondente
+async function setupPaymentUi() {
+  try {
+    const config = await getPaymentConfig();
+    stripeEnabled = Boolean(config.stripeEnabled);
+  } catch {
+    stripeEnabled = false;
+  }
+
+  stripePaymentInfo.classList.toggle("d-none", !stripeEnabled);
+  mockPaymentInfo.classList.toggle("d-none", stripeEnabled);
+  submitBtn.textContent = stripeEnabled ? "Paga con carta" : "Conferma Ordine";
+}
+
+// Tornando indietro dalla pagina di Stripe il browser può riproporre questa pagina "congelata"
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) window.location.reload();
+});

@@ -122,8 +122,15 @@ const orderSchema = new Schema(
       },
       method: {
         type: String,
-        enum: ["credit_card", "prepaid_card"],
+        enum: ["credit_card", "prepaid_card", "debit_card"],
         default: "credit_card"
+      },
+      checkoutSessionId: {
+        type: String,
+        trim: true
+      },
+      paidAt: {
+        type: Date
       },
       last4Digits: {
         type: String,

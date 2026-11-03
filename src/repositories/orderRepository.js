@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import { stripeEnabled } from "../public/services/stripeService.js";
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import { Restaurant } from "../models/User.js";
@@ -152,7 +153,7 @@ export const buildQuote = async ({ restaurantId, items, orderType, deliveryAddre
   }
 
   // Attesa: piatti già in coda al ristorante + quelli di questo ordine (+ viaggio se consegna)
-  const queued = await Order.find({ restaurantId, status: { $in: QUEUE_STATUSES } })
+  const queued = await Order.find({ restaurantId, status: { $in: QUEUE_STATUSES }, "payment.status": "completato" })
     .select("items.quantity")
     .lean();
   const queuedItems = queued.reduce((sum, o) => sum + countItems(o.items), 0);
@@ -189,9 +190,11 @@ export const createOrder = async (customerId, data) => {
     totalAmount: quote.totalAmount,
     estimatedTimeMinutes: quote.estimatedTimeMinutes,
     payment: {
-      provider: payment?.provider,
-      method: payment?.method,
-      last4Digits: payment?.last4Digits
+      provider: stripeEnabled ? "stripe" : "mock",
+      status: stripeEnabled ? "in_attesa" : "completato",
+      paidAt: stripeEnabled ? undefined : new Date(),
+      method: stripeEnabled ? undefined : payment?.method,
+      last4Digits: stripeEnabled ? undefined : payment?.last4Digits
     }
   });
 };
@@ -203,6 +206,7 @@ export const getOrdersByRestaurant = (restaurantId) => {
   today.setHours(0, 0, 0, 0);
 
   return Order.find({
+    "payment.status": "completato", // il ristoratore vede solo gli ordini pagati
     restaurantId,
     $or: [
       { status: { $ne: "consegnato" } }, // 1. Prendi TUTTI gli ordini non ancora consegnati (anche vecchi)
@@ -231,7 +235,7 @@ const FLOW = {
 
 // UPDATE: stato ordine con regole di business (solo il ristorante proprietario)
 export const updateOrderStatus = async (id, restaurantId, newStatus, verificationCode) => {
-  const order = await Order.findOne({ _id: id, restaurantId });
+  const order = await Order.findOne({ _id: id, restaurantId, "payment.status": "completato" });
   if (!order) return null;
 
   const allowed = FLOW[order.orderType]?.[order.status] || [];
@@ -270,7 +274,7 @@ export const getRestaurantStats = async (restaurantId, days = 30) => {
   const coarseStart = new Date(Date.now() - (span + 1) * 86400000); // pre-filtro grossolano
 
   const [result] = await Order.aggregate([
-    { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId), createdAt: { $gte: coarseStart } } },
+    { $match: { restaurantId: new mongoose.Types.ObjectId(restaurantId), "payment.status": "completato", createdAt: { $gte: coarseStart } } },
     {
       $addFields: {
         day: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: STATS_TIMEZONE } },
@@ -337,3 +341,7 @@ export const getRestaurantStats = async (restaurantId, days = 30) => {
     topDishes: result.topDishes.map((d) => ({ name: d._id, quantity: d.quantity, revenue: round2(d.revenue) }))
   };
 };
+
+// Collega all'ordine l'ultima sessione di pagamento Stripe creata
+export const setCheckoutSession = (id, sessionId) =>
+  Order.updateOne({ _id: id }, { $set: { "payment.checkoutSessionId": sessionId } });

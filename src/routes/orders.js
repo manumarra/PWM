@@ -2,6 +2,8 @@ import { Router } from "express";
 import { asyncWrapper as AW } from "../utils/asyncWrapper.js";
 import * as orderRepo from "../repositories/orderRepository.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import * as userRepo from "../repositories/userRepository.js";
+import * as stripeService from "../public/services/stripeService.js";
 
 const router = Router();
 
@@ -14,7 +16,21 @@ const parsePagination = (query) => {
 // POST /api/orders/create (solo clienti; il cliente è quello del token)
 router.post("/create", requireAuth, requireRole("customer"), AW(async (req, res) => {
   const newOrder = await orderRepo.createOrder(req.user.id, req.body);
-  res.status(201).json({ status: "ok", data: newOrder });
+  // Pagamento simulato (nessuna chiave Stripe): l'ordine è già valido
+  if (newOrder.payment.provider !== "stripe") {
+    return res.status(201).json({ status: "ok", data: newOrder });
+  }
+
+  // Stripe: crea la sessione di pagamento e indica al browser dove mandare il cliente
+  try {
+    const customer = await userRepo.getUserById(req.user.id);
+    const session = await stripeService.createCheckoutSession(newOrder, customer?.email);
+    await orderRepo.setCheckoutSession(newOrder._id, session.id);
+    return res.status(201).json({ status: "ok", data: newOrder, checkoutUrl: session.url });
+  } catch (error) {
+    // L'ordine resta "in attesa di pagamento": il cliente può riprovare dallo storico
+    return res.status(502).json({ status: "fail", message: error.message, orderId: newOrder._id });
+  }
 }));
 
 // GET /api/orders/customer/:customerId (solo i propri ordini)

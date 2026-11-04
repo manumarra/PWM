@@ -1,0 +1,1751 @@
+openapi: 3.0.3
+
+info:
+  title: FastFood API
+  version: 1.0.0
+  description: |
+    API REST dell'applicazione **FastFood**, sito di ordinazione online per ristoranti
+    (progetto di Programmazione Web e Mobile, A.A. 2025/2026).
+
+    ## Come provarla da questa pagina
+    1. Registra un utente con **POST /users/signup** (oppure usa uno già esistente).
+    2. Esegui **POST /users/login**: il server imposta il cookie `token` (httpOnly, 2 ore).
+    3. Da quel momento le operazioni protette funzionano direttamente da qui, perché il browser
+       invia il cookie da solo (questa pagina è servita dallo stesso server delle API).
+    4. **POST /users/logout** cancella il cookie.
+
+    ## Autenticazione e ruoli
+    - L'autenticazione usa un **JWT in un cookie httpOnly** chiamato `token`.
+    - Esistono due ruoli: **customer** (cliente) e **restaurateur** (ristoratore).
+    - `401` = non autenticato o sessione scaduta; `403` = autenticato ma non autorizzato
+      (ruolo sbagliato, risorsa di un altro utente, password di conferma errata).
+    - Per ogni operazione protetta è indicato il ruolo richiesto.
+
+    ## Formato delle risposte
+    Tutte le risposte sono JSON.
+    - Successo: `{ "status": "ok", "data": ... }` (con `message` e/o `pagination` dove previsto).
+    - Errore: `{ "status": "fail", "message": "..." }`. Gli errori di validazione includono anche
+      `errors`, l'elenco dei campi non validi. Gli errori interni usano `"status": "error"`.
+
+    ## Ordini e pagamenti
+    - Un ordine passa per gli stati **ordinato → in preparazione → (in consegna) → consegnato**.
+      La consegna a domicilio ha lo stato *in consegna*; il ritiro in locale passa direttamente
+      da *in preparazione* a *consegnato*. Per consegnare serve il **codice di verifica** del cliente.
+    - Prezzi, costo di consegna, totale e tempo di attesa sono **calcolati dal server**: il client
+      invia solo i piatti scelti e le quantità.
+    - Con Stripe attivo l'ordine nasce *in attesa di pagamento* e il ristoratore lo vede solo dopo
+      il pagamento. Senza chiavi Stripe il pagamento è simulato e l'ordine nasce già pagato.
+
+servers:
+  - url: /api
+    description: Server corrente (percorsi relativi)
+
+tags:
+  - name: Utenti
+    description: Registrazione, accesso e gestione del profilo (cliente e ristoratore)
+  - name: Ristoranti
+    description: Elenco e dettaglio dei ristoranti (pubblico)
+  - name: Catalogo
+    description: Ricettario comune a tutti i ristoranti, caricato da meals.json
+  - name: Menu e piatti
+    description: Piatti in vendita dei ristoranti, gestione del menu e ricerca
+  - name: Ordini
+    description: Preventivo, creazione e gestione degli ordini, storico e statistiche
+  - name: Pagamenti
+    description: Pagamento online con Stripe Checkout
+
+paths:
+  # ───────────────────────────── UTENTI ─────────────────────────────
+  /users/signup:
+    post:
+      tags: [Utenti]
+      operationId: signup
+      summary: Registrazione di un nuovo utente
+      description: |
+        Crea un cliente o un ristoratore, a seconda del campo `role`.
+        L'email deve essere unica. La password viene salvata con hash e non è mai restituita.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/CustomerSignup"
+                - $ref: "#/components/schemas/RestaurantSignup"
+              discriminator:
+                propertyName: role
+                mapping:
+                  customer: "#/components/schemas/CustomerSignup"
+                  restaurateur: "#/components/schemas/RestaurantSignup"
+            examples:
+              cliente:
+                summary: Registrazione di un cliente
+                value:
+                  role: customer
+                  email: mario.rossi@example.com
+                  password: Passw123
+                  name: Mario
+                  surname: Rossi
+                  phone: "3331234567"
+                  address:
+                    street: Via Roma 12
+                    city: Milano
+                    zip: "20100"
+              ristoratore:
+                summary: Registrazione di un ristoratore
+                value:
+                  role: restaurateur
+                  email: info@pizzeria.it
+                  password: Passw123
+                  name: Pizzeria da Luigi
+                  phone: "0212345678"
+                  ivaNumber: "12345678901"
+                  address:
+                    street: Via Torino 5
+                    city: Milano
+                    zip: "20123"
+      responses:
+        "201":
+          description: Utente creato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Email già registrata
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { status: fail, message: Email già registrata }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /users/login:
+    post:
+      tags: [Utenti]
+      operationId: login
+      summary: Accesso
+      description: |
+        Verifica le credenziali e imposta il cookie `token` (JWT, httpOnly, 2 ore).
+        La risposta contiene i dati pubblici dell'utente, compreso il ruolo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+            example:
+              email: mario.rossi@example.com
+              password: Passw123
+      responses:
+        "200":
+          description: Accesso eseguito
+          headers:
+            Set-Cookie:
+              description: Cookie di sessione `token` (httpOnly, SameSite=Strict)
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  message: { type: string, example: Accesso eseguito con successo }
+                  data: { $ref: "#/components/schemas/User" }
+        "400":
+          description: Email o password mancanti
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Credenziali non valide
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { status: fail, message: Credenziali non valide }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /users/logout:
+    post:
+      tags: [Utenti]
+      operationId: logout
+      summary: Uscita
+      description: Cancella il cookie di sessione. Non richiede di essere autenticati.
+      responses:
+        "200":
+          description: Logout eseguito
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+
+  /users/me:
+    get:
+      tags: [Utenti]
+      operationId: getMe
+      summary: Utente della sessione corrente
+      description: Restituisce i dati pubblici dell'utente identificato dal cookie. Ruolo richiesto, qualsiasi.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Dati dell'utente
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /users/update:
+    put:
+      tags: [Utenti]
+      operationId: updateProfile
+      summary: Modifica dei dati dell'utente
+      description: |
+        Modifica il profilo dell'utente autenticato (l'identità viene dal cookie, non dal corpo).
+        Richiede la **password attuale**. Sono modificabili solo i campi previsti per il proprio ruolo:
+        - cliente: `name`, `surname`, `phone`, `address`, `paymentMethod`, `preferences`, `password`;
+        - ristoratore: `name`, `phone`, `address`, `image`, `ivaNumber`, `password`.
+
+        Per cambiare la password inviare anche `confirmPassword`, uguale alla nuova password.
+        L'email e il ruolo non sono modificabili.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, updates]
+              properties:
+                currentPassword: { type: string, format: password }
+                confirmPassword:
+                  type: string
+                  format: password
+                  description: Obbligatoria solo se `updates.password` è presente
+                updates: { $ref: "#/components/schemas/UserUpdates" }
+            example:
+              currentPassword: Passw123
+              updates:
+                phone: "3339876543"
+      responses:
+        "200":
+          description: Profilo aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  message: { type: string, example: Modifica avvenuta con successo }
+                  data: { $ref: "#/components/schemas/User" }
+        "400":
+          description: Dati non validi, `updates` mancante o le nuove password non coincidono
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Password attuale errata
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { status: fail, message: Password non valida }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+  /users/delete:
+    delete:
+      tags: [Utenti]
+      operationId: deleteAccount
+      summary: Eliminazione dell'account
+      description: |
+        Elimina l'account dell'utente autenticato; richiede la password.
+        Per un ristoratore elimina anche tutti i suoi piatti a menu. Cancella il cookie di sessione.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: Account eliminato
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: Password errata
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ─────────────────────────── RISTORANTI ───────────────────────────
+  /users/restaurants:
+    get:
+      tags: [Ristoranti]
+      operationId: listRestaurants
+      summary: Elenco dei ristoranti, con ricerca e paginazione
+      description: |
+        Pubblica. Si può cercare per **luogo** (`city`, corrispondenza esatta senza distinzione di
+        maiuscole), per **nome** (`search`, anche parziale) e per **piatto** (`dish`: restano i ristoranti
+        che vendono, e hanno disponibile, un piatto con quel nome). I filtri si combinano.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/Limit100Param"
+        - name: city
+          in: query
+          description: Città del ristorante
+          schema: { type: string }
+          example: Milano
+        - name: search
+          in: query
+          description: Parte del nome del ristorante
+          schema: { type: string }
+          example: pizzeria
+        - name: dish
+          in: query
+          description: Parte del nome di un piatto in vendita (ricerca del ristorante per piatto)
+          schema: { type: string }
+          example: margherita
+      responses:
+        "200":
+          description: Pagina di ristoranti
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data, pagination]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/RestaurantSummary" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+
+  /users/restaurants/{id}:
+    get:
+      tags: [Ristoranti]
+      operationId: getRestaurant
+      summary: Dettaglio di un ristorante
+      description: Pubblica.
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPath"
+      responses:
+        "200":
+          description: Dati del ristorante
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/RestaurantSummary" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ───────────────────────────── CATALOGO ───────────────────────────
+  /meals/catalog:
+    get:
+      tags: [Catalogo]
+      operationId: listCatalogMeals
+      summary: Ricerca nel ricettario comune
+      description: |
+        Pubblica. Il ricettario è la lista comune a tutti i ristoranti (caricata da `meals.json`).
+        Si può filtrare per nome, categoria e ingredienti; i risultati sono ordinati per nome.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/Limit100Param"
+        - name: search
+          in: query
+          description: Parte del nome del piatto
+          schema: { type: string }
+          example: curry
+        - name: category
+          in: query
+          description: Categoria (corrispondenza esatta senza distinzione di maiuscole)
+          schema: { type: string }
+          example: Chicken
+        - name: ingredient
+          in: query
+          description: Ingredienti separati da virgola; il piatto deve contenerli tutti
+          schema: { type: string }
+          example: chicken,garlic
+      responses:
+        "200":
+          description: Pagina di piatti del catalogo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data, pagination]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Meal" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+
+  /meals/detail/{id}:
+    get:
+      tags: [Catalogo]
+      operationId: getCatalogMeal
+      summary: Dettaglio di un piatto del catalogo
+      description: Pubblica.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificativo del piatto nel catalogo
+          schema: { $ref: "#/components/schemas/ObjectId" }
+      responses:
+        "200":
+          description: Piatto del catalogo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Meal" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ─────────────────────────── MENU E PIATTI ────────────────────────
+  /products/create:
+    post:
+      tags: [Menu e piatti]
+      operationId: createProduct
+      summary: Aggiunge un piatto al menu
+      description: |
+        Ruolo richiesto: **restaurateur**. Il piatto viene sempre assegnato al ristorante dell'utente
+        autenticato. Può derivare dal catalogo (`mealId`) oppure essere inventato dal ristoratore
+        (`mealId` assente). Gli **allergeni** sono calcolati dal server a partire dagli ingredienti.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductInput" }
+            example:
+              nameMeal: Pizza Margherita
+              category: Pizza
+              price: 8.5
+              ingredients: [Pomodoro, Mozzarella, Basilico, Farina]
+              available: true
+              discount: 0
+      responses:
+        "201":
+          description: Piatto creato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Product" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /products/restaurant/{restaurantId}:
+    get:
+      tags: [Menu e piatti]
+      operationId: getRestaurantMenu
+      summary: Menu di un ristorante
+      description: |
+        Pubblica. Restituisce tutti i piatti del ristorante, compresi quelli non disponibili
+        (campo `available`), perché il cliente li veda come "esauriti".
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPathNamed"
+      responses:
+        "200":
+          description: Piatti del menu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Product" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    delete:
+      tags: [Menu e piatti]
+      operationId: clearMenu
+      summary: Svuota il proprio menu
+      description: "Ruolo richiesto: **restaurateur**. Si può svuotare solo il proprio menu."
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPathNamed"
+      responses:
+        "200":
+          description: Menu svuotato
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /products/search:
+    get:
+      tags: [Menu e piatti]
+      operationId: searchProducts
+      summary: Ricerca dei piatti in vendita
+      description: |
+        Pubblica. Cerca fra i piatti **disponibili** di tutti i ristoranti. I filtri si combinano:
+        nome, tipologia (`category`), prezzo (di listino, senza sconto), ingredienti, allergeni da evitare
+        e città del ristorante. Ogni risultato include i dati essenziali del ristorante.
+
+        Gli allergeni validi sono: `glutine`, `crostacei`, `uova`, `pesce`, `arachidi`, `soia`, `latte`,
+        `frutta_a_guscio`, `sedano`, `senape`, `sesamo`, `solfiti`, `lupini`, `molluschi`.
+        Sono dedotti dagli ingredienti, quindi **indicativi**.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/Limit50Param"
+        - name: search
+          in: query
+          description: Parte del nome del piatto
+          schema: { type: string }
+          example: pizza
+        - name: category
+          in: query
+          description: Tipologia (corrispondenza esatta senza distinzione di maiuscole)
+          schema: { type: string }
+          example: Dessert
+        - name: city
+          in: query
+          description: Città del ristorante
+          schema: { type: string }
+          example: Milano
+        - name: minPrice
+          in: query
+          description: Prezzo minimo in euro
+          schema: { type: number, minimum: 0 }
+          example: 5
+        - name: maxPrice
+          in: query
+          description: Prezzo massimo in euro
+          schema: { type: number, minimum: 0 }
+          example: 12
+        - name: ingredient
+          in: query
+          description: Ingredienti separati da virgola; il piatto deve contenerli tutti
+          schema: { type: string }
+          example: cheese,tomato
+        - name: avoidAllergens
+          in: query
+          description: Allergeni da evitare, separati da virgola; i piatti che li contengono sono esclusi
+          schema: { type: string }
+          example: glutine,latte
+        - name: sort
+          in: query
+          description: Ordinamento dei risultati
+          schema:
+            type: string
+            enum: [name, price_asc, price_desc]
+            default: name
+      responses:
+        "200":
+          description: Pagina di piatti
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data, pagination]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ProductSearchResult" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "400":
+          description: Allergene non valido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { status: fail, message: "Allergene non valido: boh" }
+
+  /products/update/{id}:
+    put:
+      tags: [Menu e piatti]
+      operationId: updateProduct
+      summary: Modifica un piatto del proprio menu
+      description: |
+        Ruolo richiesto: **restaurateur**. Si possono modificare solo i piatti del proprio ristorante;
+        un piatto di un altro ristorante risponde `404`. Si inviano solo i campi da cambiare.
+        Se cambiano gli ingredienti, gli allergeni vengono ricalcolati.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ProductIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+            example:
+              available: false
+              discount: 15
+      responses:
+        "200":
+          description: Piatto aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Product" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /products/remove/{id}:
+    delete:
+      tags: [Menu e piatti]
+      operationId: removeProduct
+      summary: Rimuove un piatto dal proprio menu
+      description: "Ruolo richiesto: **restaurateur**. Un piatto di un altro ristorante risponde `404`."
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ProductIdPath"
+      responses:
+        "200":
+          description: Piatto rimosso
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ───────────────────────────── ORDINI ─────────────────────────────
+  /orders/quote:
+    post:
+      tags: [Ordini]
+      operationId: quoteOrder
+      summary: Preventivo di un ordine
+      description: |
+        Ruolo richiesto: **customer**. Calcola, senza creare nulla, prezzi, costo di consegna, totale e
+        tempo di attesa stimato. Per la consegna a domicilio geocodifica l'indirizzo (OpenStreetMap/Nominatim)
+        e calcola la **distanza stradale** (OSRM); se OSRM non risponde usa la distanza in linea d'aria
+        (`route.method` = `air`).
+
+        Costo di consegna: tariffa per km con un minimo; oltre il limite di distanza non si consegna.
+        Tempo di attesa: tempo base più un tempo per ogni piatto in coda al ristorante e in questo
+        ordine (più il viaggio per le consegne).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuoteRequest" }
+            example:
+              restaurantId: 64f1c2a9b3e4d5f6a7b8c9d0
+              orderType: delivery
+              items:
+                - productId: 64f1c2a9b3e4d5f6a7b8c9d1
+                  quantity: 2
+              deliveryAddress:
+                street: Via Roma 12
+                city: Milano
+      responses:
+        "200":
+          description: Preventivo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Quote" }
+        "400":
+          description: |
+            Dati non validi: piatto di un altro ristorante o non disponibile, quantità non valida,
+            indirizzo non trovato o fuori dall'area di consegna
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "503":
+          description: Servizio di localizzazione non disponibile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/create:
+    post:
+      tags: [Ordini]
+      operationId: createOrder
+      summary: Crea un ordine
+      description: |
+        Ruolo richiesto: **customer**; il cliente è quello del cookie. Il server ricalcola tutto come
+        nel preventivo: eventuali prezzi, totali o stati inviati dal client vengono ignorati.
+
+        - **Con Stripe attivo** l'ordine nasce con pagamento `in_attesa` e la risposta contiene
+          `checkoutUrl`, l'indirizzo della pagina di pagamento a cui mandare il cliente. Il ristoratore
+          vede l'ordine solo dopo il pagamento.
+        - **Senza Stripe** il pagamento è simulato: l'ordine nasce già `completato` e `checkoutUrl` manca.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderRequest" }
+            example:
+              restaurantId: 64f1c2a9b3e4d5f6a7b8c9d0
+              orderType: delivery
+              items:
+                - productId: 64f1c2a9b3e4d5f6a7b8c9d1
+                  quantity: 2
+              deliveryAddress:
+                street: Via Roma 12
+                city: Milano
+                zip: "20100"
+                notes: Citofono Rossi
+      responses:
+        "201":
+          description: Ordine creato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Order" }
+                  checkoutUrl:
+                    type: string
+                    format: uri
+                    description: Pagina di pagamento Stripe (solo con Stripe attivo)
+        "400":
+          description: Dati non validi (stesse regole del preventivo)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "502":
+          description: |
+            L'ordine è stato creato ma Stripe non è raggiungibile: il pagamento si può riprendere
+            con **POST /payments/checkout/{orderId}**
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [fail] }
+                  message: { type: string }
+                  orderId: { $ref: "#/components/schemas/ObjectId" }
+        "503":
+          description: Servizio di localizzazione non disponibile (solo consegna a domicilio)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /orders/customer/{customerId}:
+    get:
+      tags: [Ordini]
+      operationId: listCustomerOrders
+      summary: Storico degli ordini del cliente
+      description: |
+        Ruolo richiesto: **customer**, e solo per i propri ordini (un altro identificativo risponde `403`).
+        Include gli ordini non ancora pagati, dal più recente. Ogni ordine riporta nome, telefono e
+        indirizzo del ristorante.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Identificativo del cliente (deve coincidere con quello della sessione)
+          schema: { $ref: "#/components/schemas/ObjectId" }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/Limit50Param"
+      responses:
+        "200":
+          description: Pagina di ordini
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data, pagination]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Order" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/restaurant/{restaurantId}:
+    get:
+      tags: [Ordini]
+      operationId: listRestaurantOrders
+      summary: Ordini attivi del ristorante
+      description: |
+        Ruolo richiesto: **restaurateur**, solo per il proprio ristorante. Restituisce gli ordini ancora
+        attivi e quelli di oggi (per dashboard e Kanban), **solo se già pagati**. Ogni ordine riporta i
+        dati del cliente.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPathNamed"
+      responses:
+        "200":
+          description: Ordini
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Order" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/restaurant/{restaurantId}/history:
+    get:
+      tags: [Ordini]
+      operationId: getRestaurantOrderHistory
+      summary: Storico degli ordini consegnati del ristorante
+      description: "Ruolo richiesto: **restaurateur**, solo per il proprio ristorante."
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPathNamed"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/Limit50Param"
+      responses:
+        "200":
+          description: Pagina di ordini consegnati
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data, pagination]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Order" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/restaurant/{restaurantId}/stats:
+    get:
+      tags: [Ordini]
+      operationId: getRestaurantStats
+      summary: Statistiche del ristorante
+      description: |
+        Ruolo richiesto: **restaurateur**, solo per il proprio ristorante. Considera gli ordini pagati
+        degli ultimi `days` giorni (giorni e fasce orarie in fuso orario italiano). L'incasso è la somma
+        dei totali, costo di consegna compreso, di tutti gli stati.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/RestaurantIdPathNamed"
+        - name: days
+          in: query
+          description: Ampiezza del periodo in giorni (da 1 a 365; se non valido vale 30)
+          schema: { type: integer, minimum: 1, maximum: 365, default: 30 }
+          example: 30
+      responses:
+        "200":
+          description: Statistiche
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Stats" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /orders/update-status/{id}:
+    patch:
+      tags: [Ordini]
+      operationId: updateOrderStatus
+      summary: Fa avanzare lo stato di un ordine
+      description: |
+        Ruolo richiesto: **restaurateur**, solo per ordini del proprio ristorante e già pagati
+        (altrimenti `404`). Sono ammesse solo le transizioni valide:
+
+        | Tipo | Percorso |
+        |---|---|
+        | `delivery` | ordinato → in preparazione → in consegna → consegnato |
+        | `takeaway` | ordinato → in preparazione → consegnato |
+
+        Per passare a **consegnato** serve il `verificationCode` che il cliente ha nel suo storico.
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OrderIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [ordinato, in preparazione, in consegna, consegnato]
+                verificationCode:
+                  type: string
+                  description: Codice di 6 cifre del cliente (obbligatorio per `consegnato`)
+                  example: "482910"
+            examples:
+              avanzamento:
+                summary: Inizio preparazione
+                value: { status: in preparazione }
+              consegna:
+                summary: Consegna con codice
+                value: { status: consegnato, verificationCode: "482910" }
+      responses:
+        "200":
+          description: Stato aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data: { $ref: "#/components/schemas/Order" }
+        "400":
+          description: Transizione non consentita oppure codice di verifica errato
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                status: fail
+                message: 'Transizione non consentita: da "ordinato" a "consegnato"'
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  # ─────────────────────────── PAGAMENTI ────────────────────────────
+  /payments/config:
+    get:
+      tags: [Pagamenti]
+      operationId: getPaymentConfig
+      summary: Configurazione dei pagamenti
+      description: Pubblica. Dice al frontend se i pagamenti online con Stripe sono attivi o simulati.
+      responses:
+        "200":
+          description: Configurazione
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: object
+                    required: [stripeEnabled]
+                    properties:
+                      stripeEnabled: { type: boolean }
+
+  /payments/checkout/{orderId}:
+    post:
+      tags: [Pagamenti]
+      operationId: resumePayment
+      summary: Nuova sessione di pagamento per un ordine in attesa
+      description: |
+        Ruolo richiesto: **customer**, solo per i propri ordini. Serve a "riprendere il pagamento" di un
+        ordine Stripe ancora `in_attesa` (ad esempio dopo un annullamento). Un ordine già pagato, scaduto o
+        simulato risponde `400`.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/ObjectId" }
+      responses:
+        "200":
+          description: Sessione creata
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, checkoutUrl]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  checkoutUrl: { type: string, format: uri }
+        "400":
+          description: L'ordine non è in attesa di pagamento
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "502":
+          description: Stripe non raggiungibile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Pagamenti online non attivi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /payments/confirm:
+    post:
+      tags: [Pagamenti]
+      operationId: confirmPayment
+      summary: Conferma il pagamento al ritorno da Stripe
+      description: |
+        Ruolo richiesto: **customer**. Chiamata dalla pagina di esito con l'identificativo della sessione
+        (`session_id` nell'indirizzo di ritorno). Il server chiede a Stripe se la sessione è stata pagata,
+        controlla che appartenga a un ordine del cliente e che l'importo coincida, e segna l'ordine come
+        pagato. È **idempotente**: ripeterla non ha effetti collaterali.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sessionId]
+              properties:
+                sessionId:
+                  type: string
+                  description: Identificativo della sessione Stripe (inizia con `cs_`)
+                  example: cs_test_a1b2c3d4
+      responses:
+        "200":
+          description: Stato del pagamento dopo la verifica
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, data]
+                properties:
+                  status: { type: string, enum: [ok] }
+                  data:
+                    type: object
+                    required: [orderId, paymentStatus]
+                    properties:
+                      orderId: { $ref: "#/components/schemas/ObjectId" }
+                      paymentStatus:
+                        type: string
+                        enum: [in_attesa, completato, fallito, rimborsato]
+        "400":
+          description: Sessione non valida o importo non coerente con l'ordine
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "502":
+          description: Impossibile verificare il pagamento con Stripe
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: Pagamenti online non attivi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /payments/webhook:
+    post:
+      tags: [Pagamenti]
+      operationId: stripeWebhook
+      summary: Webhook di Stripe
+      description: |
+        **Chiamata da Stripe, non dal frontend.** Non usa il cookie: l'autenticità è garantita dalla firma
+        nell'intestazione `Stripe-Signature`, verificata con il segreto `STRIPE_WEBHOOK_SECRET`. Il corpo
+        deve arrivare **grezzo** (per questo la route è montata prima del parser JSON).
+
+        Gestisce `checkout.session.completed` e `checkout.session.async_payment_succeeded`: segna l'ordine
+        come pagato, in modo idempotente. Gli altri eventi sono ignorati. È facoltativo: senza webhook il
+        pagamento si conferma comunque quando il cliente torna al sito.
+      security: []
+      parameters:
+        - name: Stripe-Signature
+          in: header
+          required: true
+          description: Firma dell'evento calcolata da Stripe
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Evento Stripe (vedi la documentazione di Stripe)
+              properties:
+                id: { type: string, example: evt_1Nabc }
+                type: { type: string, example: checkout.session.completed }
+                data:
+                  type: object
+                  properties:
+                    object: { type: object }
+      responses:
+        "200":
+          description: Evento ricevuto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received: { type: boolean, example: true }
+        "400":
+          description: Firma non valida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "500":
+          description: Errore nell'elaborazione (Stripe ritenterà l'invio)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "501":
+          description: Webhook non configurato (manca la chiave o il segreto)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+      description: |
+        JWT impostato da **POST /users/login** in un cookie httpOnly (durata 2 ore).
+        Non va inserito a mano: il browser lo invia da solo.
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Numero di pagina (parte da 1)
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limit50Param:
+      name: limit
+      in: query
+      description: Elementi per pagina (massimo 50)
+      schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+    Limit100Param:
+      name: limit
+      in: query
+      description: Elementi per pagina (massimo 100)
+      schema: { type: integer, minimum: 1, maximum: 100, default: 12 }
+    RestaurantIdPath:
+      name: id
+      in: path
+      required: true
+      description: Identificativo del ristorante
+      schema: { $ref: "#/components/schemas/ObjectId" }
+    RestaurantIdPathNamed:
+      name: restaurantId
+      in: path
+      required: true
+      description: Identificativo del ristorante
+      schema: { $ref: "#/components/schemas/ObjectId" }
+    ProductIdPath:
+      name: id
+      in: path
+      required: true
+      description: Identificativo del piatto a menu
+      schema: { $ref: "#/components/schemas/ObjectId" }
+    OrderIdPath:
+      name: id
+      in: path
+      required: true
+      description: Identificativo dell'ordine
+      schema: { $ref: "#/components/schemas/ObjectId" }
+
+  responses:
+    BadRequest:
+      description: |
+        Richiesta non valida: validazione fallita (con l'elenco `errors`) oppure identificativo non valido
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            status: fail
+            message: Il CAP non è valido (5 cifre)
+            errors:
+              - { field: address.zip, msg: CAP non valido (5 cifre) }
+    Unauthorized:
+      description: Non autenticato o sessione scaduta
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { status: fail, message: Autenticazione richiesta }
+    Forbidden:
+      description: Operazione non consentita (ruolo sbagliato o risorsa di un altro utente)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { status: fail, message: Operazione non consentita }
+    NotFound:
+      description: Risorsa non trovata
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { status: fail, message: Ordine non trovato }
+    ServerError:
+      description: Errore interno del server
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { status: error, message: Errore interno del server }
+
+  schemas:
+    ObjectId:
+      type: string
+      pattern: "^[0-9a-fA-F]{24}$"
+      description: Identificativo MongoDB (24 caratteri esadecimali)
+      example: 64f1c2a9b3e4d5f6a7b8c9d0
+
+    Error:
+      type: object
+      required: [status, message]
+      properties:
+        status: { type: string, enum: [fail, error] }
+        message: { type: string }
+        errors:
+          type: array
+          description: Elenco dei campi non validi (solo errori di validazione)
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              msg: { type: string }
+
+    MessageResponse:
+      type: object
+      required: [status, message]
+      properties:
+        status: { type: string, enum: [ok] }
+        message: { type: string }
+
+    Pagination:
+      type: object
+      required: [page, limit, total, pages, hasNext]
+      properties:
+        page: { type: integer, example: 1 }
+        limit: { type: integer, example: 12 }
+        total: { type: integer, example: 37 }
+        pages: { type: integer, example: 4 }
+        hasNext: { type: boolean }
+        hasPrev: { type: boolean }
+
+    Address:
+      type: object
+      required: [street, city, zip]
+      properties:
+        street:
+          type: string
+          description: Via ed eventuale numero civico
+          example: Via Roma 12
+        city: { type: string, example: Milano }
+        zip:
+          type: string
+          pattern: "^\\d{5}$"
+          example: "20100"
+        country:
+          type: string
+          minLength: 2
+          maxLength: 3
+          default: ITA
+
+    GeoPoint:
+      type: object
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lon: { type: number, minimum: -180, maximum: 180 }
+
+    # ── Utenti ──
+    CustomerSignup:
+      type: object
+      required: [role, email, password, name, surname, phone]
+      properties:
+        role: { type: string, enum: [customer] }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 6 }
+        name: { type: string, minLength: 2, maxLength: 80, description: Solo lettere }
+        surname: { type: string, minLength: 2, maxLength: 80, description: Solo lettere }
+        phone:
+          type: string
+          pattern: "^[0-9]{6,15}$"
+          description: Solo cifre, senza prefisso internazionale
+        address:
+          allOf:
+            - $ref: "#/components/schemas/Address"
+          description: Facoltativo, precompila il checkout
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethodPreference" }
+        preferences:
+          type: array
+          description: Preferenze per le offerte in bacheca (es. categorie di piatti)
+          items: { type: string }
+
+    RestaurantSignup:
+      type: object
+      required: [role, email, password, name, phone, ivaNumber, address]
+      properties:
+        role: { type: string, enum: [restaurateur] }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 6 }
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Nome del ristorante
+        phone:
+          type: string
+          pattern: "^[0-9]{6,15}$"
+        ivaNumber:
+          type: string
+          pattern: "^\\d{11}$"
+          description: Partita IVA (11 cifre)
+        address: { $ref: "#/components/schemas/Address" }
+
+    PaymentMethodPreference:
+      type: object
+      description: Metodo di pagamento preferito del cliente (non contiene mai il numero della carta)
+      properties:
+        type: { type: string, enum: [credit_card, prepaid_card] }
+        last4Digits: { type: string, pattern: "^\\d{4}$" }
+
+    Customer:
+      type: object
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        role: { type: string, enum: [customer] }
+        email: { type: string, format: email }
+        name: { type: string }
+        surname: { type: string }
+        phone: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethodPreference" }
+        preferences:
+          type: array
+          items: { type: string }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    RestaurantUser:
+      type: object
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        role: { type: string, enum: [restaurateur] }
+        email: { type: string, format: email }
+        name: { type: string }
+        phone: { type: string }
+        ivaNumber: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        location:
+          allOf:
+            - $ref: "#/components/schemas/GeoPoint"
+          description: Coordinate del ristorante, calcolate dal server al primo preventivo di consegna
+        image: { type: string, example: /assets/defaultAvatar.jpeg }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    User:
+      description: Dati pubblici di un utente (mai la password). Il campo `role` indica il tipo.
+      oneOf:
+        - $ref: "#/components/schemas/Customer"
+        - $ref: "#/components/schemas/RestaurantUser"
+      discriminator:
+        propertyName: role
+        mapping:
+          customer: "#/components/schemas/Customer"
+          restaurateur: "#/components/schemas/RestaurantUser"
+
+    UserUpdates:
+      type: object
+      description: Campi modificabili (solo quelli previsti per il proprio ruolo; gli altri sono ignorati)
+      properties:
+        name: { type: string }
+        surname: { type: string, description: Solo clienti }
+        phone: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethodPreference" }
+        preferences:
+          type: array
+          items: { type: string }
+        image: { type: string, description: Solo ristoratori }
+        ivaNumber: { type: string, description: Solo ristoratori }
+        password: { type: string, format: password, minLength: 6 }
+
+    RestaurantSummary:
+      type: object
+      description: Dati pubblici di un ristorante
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        name: { type: string, example: Pizzeria da Luigi }
+        image: { type: string, example: /assets/defaultAvatar.jpeg }
+        phone: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+
+    # ── Catalogo, menu ──
+    Allergens:
+      type: array
+      description: Allergeni dedotti dagli ingredienti (indicativi)
+      items:
+        type: string
+        enum:
+          - glutine
+          - crostacei
+          - uova
+          - pesce
+          - arachidi
+          - soia
+          - latte
+          - frutta_a_guscio
+          - sedano
+          - senape
+          - sesamo
+          - solfiti
+          - lupini
+          - molluschi
+
+    Meal:
+      type: object
+      description: Piatto del ricettario comune
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        mealId: { type: string, description: Identificativo nel file meals.json }
+        nameMeal: { type: string, example: Chicken Curry }
+        category: { type: string, example: Chicken }
+        area: { type: string, example: Indian }
+        instructions: { type: string }
+        image: { type: string }
+        ingredients:
+          type: array
+          items: { type: string }
+        measures:
+          type: array
+          items: { type: string }
+        allergens: { $ref: "#/components/schemas/Allergens" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Product:
+      type: object
+      description: Piatto in vendita presso un ristorante
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        restaurantId: { $ref: "#/components/schemas/ObjectId" }
+        mealId:
+          type: string
+          nullable: true
+          description: Piatto del catalogo da cui deriva; `null` per i piatti inventati dal ristoratore
+        nameMeal: { type: string, example: Pizza Margherita }
+        category: { type: string, example: Pizza }
+        price: { type: number, minimum: 0, example: 8.5 }
+        image: { type: string, example: /assets/defaultMeal.jpeg }
+        ingredients:
+          type: array
+          items: { type: string }
+        allergens: { $ref: "#/components/schemas/Allergens" }
+        available:
+          type: boolean
+          description: Se `false` il piatto risulta esaurito e non si può ordinare
+        discount:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Sconto in percentuale
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ProductInput:
+      type: object
+      required: [nameMeal, price, ingredients]
+      properties:
+        nameMeal: { type: string }
+        category: { type: string, default: Altro }
+        price: { type: number, minimum: 0 }
+        image: { type: string }
+        ingredients:
+          type: array
+          minItems: 1
+          items: { type: string }
+        mealId:
+          type: string
+          nullable: true
+          description: Piatto del catalogo da cui deriva
+        available: { type: boolean, default: false }
+        discount: { type: number, minimum: 0, maximum: 100, default: 0 }
+
+    ProductUpdate:
+      type: object
+      description: "Campi da modificare (tutti facoltativi). Gli allergeni non si inviano: li calcola il server."
+      properties:
+        nameMeal: { type: string }
+        category: { type: string }
+        price: { type: number, minimum: 0 }
+        image: { type: string }
+        ingredients:
+          type: array
+          items: { type: string }
+        mealId:
+          type: string
+          nullable: true
+        available: { type: boolean }
+        discount: { type: number, minimum: 0, maximum: 100 }
+
+    ProductSearchResult:
+      allOf:
+        - $ref: "#/components/schemas/Product"
+        - type: object
+          properties:
+            restaurant: { $ref: "#/components/schemas/RestaurantSummary" }
+
+    # ── Ordini ──
+    DeliveryAddress:
+      type: object
+      required: [street, city, zip]
+      properties:
+        street: { type: string, example: Via Roma 12 }
+        city: { type: string, example: Milano }
+        zip: { type: string, pattern: "^\\d{5}$", example: "20100" }
+        notes: { type: string, description: Note per il corriere }
+
+    OrderItemRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { $ref: "#/components/schemas/ObjectId" }
+        quantity: { type: integer, minimum: 1, maximum: 20 }
+
+    OrderItem:
+      type: object
+      description: Riga d'ordine con nome e prezzo calcolati dal server al momento dell'ordine
+      properties:
+        productId: { $ref: "#/components/schemas/ObjectId" }
+        nameMeal: { type: string }
+        price:
+          type: number
+          description: Prezzo unitario già scontato
+        quantity: { type: integer, minimum: 1 }
+
+    QuoteRequest:
+      type: object
+      required: [restaurantId, orderType, items]
+      properties:
+        restaurantId: { $ref: "#/components/schemas/ObjectId" }
+        orderType: { type: string, enum: [takeaway, delivery] }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/OrderItemRequest" }
+        deliveryAddress:
+          type: object
+          description: Obbligatorio per `delivery`
+          properties:
+            street: { type: string }
+            city: { type: string }
+
+    OrderRequest:
+      type: object
+      required: [restaurantId, orderType, items]
+      properties:
+        restaurantId: { $ref: "#/components/schemas/ObjectId" }
+        orderType: { type: string, enum: [takeaway, delivery] }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/OrderItemRequest" }
+        deliveryAddress:
+          allOf:
+            - $ref: "#/components/schemas/DeliveryAddress"
+          description: Obbligatorio per `delivery`
+        payment:
+          type: object
+          description: Usato solo con il pagamento simulato (senza Stripe)
+          properties:
+            method: { type: string, enum: [credit_card, prepaid_card] }
+
+    QuoteRoute:
+      type: object
+      description: Percorso del ristorante all'indirizzo di consegna (solo per `delivery`)
+      properties:
+        method:
+          type: string
+          enum: [road, air]
+          description: "`road` distanza stradale (OSRM); `air` linea d'aria di ripiego"
+        path:
+          type: array
+          description: Punti [lat, lon] del tracciato, per disegnarlo sulla mappa
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items: { type: number }
+        restaurant: { $ref: "#/components/schemas/GeoPoint" }
+        customer: { $ref: "#/components/schemas/GeoPoint" }
+
+    Quote:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+        subtotal: { type: number }
+        distanceKm: { type: number, description: Distanza in km (0 per il ritiro) }
+        deliveryFee: { type: number, description: Costo di consegna in euro (0 per il ritiro) }
+        totalAmount: { type: number }
+        estimatedTimeMinutes: { type: integer }
+        route:
+          allOf:
+            - $ref: "#/components/schemas/QuoteRoute"
+          nullable: true
+
+    Payment:
+      type: object
+      properties:
+        provider: { type: string, enum: [stripe, mock] }
+        status:
+          type: string
+          enum: [in_attesa, completato, fallito, rimborsato]
+        method: { type: string, enum: [credit_card, prepaid_card, debit_card] }
+        last4Digits: { type: string, pattern: "^\\d{4}$" }
+        transactionId: { type: string, description: Identificativo del pagamento su Stripe }
+        checkoutSessionId: { type: string }
+        paidAt: { type: string, format: date-time }
+
+    PartyInfo:
+      type: object
+      description: Dati essenziali di un cliente o di un ristorante, quando l'ordine li riporta
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        name: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        address: { $ref: "#/components/schemas/Address" }
+
+    Order:
+      type: object
+      properties:
+        _id: { $ref: "#/components/schemas/ObjectId" }
+        customerId:
+          description: Identificativo del cliente, oppure i suoi dati essenziali
+          oneOf:
+            - $ref: "#/components/schemas/ObjectId"
+            - $ref: "#/components/schemas/PartyInfo"
+        restaurantId:
+          description: Identificativo del ristorante, oppure i suoi dati essenziali
+          oneOf:
+            - $ref: "#/components/schemas/ObjectId"
+            - $ref: "#/components/schemas/PartyInfo"
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+        orderType: { type: string, enum: [takeaway, delivery] }
+        status:
+          type: string
+          enum: [ordinato, in preparazione, in consegna, consegnato]
+        verificationCode:
+          type: string
+          description: Codice di 6 cifre da mostrare al momento della consegna
+          example: "482910"
+        deliveryAddress: { $ref: "#/components/schemas/DeliveryAddress" }
+        distanceKm: { type: number }
+        deliveryFee: { type: number }
+        subtotal: { type: number }
+        totalAmount: { type: number }
+        estimatedTimeMinutes: { type: integer }
+        payment: { $ref: "#/components/schemas/Payment" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    Stats:
+      type: object
+      properties:
+        days: { type: integer, example: 30 }
+        totals:
+          type: object
+          properties:
+            orders: { type: integer }
+            revenue: { type: number }
+            averageOrder: { type: number }
+            delivered: { type: integer }
+            deliveryOrders: { type: integer }
+            takeawayOrders: { type: integer }
+        daily:
+          type: array
+          description: Un elemento per ogni giorno del periodo, anche senza ordini
+          items:
+            type: object
+            properties:
+              day: { type: string, format: date, example: "2026-11-04" }
+              orders: { type: integer }
+              revenue: { type: number }
+        hourly:
+          type: array
+          description: Ordini per fascia oraria (24 elementi)
+          items:
+            type: object
+            properties:
+              hour: { type: integer, minimum: 0, maximum: 23 }
+              orders: { type: integer }
+        topDishes:
+          type: array
+          description: I 5 piatti più venduti
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              quantity: { type: integer }
+              revenue: { type: number }

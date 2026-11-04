@@ -32,7 +32,7 @@ router.post("/signup", AW(async (req, res) => {
   }
 
   const user = await userRepo.createUser(req.body);
-  res.status(201).json({status: "ok", data: user});
+  res.status(201).json({ status: "ok", data: userRepo.toPublicJSON(user) });
 }));
 
 router.post("/login", AW(async (req, res) => {

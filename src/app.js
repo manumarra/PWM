@@ -1,5 +1,10 @@
 import "dotenv/config";
 import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import swaggerUi from "swagger-ui-express";
+import { load as loadYaml } from "js-yaml";
 import { connectMongoose } from "./config/mongoose.js";
 import { seedDatabase } from "./config/seed.js";
 import userRoutes from "./routes/users.js";
@@ -13,6 +18,9 @@ import { mongoErrorHandler } from "./middleware/errorHandler.js";
 import cookieParser from "cookie-parser";
 
 const app = express();
+// Documentazione delle API (OpenAPI/Swagger): src/docs/openapi.yaml
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const openApiSpec = loadYaml(fs.readFileSync(path.join(__dirname, "docs", "openapi.yaml"), "utf-8"));
 const port = process.env.PORT || 3000;
 
 // Il webhook di Stripe ha bisogno del corpo grezzo: va montato PRIMA di express.json()
@@ -26,6 +34,11 @@ app.use("/api/meals", mealRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+
+// Swagger UI su http://localhost:3000/api-docs (e la specifica grezza su /api-docs.json)
+app.get("/api-docs.json", (req, res) => res.json(openApiSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec, { customSiteTitle: "FastFood API" }));
+
 app.use(mongoErrorHandler);
 
 async function startServer(){

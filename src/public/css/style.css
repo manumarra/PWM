@@ -1331,22 +1331,6 @@ body.menu-builder-page {
   font-size: 0.85rem;
 }
 
-/* 4. Colori dei contatori del Summary */
-.count-available {
-  color: #10B981 !important;
-  font-weight: 700;
-}
-
-.count-unavailable {
-  color: #9CA3AF !important;
-  font-weight: 700;
-}
-
-.count-discounted {
-  color: var(--amber-primary) !important;
-  font-weight: 700;
-}
-
 /* =========================================================
    PAGINA GESTIONE MENÙ: SUMMARY BAR RESPONSIVE
    ========================================================= */
@@ -1486,9 +1470,22 @@ body.menu-builder-page {
    CUSTOMER HOME: TEMA VIVACE AMBRA
    ========================================================= */
 
-/* Sfondo chiaro e luminoso per i clienti */
 body.customer-home-page {
-  background-color: #FDFBF7; /* Bianco crema caldo */
+  /* Percorso dell'immagine di sfondo verticale con i bordi colorati */
+  background-image: url('/assets/sfondo-menu.jpeg');
+  
+  /* Copre interamente lo schermo senza distorsioni */
+  background-size: cover;
+  
+  /* Centra l'immagine orizzontalmente e verticalmente */
+  background-position: center;
+  
+  /* L'IMMAGINE RESTA FISSA E NON SCORRE CON LA PAGINA */
+  background-attachment: fixed;
+  
+  /* Colore di fallback di sicurezza */
+  background-color: #FDFBF7;
+  
   color: var(--night-dark);
   min-height: 100vh;
 }
@@ -1775,31 +1772,6 @@ body.customer-home-page {
 .cart-product {
   max-width: 60%;
 }
-
-/* =========================================================
-   CUSTOMER HOME: TEMA VIVACE AMBRA
-   ========================================================= */
-
-body.customer-home-page {
-  /* Percorso dell'immagine di sfondo verticale con i bordi colorati */
-  background-image: url('/assets/sfondo-menu.jpeg');
-  
-  /* Copre interamente lo schermo senza distorsioni */
-  background-size: cover;
-  
-  /* Centra l'immagine orizzontalmente e verticalmente */
-  background-position: center;
-  
-  /* L'IMMAGINE RESTA FISSA E NON SCORRE CON LA PAGINA */
-  background-attachment: fixed;
-  
-  /* Colore di fallback di sicurezza */
-  background-color: #FDFBF7;
-  
-  color: var(--night-dark);
-  min-height: 100vh;
-}
-
 
 /* =========================================================
    CHECKOUT PAGE (Macro-scenario 3)

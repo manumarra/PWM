@@ -82,7 +82,7 @@ paths:
                 summary: Registrazione di un cliente
                 value:
                   role: customer
-                  email: mario.rossi@example.com
+                  email: mario@example.com
                   password: Passw123
                   name: Mario
                   surname: Rossi
@@ -143,7 +143,7 @@ paths:
                 email: { type: string, format: email }
                 password: { type: string, format: password }
             example:
-              email: mario.rossi@example.com
+              email: mario@example.com
               password: Passw123
       responses:
         "200":
@@ -674,7 +674,7 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/QuoteRequest" }
             example:
-              restaurantId: 64f1c2a9b3e4d5f6a7b8c9d0
+              restaurantId: 6ae1c8452db18e03664e23c5
               orderType: delivery
               items:
                 - productId: 64f1c2a9b3e4d5f6a7b8c9d1
@@ -729,7 +729,7 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/OrderRequest" }
             example:
-              restaurantId: 64f1c2a9b3e4d5f6a7b8c9d0
+              restaurantId: 6ae1c8452db18e03664e23c5
               orderType: delivery
               items:
                 - productId: 64f1c2a9b3e4d5f6a7b8c9d1
@@ -1251,7 +1251,7 @@ components:
       type: string
       pattern: "^[0-9a-fA-F]{24}$"
       description: Identificativo MongoDB (24 caratteri esadecimali)
-      example: 64f1c2a9b3e4d5f6a7b8c9d0
+      example: 6ae1c8452db18e03664e23c5
 
     Error:
       type: object

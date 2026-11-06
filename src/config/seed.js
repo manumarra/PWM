@@ -1,6 +1,10 @@
 import fs from "fs";
 import Meal from "../models/Meal.js";
 import { detectAllergens } from "../public//utils/common/allergens.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const MEALS_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "meals.json");
 
 export async function seedDatabase() {
   try {
@@ -9,7 +13,7 @@ export async function seedDatabase() {
     if (count === 0) {
       console.log("⏳ Database vuoto, caricamento sincrono del file JSON...");
 
-      const fileData = fs.readFileSync("./meals.json", "utf-8");
+      const fileData = fs.readFileSync(MEALS_FILE, "utf-8");
       const parsedData = JSON.parse(fileData);
 
       const cleanData = parsedData.map(meal => {

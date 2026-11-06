@@ -23,12 +23,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const openApiSpec = loadYaml(fs.readFileSync(path.join(__dirname, "docs", "openapi.yaml"), "utf-8"));
 const port = process.env.PORT || 3000;
 
-// Il webhook di Stripe ha bisogno del corpo grezzo: va montato PRIMA di express.json()
+// Il webhook di Stripe ha bisogno del corpo grezzo
 app.post("/api/payments/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static("./src/public"));
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/users", userRoutes);
 app.use("/api/meals", mealRoutes);
 app.use("/api/products", productRoutes);

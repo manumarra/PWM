@@ -68,7 +68,7 @@ router.patch("/update-status/:id", requireAuth, requireRole("restaurateur"), AW(
     }
     res.json({ status: "ok", data: updatedOrder });
   } catch (error) {
-    return res.status(400).json({ status: "fail", message: error.message });
+    return res.status(error.status || 400).json({ status: "fail", message: error.message });
   }
 }));
 

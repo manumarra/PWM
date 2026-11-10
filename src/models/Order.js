@@ -1,5 +1,6 @@
 // src/models/Order.js
 import mongoose from "mongoose";
+import { randomInt } from "crypto";
 
 const { Schema } = mongoose;
 
@@ -75,7 +76,7 @@ const orderSchema = new Schema(
     verificationCode: {
       type: String,
       required: true,
-      default: () => Math.floor(100000 + Math.random() * 900000).toString() //es: "482910"
+      default: () => randomInt(100000, 1000000).toString() // es: "482910" (generatore crittografico)
     },
     deliveryAddress: {
       type: deliveryAddressSchema,

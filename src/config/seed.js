@@ -1,6 +1,6 @@
 import fs from "fs";
 import Meal from "../models/Meal.js";
-import { detectAllergens } from "../public//utils/common/allergens.js";
+import { detectAllergens } from "../utils/allergens.js";
 import path from "path";
 import { fileURLToPath } from "url";
 

@@ -920,6 +920,9 @@ paths:
         | `takeaway` | ordinato → in preparazione → consegnato |
 
         Per passare a **consegnato** serve il `verificationCode` che il cliente ha nel suo storico.
+        Il codice può essere sbagliato **al massimo 5 volte per ordine**: al quinto errore l'ordine
+        resta bloccato per **15 minuti** (risposta `429`). Il codice non è mai incluso nelle risposte
+        destinate al ristoratore.
       security:
         - cookieAuth: []
       parameters:
@@ -958,7 +961,7 @@ paths:
                   status: { type: string, enum: [ok] }
                   data: { $ref: "#/components/schemas/Order" }
         "400":
-          description: Transizione non consentita oppure codice di verifica errato
+          description: Transizione non consentita, codice mancante o errato (il messaggio indica i tentativi rimasti)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -968,6 +971,12 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "429":
+          description: Troppi tentativi errati con il codice di consegna di quell'ordine; riprovare dopo il tempo indicato nel messaggio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example: { status: fail, message: "Troppi tentativi errati: riprova fra 15 minuti." }
 
   # ─────────────────────────── PAGAMENTI ────────────────────────────
   /payments/config:
@@ -1698,7 +1707,7 @@ components:
           enum: [ordinato, in preparazione, in consegna, consegnato]
         verificationCode:
           type: string
-          description: Codice di 6 cifre da mostrare al momento della consegna
+          description: "Codice di 6 cifre da mostrare al momento della consegna. Presente solo nelle risposte destinate al cliente: il ristoratore non lo riceve mai"
           example: "482910"
         deliveryAddress: { $ref: "#/components/schemas/DeliveryAddress" }
         distanceKm: { type: number }

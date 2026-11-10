@@ -1,6 +1,6 @@
 import User, { MODEL_BY_ROLE, UPDATABLE_FIELDS } from "../models/User.js";
 import Product from "../models/Product.js";
-import { escapeRegex } from "../public/utils/common/regex.js";
+import { escapeRegex } from "../utils/regex.js";
 
 export const createUser = (userData) => {
   const Model = MODEL_BY_ROLE[userData.role];

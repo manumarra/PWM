@@ -134,6 +134,8 @@ il ritiro in locale funziona anche offline.
 - Le notifiche al ristoratore funzionano con **interrogazioni periodiche** (ogni 15 secondi).
 - Il percorso di consegna usa la distanza stradale (OSRM); se il servizio non risponde si usa la distanza in
   linea d'aria e il cliente ne viene avvisato.
+- **Codice di consegna**: generato in modo casuale, visibile solo al cliente e mai restituito al ristoratore;
+  dopo 5 tentativi errati l'ordine resta bloccato per 15 minuti.
 
 ## Limiti noti
 - Non sono previsti **rimborsi** (lo stato esiste, ma nessuna funzione lo usa).

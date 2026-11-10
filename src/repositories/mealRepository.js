@@ -1,5 +1,5 @@
 import Meal from "../models/Meal.js";
-import { escapeRegex, splitList } from "../public/utils/common/regex.js";
+import { escapeRegex, splitList } from "../utils/regex.js";
 
 export const getPaginatedMeals = async ({ category, search, ingredient, page = 1, limit = 12 } = {}) => {
   const pageNum = Math.max(parseInt(page, 10) || 1, 1);

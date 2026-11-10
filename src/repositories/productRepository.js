@@ -1,7 +1,7 @@
 import Product from "../models/Product.js";
 import { Restaurant } from "../models/User.js";
-import { ALLERGENS } from "../public//utils/common/allergens.js";
-import { escapeRegex, splitList } from "../public/utils/common/regex.js";
+import { ALLERGENS } from "../utils/allergens.js";
+import { escapeRegex, splitList } from "../utils/regex.js";
 
 const PRODUCT_UPDATABLE_FIELDS = [
   "nameMeal", "category", "price", "image", "ingredients", "mealId", "available", "discount"

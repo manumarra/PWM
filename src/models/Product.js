@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ALLERGENS, detectAllergens } from "../public/utils/common/allergens.js";
+import { ALLERGENS, detectAllergens } from "../utils/allergens.js";
 
 const { Schema } = mongoose;
 

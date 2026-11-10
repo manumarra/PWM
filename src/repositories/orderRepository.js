@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import { createAttemptLimiter } from "../utils/attemptLimiter.js";
 import { stripeEnabled } from "../public/services/stripeService.js";
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
@@ -40,7 +41,8 @@ export const getRestaurantOrderHistory = async (restaurantId, page = 1, limit = 
          .sort({ createdAt: -1 })
          .skip(skip)
          .limit(limit)
-         .populate("customerId", "name phone email")
+         .select("-verificationCode") // il ristorante non deve mai vedere il codice del cliente
+  .populate("customerId", "name phone email")
          .lean(),
     Order.countDocuments({ restaurantId, status: "consegnato" })
   ]);
@@ -63,6 +65,14 @@ const MINUTES_PER_ITEM = 2;          // minuti per ogni piatto in coda, compresi
 const TRAVEL_MINUTES_PER_KM = 3;     // tempo di viaggio per le consegne
 const MAX_ITEM_QUANTITY = 20;
 const QUEUE_STATUSES = ["ordinato", "in preparazione"];
+
+// Codice di consegna: massimo 5 tentativi errati per ordine, poi blocco di 15 minuti
+const MAX_CODE_ATTEMPTS = 5;
+const CODE_LOCK_MINUTES = 15;
+const codeLimiter = createAttemptLimiter({
+  maxAttempts: MAX_CODE_ATTEMPTS,
+  lockMs: CODE_LOCK_MINUTES * 60 * 1000
+});
 
 const DELIVERY_MIN_FEE = 1.5;        // costo minimo di consegna (€)
 const DELIVERY_FEE_PER_KM = 1.5;     // tariffa per km (€)
@@ -214,6 +224,7 @@ export const getOrdersByRestaurant = (restaurantId) => {
     ]
   })
   .sort({ createdAt: -1 })
+  .select("-verificationCode") // il ristorante non deve mai vedere il codice del cliente
   .populate("customerId", "name phone email")
   .lean();
 };
@@ -240,18 +251,39 @@ export const updateOrderStatus = async (id, restaurantId, newStatus, verificatio
 
   const allowed = FLOW[order.orderType]?.[order.status] || [];
   if (!allowed.includes(newStatus)) {
-    throw new Error(`Transizione non consentita: da "${order.status}" a "${newStatus}"`);
+    throw badRequest(`Transizione non consentita: da "${order.status}" a "${newStatus}"`);
   }
 
   if (newStatus === "consegnato") {
-    if (!verificationCode || String(order.verificationCode) !== String(verificationCode).trim()) {
-      throw new Error("Codice di verifica errato. Consegna rifiutata.");
+    const code = String(verificationCode ?? "").trim();
+    if (!code) throw badRequest("Inserisci il codice di verifica del cliente"); // non conta come tentativo
+
+    // Il tentativo si prenota PRIMA del confronto, senza attese in mezzo:
+    // richieste in parallelo non possono superare il limite
+    const attempt = codeLimiter.hit(String(order._id));
+    if (!attempt.allowed) {
+      const minutes = Math.max(1, Math.ceil(attempt.retryAfterMs / 60000));
+      throw Object.assign(
+        new Error(`Troppi tentativi errati: riprova fra ${minutes} ${minutes === 1 ? "minuto" : "minuti"}.`),
+        { status: 429 }
+      );
     }
+    if (code !== String(order.verificationCode)) {
+      throw badRequest(
+        attempt.attemptsLeft > 0
+          ? `Codice di verifica errato. Tentativi rimasti: ${attempt.attemptsLeft}.`
+          : `Codice di verifica errato. Troppi tentativi: riprova fra ${CODE_LOCK_MINUTES} minuti.`
+      );
+    }
+    codeLimiter.reset(String(order._id));
   }
 
   order.status = newStatus;
   await order.save();
-  return order.toObject();
+
+  // Il codice di consegna non va mai restituito al ristorante
+  const { verificationCode: _hidden, ...safeOrder } = order.toObject();
+  return safeOrder;
 };
 
 // ── Statistiche del ristorante ──
